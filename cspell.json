@@ -1,0 +1,24 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "ignorePaths": [
+    "**/node_modules/**",
+    "**/.git/**",
+    "**/.gitignore/**",
+    "**/*.config.js",
+    "**/*.config.ts",
+    "**/.eslintrc.*",
+    "**/.prettierrc",
+    "**/.stylelintrc",
+    "**/package.json",
+    "**/package-lock.json",
+    "**/tsconfig.json",
+    "**/.husky/**",
+    "**/*.json",
+    "**/*.yaml",
+    "vite.config.ts",
+    ".env",
+    ".env.example"
+  ],
+  "words": ["eslint", "stylelint", "prettierrc", "pnpm", "vite", "zustand", "tanstack", "Avenir"]
+}
