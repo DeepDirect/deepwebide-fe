@@ -1,0 +1,59 @@
+@use '@/styles/variables' as vars;
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 13px 24px;
+  border: none;
+  font-family: vars.$font-family-inter;
+  font-size: vars.$font-size-xsmall;
+  font-weight: vars.$font-weight-bold;
+  line-height: vars.$default-line-height;
+  border-radius: 10px;
+  transition: all 0.2s ease-in-out;
+  white-space: nowrap;
+
+  &:focus {
+    outline: none;
+  }
+
+  &--active {
+    color: vars.$white-2;
+    background-color: vars.$blue-3;
+
+    &:hover {
+      background-color: #5a8bb5;
+    }
+
+    &:active {
+      background-color: #4f7ea3;
+    }
+  }
+
+  &--inactive {
+    color: vars.$white-2;
+    background-color: vars.$blue-2;
+
+    &:hover {
+      background-color: #5a6a78;
+    }
+
+    &:active {
+      background-color: #42525e;
+    }
+  }
+
+  &--general {
+    color: vars.$white-2;
+    background-color: vars.$blue-4;
+
+    &:hover {
+      background-color: #9aa8b4;
+    }
+
+    &:active {
+      background-color: #8b9ba8;
+    }
+  }
+}
