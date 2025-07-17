@@ -41,3 +41,30 @@ $orange: #ff6500;
 
 // Green
 $green: #5cb338;
+
+// Font Family
+$font-family-silkscreen: 'Silkscreen', monospace;
+$font-family-inter:
+  'Inter',
+  -apple-system,
+  BlinkMacSystemFont,
+  sans-serif;
+$font-family-primary: $font-family-inter; // 기본 폰트
+
+// Font Size
+$font-size-xxxlarge: 2.75rem; // 44px
+$font-size-xxlarge: 2.25rem; // 36px
+$font-size-xlarge: 1.875rem; // 30px
+$font-size-large: 1.75rem; // 28px
+$font-size-medium: 1.5rem; // 24px
+$font-size-small: 1.25rem; // 20px
+$font-size-xsmall: 1rem; // 16px
+$font-size-xxsmall: 0.75rem; // 12px
+
+// Font Weight
+$font-weight-regular: 400;
+$font-weight-medium: 500;
+$font-weight-semi-bold: 600;
+$font-weight-bold: 700;
+$font-weight-extra-bold: 800;
+$font-weight-black: 900;
