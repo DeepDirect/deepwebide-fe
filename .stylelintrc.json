@@ -1,0 +1,150 @@
+{
+  "extends": ["stylelint-config-standard", "stylelint-config-standard-scss"],
+  "plugins": ["stylelint-order", "stylelint-scss"],
+  "customSyntax": "postcss-scss",
+  "rules": {
+    "selector-pseudo-class-no-unknown": [
+      true,
+      {
+        "ignorePseudoClasses": ["global"]
+      }
+    ],
+    "order/properties-order": [
+      [
+        {
+          "groupName": "Layout",
+          "properties": [
+            "position",
+            "top",
+            "right",
+            "bottom",
+            "left",
+            "display",
+            "flex",
+            "flex-direction",
+            "flex-wrap",
+            "flex-grow",
+            "align-items",
+            "justify-content"
+          ],
+          "emptyLineBefore": "always"
+        },
+        {
+          "groupName": "Box Model",
+          "properties": [
+            "width",
+            "max-width",
+            "min-width",
+            "height",
+            "max-height",
+            "min-height",
+            "margin",
+            "margin-top",
+            "margin-right",
+            "margin-bottom",
+            "margin-left",
+            "padding",
+            "padding-top",
+            "padding-right",
+            "padding-bottom",
+            "padding-left",
+            "border",
+            "border-width",
+            "border-style",
+            "border-color",
+            "box-sizing"
+          ],
+          "emptyLineBefore": "always"
+        },
+        {
+          "groupName": "Typography",
+          "properties": [
+            "font-family",
+            "font-size",
+            "font-weight",
+            "line-height",
+            "letter-spacing",
+            "color",
+            "text-align",
+            "text-decoration"
+          ],
+          "emptyLineBefore": "always"
+        },
+        {
+          "groupName": "Visual",
+          "properties": [
+            "background",
+            "background-color",
+            "background-image",
+            "background-size",
+            "background-repeat",
+            "opacity",
+            "box-shadow",
+            "border-radius"
+          ],
+          "emptyLineBefore": "always"
+        },
+
+        {
+          "groupName": "Animation & Transition",
+          "properties": [
+            "transition",
+            "transition-property",
+            "transition-duration",
+            "transition-delay",
+            "transition-timing-function",
+            "animation",
+            "animation-name",
+            "animation-duration",
+            "animation-delay",
+            "animation-timing-function",
+            "animation-iteration-count",
+            "animation-direction",
+            "animation-fill-mode",
+            "animation-play-state"
+          ],
+          "emptyLineBefore": "always"
+        },
+        {
+          "groupName": "Interaction & Misc",
+          "properties": [
+            "cursor",
+            "pointer-events",
+            "visibility",
+            "user-select",
+            "opacity",
+            "z-index",
+            "filter",
+            "backface-visibility",
+            "transform",
+            "transform-origin",
+            "will-change"
+          ],
+          "emptyLineBefore": "always"
+        }
+      ],
+      {
+        "unspecified": "bottomAlphabetical"
+      }
+    ],
+
+    "color-hex-length": "long",
+    "color-no-invalid-hex": true,
+    "selector-class-pattern": null,
+    "no-descending-specificity": null,
+    "value-keyword-case": null,
+    "no-empty-source": null
+  },
+
+  "ignoreFiles": [
+    "node_modules/**/*",
+    "dist/**/*",
+    "build/**/*",
+    "**/*.js",
+    "**/*.jsx",
+    "**/*.ts",
+    "**/*.tsx",
+    "src/styles/**/*reset*.scss",
+    "**/*.yaml"
+  ]
+}
