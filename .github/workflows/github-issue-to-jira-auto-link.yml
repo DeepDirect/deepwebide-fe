@@ -43,7 +43,6 @@ jobs:
             {
               {{ env.EPIC_KEY && '"Epic Link": "' + env.EPIC_KEY + '",' }}
               {{ env.START_DATE && '"Start date": "' + env.START_DATE + '",' }}
-              # {{ env.DUE_DATE && '"Due date": "' + env.DUE_DATE + '"' }}
             }
 
       # 3. 생성된 Jira 이슈키를 Github 이슈에 코멘트로 기록 (자동 추적)
