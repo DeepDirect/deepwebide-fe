@@ -1,7 +1,7 @@
 ---
 name: 기능 개발
 about: 새로운 기능 개발을 위한 이슈를 생성합니다.
-title: "[Feature] "
+title: "[FE][Feature] "
 labels: feature
 assignees: 
   - 작성자_깃허브ID
