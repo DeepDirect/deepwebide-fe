@@ -24,9 +24,9 @@ jobs:
           COMMENTS=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" ${{ github.event.issue.comments_url }} | jq -r '.[].body')
           echo "$COMMENTS" | grep -oE '[A-Z]+-[0-9]+' | head -1 > jira_key.txt
           echo "JIRA_KEY=$(cat jira_key.txt)" >> $GITHUB_ENV
-
+          
       - name: Jira 이슈 완료 처리 (상태 전환)
         uses: atlassian/gajira-transition@v3
         with:
           issue: ${{ env.JIRA_KEY }}
-          transition: Done
+          transition: 완료
