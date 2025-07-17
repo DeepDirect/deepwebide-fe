@@ -27,7 +27,7 @@
             "align-items",
             "justify-content"
           ],
-          "emptyLineBefore": "always"
+          "emptyLineBefore": "never"
         },
         {
           "groupName": "Box Model",
@@ -54,7 +54,7 @@
             "border-color",
             "box-sizing"
           ],
-          "emptyLineBefore": "always"
+          "emptyLineBefore": "never"
         },
         {
           "groupName": "Typography",
@@ -68,7 +68,7 @@
             "text-align",
             "text-decoration"
           ],
-          "emptyLineBefore": "always"
+          "emptyLineBefore": "never"
         },
         {
           "groupName": "Visual",
@@ -82,7 +82,7 @@
             "box-shadow",
             "border-radius"
           ],
-          "emptyLineBefore": "always"
+          "emptyLineBefore": "never"
         },
 
         {
@@ -103,7 +103,7 @@
             "animation-fill-mode",
             "animation-play-state"
           ],
-          "emptyLineBefore": "always"
+          "emptyLineBefore": "never"
         },
         {
           "groupName": "Interaction & Misc",
@@ -120,7 +120,7 @@
             "transform-origin",
             "will-change"
           ],
-          "emptyLineBefore": "always"
+          "emptyLineBefore": "never"
         }
       ],
       {

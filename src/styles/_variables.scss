@@ -1,0 +1,70 @@
+// 기본 줄
+$default-line-height: 1.4;
+
+// Color Variables (색상 변수들)
+// Common Colors (공통 색상)
+
+// Black
+$black-1: #0d0d0d;
+$black-2: #1e1e1e;
+
+// Gray
+$gray-1: #2d2d30;
+$gray-2: #34383c;
+$gray-3: #383838;
+$gray-4: #3f4245;
+$gray-5: #525252;
+$gray-6: #909090;
+$gray-7: #c4c4c4;
+$gray-8: #d7d7d7;
+$gray-9: #e9e9e9;
+$gray-10: #f0f0f0;
+
+// White
+$white-1: #fafafa;
+$white-2: #ffffff;
+
+// Blue
+$blue-1: #374fff;
+$blue-2: #4e5e6c;
+$blue-3: #6498c6;
+$blue-4: #a9b5c0;
+
+// Red
+$red: #dc2626;
+
+// Yellow
+$yellow: #facc15;
+
+// Orange
+$orange: #ff6500;
+
+// Green
+$green: #5cb338;
+
+// Font Family
+$font-family-silkscreen: 'Silkscreen', monospace;
+$font-family-inter:
+  'Inter',
+  -apple-system,
+  BlinkMacSystemFont,
+  sans-serif;
+$font-family-primary: $font-family-inter; // 기본 폰트
+
+// Font Size
+$font-size-xxxlarge: 2.75rem; // 44px
+$font-size-xxlarge: 2.25rem; // 36px
+$font-size-xlarge: 1.875rem; // 30px
+$font-size-large: 1.75rem; // 28px
+$font-size-medium: 1.5rem; // 24px
+$font-size-small: 1.25rem; // 20px
+$font-size-xsmall: 1rem; // 16px
+$font-size-xxsmall: 0.75rem; // 12px
+
+// Font Weight
+$font-weight-regular: 400;
+$font-weight-medium: 500;
+$font-weight-semi-bold: 600;
+$font-weight-bold: 700;
+$font-weight-extra-bold: 800;
+$font-weight-black: 900;
