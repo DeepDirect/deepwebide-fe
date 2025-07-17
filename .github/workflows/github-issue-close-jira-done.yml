@@ -4,6 +4,9 @@ on:
   issues:
     types: [closed]
 
+permissions:
+  issues: write
+
 jobs:
   close-jira-issue:
     name: Close linked Jira issue
