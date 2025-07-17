@@ -41,10 +41,11 @@ jobs:
             ${{ github.event.issue.body }}
           fields: |
             {
-              "Epic Link": "${{ env.EPIC_KEY }}",
-              "Start date": "${{ env.START_DATE }}",
-              "Due date": "${{ env.DUE_DATE }}"
+              "customfield_10014": "${{ env.EPIC_KEY }}",   # Epic Link
+              "customfield_10015": "${{ env.START_DATE }}", # Start date
+              "duedate":                "${{ env.DUE_DATE }}"    # Due date
             }
+
 
       # 3. 생성된 Jira 이슈키를 Github 이슈에 코멘트로 기록 (자동 추적)
       - name: 생성된 Jira 이슈키를 Github 이슈에 코멘트로 기록
