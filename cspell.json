@@ -16,6 +16,7 @@
     "**/.husky/**",
     "**/*.json",
     "**/*.yaml",
+    "**/*.scss",
     "vite.config.ts",
     ".env",
     ".env.example"
