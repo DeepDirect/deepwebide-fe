@@ -1,4 +1,4 @@
-name: Create Jira issue
+name: GitHub 이슈 생성 시 Jira Task 자동 생성 및 키 자동 연결
 
 on:
   issues:
@@ -6,19 +6,18 @@ on:
 
 jobs:
   create-issue:
-    name: Create Jira issue
+    name: Create Jira issue and comment issue key
     runs-on: ubuntu-latest
     steps:
-      # 1. Jira 로그인 액션 (필수)
-      - name: Login to Jira
+      - name: Jira 로그인
         uses: atlassian/gajira-login@v3
         env:
           JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
           JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
 
-      # 2. Jira 이슈 생성 액션
-      - name: Create Issue in Jira
+      - name: Jira 이슈 생성
+        id: create_jira
         uses: atlassian/gajira-create@v3
         with:
           project: DEEP
@@ -30,8 +29,7 @@ jobs:
             본문:
             ${{ github.event.issue.body }}
 
-
-      - name: Comment Jira Issue Key on GitHub Issue
+      - name: 생성된 Jira 이슈키를 Github 이슈에 코멘트로 기록
         uses: actions/github-script@v7
         with:
           script: |
@@ -39,5 +37,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `Jira 이슈가 생성되었습니다: **${{ steps.create_jira.outputs.issue }}**`
+              body: `🔗 **Jira 이슈가 생성되었습니다:** [${{ steps.create_jira.outputs.issue }}](${{ secrets.JIRA_BASE_URL }}/browse/${{ steps.create_jira.outputs.issue }})`
             })
