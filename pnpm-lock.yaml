@@ -32,6 +32,9 @@ importers:
       axios:
         specifier: ^1.10.0
         version: 1.10.0
+      pixelarticons:
+        specifier: ^1.8.1
+        version: 1.8.1
       react:
         specifier: ^19.1.0
         version: 19.1.0
@@ -1464,6 +1467,9 @@ packages:
   picomatch@4.0.3:
     resolution: {integrity: sha512-5gTmgEY/sqK6gFXLIsQNH19lWb4ebPDLA4SdLP7dsWkIXHWlG66oPuVvXSGFPppYZz8ZDZq0dYYrbHfBCVUb1Q==}
     engines: {node: '>=12'}
+
+  pixelarticons@1.8.1:
+    resolution: {integrity: sha512-4taoDCleft9RtzVHLA73VDnRBwJNqlwbW8ShO6S0G9b+bM5ArGe1MVFW9xpromuPvQgVUYCSjRxNAQuNtADqyA==}
 
   postcss@8.5.6:
     resolution: {integrity: sha512-3Ybi1tAuwAP9s0r1UQ2J4n5Y0G05bJkpUIO0/bI9MhwmD70S5aTWbXGBwxHrelT+XM1k6dM0pk+SwNkpTRN7Pg==}
@@ -3009,6 +3015,8 @@ snapshots:
   picomatch@2.3.1: {}
 
   picomatch@4.0.3: {}
+
+  pixelarticons@1.8.1: {}
 
   postcss@8.5.6:
     dependencies:
