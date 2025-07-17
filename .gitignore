@@ -1,0 +1,103 @@
+# === 로그 파일 ===
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# === 빌드 아웃풋 ===
+dist/
+dist-ssr/
+*.local
+
+# === 의존성 디렉토리 ===
+node_modules/
+bower_components/
+
+# === 환경/설정 파일 ===
+.env
+.env.*  
+*.local
+
+# === IDE/에디터 설정 ===
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.sublime*
+.history/
+.DS_Store
+*.sw?
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# === macOS 불필요 파일 ===
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+*.icloud
+
+# === Windows 불필요 파일 ===
+Thumbs.db
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# === React & 개발 관련 ===
+**/*.backup.*
+**/*.back.*
+psd
+thumb
+sketch
+
+# === 기타 ===
+# 빌드/캐시
+.cache/
+.next/
+out/
+coverage/
+
+# Storybook 빌드 아웃풋 (사용 시)
+storybook-static/
+
+# 터미널 기록 파일 (zsh, bash 등)
+.zsh_history
+.bash_history
+
+# 타입스크립트 빌드 아웃풋
+*.tsbuildinfo
+
+# pnpm 관련 파일 (잠금파일은 필요에 따라 관리)
+.pnpm-debug.log*
+
+# JetBrains Rider/PhpStorm 등 추가 IDE
+.idea/
+
+# Local History for Visual Studio Code
+.history/
+
+# 테스트 결과
+coverage/
