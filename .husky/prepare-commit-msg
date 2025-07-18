@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# 브랜치명에서 DP-숫자 패턴 확인
+branch=$(git rev-parse --abbrev-ref HEAD)
+if echo "$branch" | grep -q "DP-[0-9]\+"; then
+  # Platform detection and execution
+  case "$(uname -s)" in
+    CYGWIN*|MINGW*|MSYS*)
+      # Windows
+      npx jira-prepare-commit-msg $1
+      ;;
+    *)
+      # macOS/Linux
+      exec < /dev/tty && npx jira-prepare-commit-msg $1
+      ;;
+  esac
+fi
