@@ -1,0 +1,58 @@
+@use '@/styles/variables' as *;
+
+.container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+  height: 56px;
+  padding: 0 1rem;
+  box-sizing: border-box;
+}
+
+.center {
+  position: absolute;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  transform: translateX(-50%);
+  gap: 1rem;
+  white-space: nowrap;
+}
+
+.pathArea {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 6rem;
+  font-size: $font-size-xsmall;
+  color: $gray-5;
+  background-color: $gray-10;
+  border-radius: 8px;
+  gap: 0.5rem;
+}
+
+.chatButton {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 29px;
+  height: 29px;
+  background: none;
+  box-shadow: $shadow;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.rightArea {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.toggleButton {
+  border: none;
+  background: none;
+  cursor: pointer;
+}
