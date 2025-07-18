@@ -6,13 +6,13 @@
   justify-content: center;
   padding: 13px 24px;
   border: none;
+  border-radius: 10px;
   font-family: vars.$font-family-inter;
   font-size: vars.$font-size-xsmall;
   font-weight: vars.$font-weight-bold;
   line-height: vars.$default-line-height;
-  border-radius: 10px;
-  transition: all 0.2s ease-in-out;
   white-space: nowrap;
+  transition: all 0.2s ease-in-out;
 
   &:focus {
     outline: none;
