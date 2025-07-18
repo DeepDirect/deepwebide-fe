@@ -1,0 +1,57 @@
+@use '@/styles/variables' as vars;
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  width: 44px;
+  height: 1024px;
+  padding: 12px 0;
+  background-color: vars.$gray-9;
+
+  [data-theme='dark'] & {
+    background-color: vars.$black-2;
+  }
+}
+
+.top,
+.bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 29px;
+  height: 29px;
+  padding: 0;
+  color: vars.$gray-5;
+  background-color: vars.$white-2;
+  border-radius: 5px;
+  cursor: pointer;
+
+  [data-theme='dark'] & {
+    color: vars.$white-2;
+    background-color: vars.$gray-5;
+  }
+
+  &:hover {
+    color: vars.$white-2;
+    background-color: vars.$gray-5;
+
+    [data-theme='dark'] & {
+      color: vars.$gray-5;
+      background-color: vars.$white-2;
+    }
+  }
+
+  .iconImage {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+}
