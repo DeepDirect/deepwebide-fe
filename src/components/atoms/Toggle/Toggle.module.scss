@@ -10,7 +10,6 @@
   background-repeat: no-repeat;
   border-radius: 9999px;
   transition: background-color 0.2s ease;
-  all: unset;
   background-position: center right 6px;
 }
 
@@ -53,10 +52,14 @@
   }
 }
 
-.favorite .thumb {
-  background-image: url('@/assets/icons/heart.svg');
-}
+.favorite {
+  .thumb {
+    background-image: url('@/assets/icons/heart.svg');
+    background-repeat: no-repeat;
+    background-position: center;
+  }
 
-.favorite [data-state='checked'] .thumb {
-  background-position: center left 5px;
+  &[data-state='checked'] .thumb {
+    background-position: center;
+  }
 }
