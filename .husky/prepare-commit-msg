@@ -4,15 +4,20 @@
 # 브랜치명에서 DP-숫자 패턴 확인
 branch=$(git rev-parse --abbrev-ref HEAD)
 if echo "$branch" | grep -q "DP-[0-9]\+"; then
-  # Platform detection and execution
   case "$(uname -s)" in
     CYGWIN*|MINGW*|MSYS*)
       # Windows
-      npx jira-prepare-commit-msg $1
+      npx --yes jira-prepare-commit-msg $1
       ;;
     *)
       # macOS/Linux
-      exec < /dev/tty && npx jira-prepare-commit-msg $1
+      # TTY 사용 가능한지 확인하고, 가능하면 사용
+      if [ -t 0 ] && [ -c /dev/tty ]; then
+        exec < /dev/tty && npx --yes jira-prepare-commit-msg $1
+      else
+        # TTY 사용 불가능한 환경에서는 직접 실행
+        npx --yes jira-prepare-commit-msg $1
+      fi
       ;;
   esac
 fi
