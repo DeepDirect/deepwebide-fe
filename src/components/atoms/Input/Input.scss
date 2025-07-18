@@ -41,12 +41,12 @@
   width: 100%;
   padding: 14px 12px;
   border: 1px solid vars.$gray-7;
+  border-radius: 10px;
   font-family: vars.$font-family-inter;
   font-size: vars.$font-size-xsmall;
   font-weight: vars.$font-weight-medium;
   color: vars.$black-1;
   background-color: vars.$white-2;
-  border-radius: 10px;
   transition: all 0.2s ease-in-out;
 
   &::placeholder {
@@ -56,8 +56,8 @@
 
   &:focus {
     border-color: vars.$blue-3;
-    box-shadow: 0 0 0 1px vars.$blue-3;
     outline: none;
+    box-shadow: 0 0 0 1px vars.$blue-3;
   }
 
   &--error {
