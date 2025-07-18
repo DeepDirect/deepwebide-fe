@@ -1,0 +1,85 @@
+@use '@/styles/variables' as vars;
+
+.input-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.input-label {
+  font-family: vars.$font-family-inter;
+  font-size: vars.$font-size-xsmall;
+  font-weight: vars.$font-weight-bold;
+  line-height: vars.$default-line-height;
+  color: vars.$black-1;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  &--error {
+    .input {
+      border-color: vars.$orange;
+
+      &:focus {
+        border-color: vars.$orange;
+        box-shadow: 0 0 0 1px vars.$orange;
+      }
+    }
+  }
+
+  &--password {
+    .input-icon {
+      cursor: pointer;
+    }
+  }
+}
+
+.input {
+  width: 100%;
+  padding: 14px 12px;
+  border: 1px solid vars.$gray-7;
+  font-family: vars.$font-family-inter;
+  font-size: vars.$font-size-xsmall;
+  font-weight: vars.$font-weight-medium;
+  color: vars.$black-1;
+  background-color: vars.$white-2;
+  border-radius: 10px;
+  transition: all 0.2s ease-in-out;
+
+  &::placeholder {
+    font-weight: vars.$font-weight-medium;
+    color: vars.$gray-6;
+  }
+
+  &:focus {
+    border-color: vars.$blue-3;
+    box-shadow: 0 0 0 1px vars.$blue-3;
+    outline: none;
+  }
+
+  &--error {
+    border-color: vars.$orange;
+
+    &:focus {
+      border-color: vars.$orange;
+      box-shadow: 0 0 0 1px vars.$orange;
+    }
+  }
+}
+
+.input-icon {
+  position: absolute;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: vars.$gray-6;
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}
