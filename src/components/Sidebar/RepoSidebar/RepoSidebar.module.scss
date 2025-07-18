@@ -9,6 +9,10 @@
   height: 1024px;
   padding: 12px 0;
   background-color: vars.$gray-9;
+
+  [data-theme='dark'] & {
+    background-color: vars.$black-2;
+  }
 }
 
 .top,
@@ -30,9 +34,19 @@
   border-radius: 5px;
   cursor: pointer;
 
+  [data-theme='dark'] & {
+    color: vars.$white-2;
+    background-color: vars.$gray-5;
+  }
+
   &:hover {
     color: vars.$white-2;
     background-color: vars.$gray-5;
+
+    [data-theme='dark'] & {
+      color: vars.$gray-5;
+      background-color: vars.$white-2;
+    }
   }
 
   .iconImage {
