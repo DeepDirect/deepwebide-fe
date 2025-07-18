@@ -30,7 +30,6 @@
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^19.1.0",
     "react-hook-form": "^7.60.0",
-    "react-router-dom": "^7.7.0",
     "sass": "^1.89.2",
     "socket.io-client": "^4.8.1",
     "y-monaco": "^0.1.6",
