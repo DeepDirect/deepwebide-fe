@@ -1,0 +1,22 @@
+@use '@/styles/variables' as *;
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 100vh;
+  padding: 0 16px;
+  padding-top: 56px;
+  background-color: $white-1;
+}
+
+.content {
+  width: 985px;
+  height: 700px;
+  padding: 40px 32px;
+  border: 1px solid $blue-3;
+  border-radius: 10px;
+  background-color: $white-2;
+}
