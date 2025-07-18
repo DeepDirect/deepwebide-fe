@@ -1,33 +1,30 @@
 import styles from './Header.module.scss';
 import Logo from '@/components/atoms/Logo';
-import MainHeader from './variants/Main';
-import RepoLightHeader from './variants/RepoLight';
-import RepoDarkHeader from './variants/RepoDark';
+import UserProfile from './variants/UserProfile';
+import RepoHeader from './variants/RepoHeader';
+import Toggle from '../atoms/Toggle/Toggle';
 
 type HeaderProps = {
-  variant: 'auth' | 'main' | 'repo-light' | 'repo-dark';
+  variant: 'auth' | 'main' | 'repo';
 };
 
 const Header = ({ variant }: HeaderProps) => {
-  const renderContent = () => {
-    switch (variant) {
-      case 'auth':
-        return null;
-      case 'main':
-        return <MainHeader />;
-      case 'repo-light':
-        return <RepoLightHeader />;
-      case 'repo-dark':
-        return <RepoDarkHeader />;
-      default:
-        return null;
-    }
-  };
-
   return (
     <header className={styles.header}>
-      <Logo size={240} clickable />
-      {renderContent()}
+      <div className={styles.left}>
+        <Logo size={240} clickable />
+      </div>
+
+      {variant === 'repo' && (
+        <div className={styles.center}>
+          <RepoHeader />
+        </div>
+      )}
+
+      <div className={styles.right}>
+        {variant === 'repo' && <Toggle variant="theme" />}
+        {(variant === 'main' || variant === 'repo') && <UserProfile />}
+      </div>
     </header>
   );
 };

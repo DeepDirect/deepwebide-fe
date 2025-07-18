@@ -4,13 +4,29 @@
   position: fixed;
   top: 0;
   left: 0;
-  display: flex;
+  display: grid;
   align-items: center;
-  justify-content: space-between;
   width: 100%;
   height: 56px;
-  padding: 1rem 2rem;
+  padding: 0 1rem;
+  box-sizing: border-box;
   background-color: $white-2;
   box-shadow: $shadow-under;
   z-index: 10;
+  grid-template-columns: auto 1fr auto;
+}
+
+.left {
+  justify-self: start;
+}
+
+.center {
+  justify-self: center;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  justify-self: end;
 }
