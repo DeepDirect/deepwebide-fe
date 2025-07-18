@@ -1,0 +1,26 @@
+@use '@/styles/variables' as *;
+
+.profileArea {
+  position: relative;
+}
+
+.profileButton {
+  display: flex;
+  align-items: center;
+  border: none;
+  font-weight: 500;
+  color: $gray-5;
+  background: none;
+  cursor: pointer;
+  gap: 0.5rem;
+}
+
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background-color: $green;
+  border-radius: 50%;
+}
