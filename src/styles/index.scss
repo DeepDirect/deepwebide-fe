@@ -33,3 +33,24 @@ button {
   cursor: pointer;
   outline: none;
 }
+
+// light / dark mode header
+:root {
+  // light mode
+  --header-bg: #{variables.$white-2};
+  --header-text: #{variables.$gray-5};
+  --header-path-bg: #{variables.$gray-10};
+  --header-chat-bg: #{variables.$white-2};
+  --header-chat-icon: #{variables.$gray-5};
+  --header-username: #{variables.$gray-5};
+}
+
+.dark {
+  // dark mode
+  --header-bg: #{variables.$gray-1};
+  --header-text: #{variables.$white-2};
+  --header-path-bg: #{variables.$gray-3};
+  --header-chat-bg: #{variables.$gray-5};
+  --header-chat-icon: #{variables.$white-2};
+  --header-username: #{variables.$white-1};
+}
