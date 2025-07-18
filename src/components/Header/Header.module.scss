@@ -10,7 +10,7 @@
   height: 56px;
   padding: 0 1rem;
   box-sizing: border-box;
-  background-color: $white-2;
+  background-color: var(--header-bg);
   box-shadow: $shadow-under;
   z-index: 10;
   grid-template-columns: auto 1fr auto;

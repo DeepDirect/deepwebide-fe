@@ -26,10 +26,15 @@
   align-items: center;
   padding: 0.5rem 6rem;
   font-size: $font-size-xsmall;
-  color: $gray-5;
-  background-color: $gray-10;
+  color: var(--header-text);
+  background-color: var(--header-path-bg);
   border-radius: 8px;
   gap: 0.5rem;
+}
+
+.icon {
+  width: 18px;
+  height: 18px;
 }
 
 .chatButton {
@@ -39,7 +44,9 @@
   justify-content: center;
   width: 29px;
   height: 29px;
+  color: var(--header-chat-icon);
   background: none;
+  background-color: var(--header-chat-bg);
   box-shadow: $shadow;
   border-radius: 5px;
   cursor: pointer;
