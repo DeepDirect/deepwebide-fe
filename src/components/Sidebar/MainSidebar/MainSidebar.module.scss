@@ -1,0 +1,44 @@
+@use '@/styles/variables' as vars;
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  width: 44px;
+  height: 1024px;
+  padding: 12px 0;
+  background-color: vars.$white-2;
+}
+
+.top,
+.bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 29px;
+  height: 29px;
+  padding: 0;
+  border: 1px solid vars.$gray-8;
+  color: vars.$black-1;
+  background-color: vars.$white-2;
+  border-radius: 5px;
+  cursor: pointer;
+
+  &:hover {
+    border: 1px solid vars.$blue-3;
+    color: vars.$blue-3;
+  }
+
+  .iconImage {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+}
