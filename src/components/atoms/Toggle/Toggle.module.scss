@@ -1,0 +1,62 @@
+@use '@/styles/variables' as *;
+
+.root {
+  position: relative;
+  width: 67px;
+  height: 30px;
+  border: 2px solid $gray-7;
+  box-sizing: border-box;
+  background-color: $gray-8;
+  background-repeat: no-repeat;
+  border-radius: 9999px;
+  transition: background-color 0.2s ease;
+  all: unset;
+  background-position: center right 6px;
+}
+
+.thumb {
+  position: absolute;
+  top: 50%;
+  left: 2px;
+  display: block;
+  width: 24px;
+  height: 24px;
+  background-color: $white-2;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+  transform: translateY(-50%);
+}
+
+.root[data-state='checked'] .thumb {
+  transform: translate(37px, -50%);
+}
+
+/* variant별 스타일 분기 */
+.theme {
+  border: 2px solid $orange;
+  background-color: $white-1;
+  background-image: url('@/assets/icons/sun-alt.svg');
+
+  &[data-state='checked'] {
+    border-color: $blue-3;
+    background-color: $gray-1;
+    background-image: url('@/assets/icons/moon.svg');
+    background-position: center left 6px;
+  }
+
+  .thumb {
+    background-color: $orange;
+  }
+
+  &[data-state='checked'] .thumb {
+    background-color: $blue-3;
+  }
+}
+
+.favorite .thumb {
+  background-image: url('@/assets/icons/heart.svg');
+}
+
+.favorite [data-state='checked'] .thumb {
+  background-position: center left 5px;
+}
