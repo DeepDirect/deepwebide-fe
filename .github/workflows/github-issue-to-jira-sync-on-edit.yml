@@ -11,14 +11,7 @@ jobs:
   update-jira-task:
     runs-on: ubuntu-latest
     steps:
-      - name: Jira 로그인
-        uses: atlassian/gajira-login@v3
-        env:
-          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
-          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
-          JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
-
-      - name: Epic/Date 정보 추출
+      - name: Jira 필드 정보 추출
         id: extract_info
         run: |
           echo "EPIC_KEY=$(echo '${{ github.event.issue.body }}' | grep -oE 'epic: [A-Z]+-[0-9]+' | awk '{print $2}')" >> $GITHUB_ENV
@@ -48,15 +41,27 @@ jobs:
             core.setOutput("jiraKey", jiraKey);
 
       - name: Jira Task 필드 수정 (에픽/일정)
-        uses: atlassian/gajira-edit@v3
-        with:
-          issue: ${{ steps.extract_jira_key.outputs.jiraKey }}
-          fields: |
-            {
-              "customfield_10014": "${{ env.EPIC_KEY }}",
-              "customfield_10015": "${{ env.START_DATE }}",
-              "duedate":            "${{ env.DUE_DATE }}"
-            }
+        env:
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+          JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_ISSUE_KEY: ${{ steps.extract_jira_key.outputs.jiraKey }}
+          EPIC_KEY: ${{ env.EPIC_KEY }}
+          START_DATE: ${{ env.START_DATE }}
+          DUE_DATE: ${{ env.DUE_DATE }}
+        run: |
+          echo "Jira Issue Key: $JIRA_ISSUE_KEY"
+          curl -X PUT \
+            -u "${JIRA_USER_EMAIL}:${JIRA_API_TOKEN}" \
+            -H "Content-Type: application/json" \
+            --url "${JIRA_BASE_URL}/rest/api/2/issue/${JIRA_ISSUE_KEY}" \
+            -d '{
+              "fields": {
+                "customfield_10014": "'"${EPIC_KEY}"'",
+                "customfield_10015": "'"${START_DATE}"'",
+                "duedate": "'"${DUE_DATE}"'"
+              }
+            }'
 
       - name: Github 이슈에 수정 결과 안내 코멘트
         uses: actions/github-script@v7
