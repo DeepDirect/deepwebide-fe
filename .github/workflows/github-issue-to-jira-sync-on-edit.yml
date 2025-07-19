@@ -54,19 +54,27 @@ jobs:
           ISSUE_URL: ${{ github.event.issue.html_url }}
           ISSUE_USER: ${{ github.event.issue.user.login }}
         run: |
+          JSON=$(jq -n \
+            --arg summary "$ISSUE_TITLE" \
+            --arg description "GitHub Issue: [$ISSUE_TITLE]($ISSUE_URL)\n작성자: $ISSUE_USER\n본문:\n$ISSUE_BODY" \
+            --arg epic "$EPIC_KEY" \
+            --arg start "$START_DATE" \
+            --arg due "$DUE_DATE" \
+            '{
+              fields: {
+                summary: $summary,
+                description: $description,
+                customfield_10014: $epic,
+                customfield_10015: $start,
+                duedate: $due
+              }
+            }'
+          )
           curl -X PUT \
             -u "${JIRA_USER_EMAIL}:${JIRA_API_TOKEN}" \
             -H "Content-Type: application/json" \
             --url "${JIRA_BASE_URL}/rest/api/2/issue/${JIRA_ISSUE_KEY}" \
-            -d '{
-              "fields": {
-                "summary": "'"${ISSUE_TITLE}"'",
-                "description": "GitHub Issue: ['"${ISSUE_TITLE}"']('"${ISSUE_URL}"')\n작성자: '"${ISSUE_USER}"'\n본문:\n'"${ISSUE_BODY}"'",
-                "customfield_10014": "'"${EPIC_KEY}"'",
-                "customfield_10015": "'"${START_DATE}"'",
-                "duedate": "'"${DUE_DATE}"'"
-              }
-            }'
+            -d "$JSON"
 
       - name: Github 이슈에 수정 결과 안내 코멘트
         uses: actions/github-script@v7
