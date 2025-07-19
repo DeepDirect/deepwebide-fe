@@ -14,20 +14,17 @@
 
 .content {
   align-content: center;
+  box-sizing: border-box;
   width: 985px;
-  height: 700px;
+  height: 835px;
   border: 3px solid $blue-3;
   border-radius: 10px;
   background-color: $white-2;
 }
 
 @media (width <= 768px) {
-  .container {
-    padding-top: 80px;
-  }
-
   .content {
     width: 90%;
-    padding: 24px 20px;
+    padding: 0 20px;
   }
 }
