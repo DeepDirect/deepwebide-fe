@@ -40,7 +40,7 @@ jobs:
             if (!jiraKey) throw new Error("Jira 이슈키를 찾을 수 없습니다.");
             core.setOutput("jiraKey", jiraKey);
 
-      - name: Jira Task 필드 수정 (에픽/일정)
+      - name: Jira Task 필드 수정 (에픽/일정/제목/본문)
         env:
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
           JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
@@ -49,14 +49,19 @@ jobs:
           EPIC_KEY: ${{ env.EPIC_KEY }}
           START_DATE: ${{ env.START_DATE }}
           DUE_DATE: ${{ env.DUE_DATE }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_URL: ${{ github.event.issue.html_url }}
+          ISSUE_USER: ${{ github.event.issue.user.login }}
         run: |
-          echo "Jira Issue Key: $JIRA_ISSUE_KEY"
           curl -X PUT \
             -u "${JIRA_USER_EMAIL}:${JIRA_API_TOKEN}" \
             -H "Content-Type: application/json" \
             --url "${JIRA_BASE_URL}/rest/api/2/issue/${JIRA_ISSUE_KEY}" \
             -d '{
               "fields": {
+                "summary": "'"${ISSUE_TITLE}"'",
+                "description": "GitHub Issue: ['"${ISSUE_TITLE}"']('"${ISSUE_URL}"')\n작성자: '"${ISSUE_USER}"'\n본문:\n'"${ISSUE_BODY}"'",
                 "customfield_10014": "'"${EPIC_KEY}"'",
                 "customfield_10015": "'"${START_DATE}"'",
                 "duedate": "'"${DUE_DATE}"'"
