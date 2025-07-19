@@ -13,10 +13,21 @@
 }
 
 .content {
+  align-content: center;
   width: 985px;
   height: 700px;
-  padding: 40px 32px;
-  border: 1px solid $blue-3;
+  border: 3px solid $blue-3;
   border-radius: 10px;
   background-color: $white-2;
+}
+
+@media (width <= 768px) {
+  .container {
+    padding-top: 80px;
+  }
+
+  .content {
+    width: 90%;
+    padding: 24px 20px;
+  }
 }
