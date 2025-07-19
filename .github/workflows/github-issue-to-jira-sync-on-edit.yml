@@ -38,7 +38,7 @@ jobs:
       # Base64 인코딩으로 인증 헤더 생성
       - name: 인증 헤더 생성 (Base64 인코딩)
         run: |
-          AUTH=$(echo -n "${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" | base64)
+          AUTH=$(echo -n "${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" | base64 | tr -d '\n')
           echo "JIRA_AUTH=Basic $AUTH" >> $GITHUB_ENV
 
       # Jira Task 업데이트 (with jq)
