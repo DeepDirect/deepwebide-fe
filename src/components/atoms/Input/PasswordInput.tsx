@@ -27,16 +27,16 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(({ ...pro
           aria-label={isVisible ? '비밀번호 숨기기' : '비밀번호 보기'}
         >
           {isVisible ? (
-            <svg width="16" height="16" viewBox="0 0 24 14">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
               <path
-                d="M8 0H16V2H8V0ZM4 4V2H8V4H4ZM2 6V4H4V6H2ZM2 8V6H0V8H2ZM4 10H2V8H4V10ZM8 12H4V10H8V12ZM16 12V14H8V12H16ZM20 10V12H16V10H20ZM22 8V10H20V8H22ZM22 6H24V8H22V6ZM20 4H22V6H20V4ZM20 4V2H16V4H20ZM10 5H14V9H10V5Z"
+                d="M8 6h8v2H8V6zm-4 4V8h4v2H4zm-2 2v-2h2v2H2zm0 2v-2H0v2h2zm2 2H2v-2h2v2zm4 2H4v-2h4v2zm8 0v2H8v-2h8zm4-2v2h-4v-2h4zm2-2v2h-2v-2h2zm0-2h2v2h-2v-2zm-2-2h2v2h-2v-2zm0 0V8h-4v2h4zm-10 1h4v4h-4v-4z"
                 fill="currentColor"
               />
             </svg>
           ) : (
-            <svg width="16" height="16" viewBox="0 0 24 10">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
               <path
-                d="M0 0H2V2H0V0ZM4 4H2V2H4V4ZM8 6V4H4V6H2V8H4V6H8ZM16 6H8V8H6V10H8V8H16V10H18V8H16V6ZM20 4H16V6H20V8H22V6H20V4ZM22 2V4H20V2H22ZM22 2V0H24V2H22Z"
+                d="M0 7h2v2H0V7zm4 4H2V9h2v2zm4 2v-2H4v2H2v2h2v-2h4zm8 0H8v2H6v2h2v-2h8v2h2v-2h-2v-2zm4-2h-4v2h4v2h2v-2h-2v-2zm2-2v2h-2V9h2zm0 0V7h2v2h-2z"
                 fill="currentColor"
               />
             </svg>
