@@ -38,14 +38,17 @@
   .repositoriesWrapper {
     display: flex;
     align-items: stretch;
-    gap: 28px;
+    gap: 1.5rem;
     box-sizing: border-box;
-    height: 85%;
-    padding-top: 31px;
+
+    // height: 85%;
+    // // padding-top: 31px;
+    margin-top: 2rem;
     flex-flow: column nowrap;
   }
 
   .paginationWrapper {
     margin-top: 2rem;
+    padding: 1rem 0;
   }
 }
