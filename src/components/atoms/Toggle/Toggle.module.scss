@@ -53,6 +53,11 @@
 }
 
 .favorite {
+  .thumbIcon {
+    width: 17px;
+    transform: translate(3%, 4px);
+  }
+
   &[data-state='checked'] .thumb {
     .thumbIcon {
       color: $orange;
