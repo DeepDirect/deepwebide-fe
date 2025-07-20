@@ -29,9 +29,9 @@
   width: 29px;
   height: 29px;
   padding: 0;
+  border-radius: 5px;
   color: vars.$gray-5;
   background-color: vars.$white-2;
-  border-radius: 5px;
   cursor: pointer;
 
   [data-theme='dark'] & {
@@ -50,8 +50,8 @@
   }
 
   .iconImage {
+    flex-shrink: 0;
     width: 20px;
     height: 20px;
-    flex-shrink: 0;
   }
 }
