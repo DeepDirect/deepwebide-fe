@@ -20,6 +20,18 @@ if echo "$BRANCH_NAME" | grep -q "DP-[0-9]\+"; then
   # 기존 커밋 메시지 읽기
   COMMIT_MESSAGE=$(cat "$COMMIT_MESSAGE_FILE_PATH")
   
-  # 커밋 메시지 뒤에 " / DP-숫자" 형식으로 추가
-  echo "$COMMIT_MESSAGE / $JIRA_TICKET" > "$COMMIT_MESSAGE_FILE_PATH"
+  # 첫 번째 줄(제목)과 나머지(본문) 분리
+  TITLE=$(echo "$COMMIT_MESSAGE" | head -n 1)
+  BODY=$(echo "$COMMIT_MESSAGE" | tail -n +2)
+  
+  # 제목에 JIRA 번호 추가
+  NEW_TITLE="$TITLE / $JIRA_TICKET"
+  
+  # 본문이 있으면 제목과 본문을 합치고, 없으면 제목만
+  if [ -n "$BODY" ] && [ "$BODY" != "$TITLE" ]; then
+    echo "$NEW_TITLE
+$BODY" > "$COMMIT_MESSAGE_FILE_PATH"
+  else
+    echo "$NEW_TITLE" > "$COMMIT_MESSAGE_FILE_PATH"
+  fi
 fi
