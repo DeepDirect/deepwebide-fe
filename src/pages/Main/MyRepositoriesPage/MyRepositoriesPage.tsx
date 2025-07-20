@@ -86,14 +86,14 @@ const tempList = [
     updatedAt: '2025-07-22T14:30:00Z',
     isFavorite: false,
   },
-];
+]; // TODO: api 연동 후 제거
 
 const MyRepositoriesPage = () => {
   const [pagination, setPagination] = useState({
     total: 10,
     current: 1,
     pageSize: 5,
-  });
+  }); // TODO: api 연동 후 받은 데이터로 변경
 
   const onPageChange = (page: number) => {
     setPagination(prev => ({ ...prev, current: page }));
