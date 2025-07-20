@@ -9,12 +9,12 @@
   .topWrapper {
     display: flex;
     flex-direction: row;
-    align-items: center;
+    align-items: flex-end;
     justify-content: space-between;
     width: 100%;
 
     .title {
-      font-size: $font-size-xxxlarge;
+      font-size: $font-size-xxlarge;
       font-weight: bold;
       text-align: left;
     }
