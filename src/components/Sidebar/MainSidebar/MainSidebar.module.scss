@@ -25,9 +25,9 @@
   height: 29px;
   padding: 0;
   border: 1px solid vars.$gray-8;
+  border-radius: 5px;
   color: vars.$black-1;
   background-color: vars.$white-2;
-  border-radius: 5px;
   cursor: pointer;
 
   &:hover {
@@ -36,8 +36,8 @@
   }
 
   .iconImage {
+    flex-shrink: 0;
     width: 20px;
     height: 20px;
-    flex-shrink: 0;
   }
 }

@@ -7,12 +7,12 @@
 .profileButton {
   display: flex;
   align-items: center;
+  gap: 0.5rem;
   border: none;
   font-weight: $font-weight-medium;
   color: var(--header-username);
   background: none;
   cursor: pointer;
-  gap: 0.5rem;
 }
 
 .avatar {
@@ -21,6 +21,6 @@
   justify-content: center;
   width: 32px;
   height: 32px;
-  background-color: $green;
   border-radius: 50%;
+  background-color: $green;
 }

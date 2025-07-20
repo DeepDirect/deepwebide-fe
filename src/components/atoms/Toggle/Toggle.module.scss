@@ -2,15 +2,15 @@
 
 .root {
   position: relative;
+  box-sizing: border-box;
   width: 67px;
   height: 30px;
   border: 2px solid $gray-7;
-  box-sizing: border-box;
+  border-radius: 9999px;
   background-color: $gray-8;
   background-repeat: no-repeat;
-  border-radius: 9999px;
-  transition: background-color 0.2s ease;
   background-position: center right 6px;
+  transition: background-color 0.2s ease;
 }
 
 .thumb {
@@ -20,8 +20,8 @@
   display: block;
   width: 24px;
   height: 24px;
-  background-color: $white-2;
   border-radius: 50%;
+  background-color: $white-2;
   transition: transform 0.2s ease;
   transform: translateY(-50%);
 }
