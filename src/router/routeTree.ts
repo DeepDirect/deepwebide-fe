@@ -3,9 +3,9 @@ import { authLayoutRoute } from './routes/auth/auth-layout';
 import { signInRoute } from './routes/auth/sign-in';
 import { signUpRoute } from './routes/auth/sign-up';
 import { mainLayoutRoute } from './routes/main/main-layout';
-import { myRepositories } from './routes/main/my-repositories';
+import { myRepositoriesRoute } from './routes/main/my-repositories';
 
 export const routeTree = rootRoute.addChildren([
   authLayoutRoute.addChildren([signInRoute, signUpRoute]),
-  mainLayoutRoute.addChildren([myRepositories]),
+  mainLayoutRoute.addChildren([myRepositoriesRoute]),
 ]);
