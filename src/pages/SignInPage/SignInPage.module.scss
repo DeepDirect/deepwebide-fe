@@ -56,7 +56,7 @@
 }
 
 .checkbox input[type='checkbox'] {
-  transform: translateY(-2.5px);
+  transform: translateY(-0.5px);
 }
 
 .loginBtn {
@@ -68,10 +68,11 @@
   display: flex;
   justify-content: space-between;
   width: 100%;
-  font-size: $font-size-xxsmall;
 }
 
 .link {
+  font-size: $font-size-xxsmall;
+  font-weight: $font-weight-bold;
   text-decoration: none;
   color: $gray-1;
   cursor: pointer;
