@@ -5,6 +5,6 @@ import MyRepositoriesPage from '@/pages/Main/MyRepositoriesPage/MyRepositoriesPa
 
 export const myRepositoriesRoute = createRoute({
   getParentRoute: () => mainLayoutRoute,
-  path: '/main',
+  path: '/main/my-repo',
   component: MyRepositoriesPage,
 });
