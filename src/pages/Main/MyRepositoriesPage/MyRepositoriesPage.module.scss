@@ -34,4 +34,13 @@
       }
     }
   }
+
+  .repositoriesWrapper {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: stretch;
+    gap: 28px;
+    box-sizing: border-box;
+    padding-top: 31px;
+  }
 }
