@@ -1,10 +1,23 @@
 import styles from './MyRepositoriesPage.module.scss';
 
+import Button from '@/components/atoms/Button/Button';
+import FileIcon from '@/assets/icons/file.svg?react';
+import Toggle from '@/components/atoms/Toggle/Toggle';
+
 const MyRepositoriesPage = () => {
   return (
-    <>
-      <h1 className={styles.title}></h1>
-    </>
+    <div className={styles.wrapper}>
+      <div className={styles.topWrapper}>
+        <h1 className={styles.title}>개인 레포</h1>
+
+        <div className={styles.buttonWrapper}>
+          <Toggle variant="favorite" />
+          <Button className={styles.repoButton}>
+            <FileIcon className={styles.iconImage} />새 레포지토리 생성
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 };
 
