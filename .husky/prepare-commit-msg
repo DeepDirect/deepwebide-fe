@@ -24,8 +24,8 @@ if echo "$BRANCH_NAME" | grep -q "DP-[0-9]\+"; then
   TITLE=$(echo "$COMMIT_MESSAGE" | head -n 1)
   BODY=$(echo "$COMMIT_MESSAGE" | tail -n +2)
   
-  # 제목에 JIRA 번호 추가
-  NEW_TITLE="$TITLE / $JIRA_TICKET"
+  # 제목 앞에 JIRA 번호 추가
+  NEW_TITLE="$JIRA_TICKET $TITLE"
   
   # 본문이 있으면 제목과 본문을 합치고, 없으면 제목만
   if [ -n "$BODY" ] && [ "$BODY" != "$TITLE" ]; then
