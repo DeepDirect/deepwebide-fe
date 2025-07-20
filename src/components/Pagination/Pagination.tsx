@@ -16,7 +16,6 @@ const Pagination = ({
   const currentGroup = Math.floor((currentPage - 1) / maxVisiblePages);
   const startPage = currentGroup * maxVisiblePages + 1;
   const endPage = Math.min(startPage + maxVisiblePages - 1, totalPages);
-
   const pages = [];
 
   for (let i = startPage; i <= endPage; i++) {
