@@ -5,6 +5,7 @@ import type { SignInFormValues } from '@/schemas/auth.schema';
 import Input from '@/components/atoms/Input/Input';
 import PasswordInput from '@/components/atoms/Input/PasswordInput';
 import Button from '@/components/atoms/Button/Button';
+import FormField from '@/components/molecules/FormField';
 import styles from './SignInPage.module.scss';
 
 export default function SignInForm() {
@@ -23,20 +24,13 @@ export default function SignInForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
-      <div className={styles.formGroup}>
-        <h3 className={styles.subTitle}>
-          이메일<span className={styles.required}>*</span>
-        </h3>
-        <Input type="email" placeholder="user@goorm.com" {...register('email')} />
-        {errors.email && <p className={styles.error}>{errors.email.message}</p>}
-      </div>
-      <div className={styles.formGroup}>
-        <h3 className={styles.subTitle}>
-          비밀번호<span className={styles.required}>*</span>
-        </h3>
-        <PasswordInput placeholder="********" {...register('password')} />
-        {errors.password && <p className={styles.error}>{errors.password.message}</p>}
-      </div>
+      <FormField label="이메일" htmlFor="email" required error={errors.email?.message}>
+        <Input id="email" placeholder="user@goorm.com" {...register('email')} />
+      </FormField>
+
+      <FormField label="비밀번호" htmlFor="password" required error={errors.password?.message}>
+        <PasswordInput id="password" placeholder="********" {...register('password')} />
+      </FormField>
 
       <div className={styles.options}>
         <label className={styles.checkbox}>
