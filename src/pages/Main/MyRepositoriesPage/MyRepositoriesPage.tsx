@@ -1,11 +1,107 @@
+import { useState } from 'react';
+
 import styles from './MyRepositoriesPage.module.scss';
 
 import Button from '@/components/atoms/Button/Button';
 import FileIcon from '@/assets/icons/file.svg?react';
 import Repository from '@/components/Repository/Repository';
 import Toggle from '@/components/atoms/Toggle/Toggle';
+import Pagination from '@/components/Pagination/Pagination';
+
+const tempList = [
+  {
+    repositoryId: 1,
+    repositoryName: '개인 프로젝트1',
+    ownerId: 5,
+    ownerName: '슬기로운 개발자',
+    isShared: false,
+    shareLink: null,
+    createdAt: '2025-07-18T13:10:00Z',
+    updatedAt: '2025-07-22T13:10:00Z',
+    isFavorite: true,
+  },
+  {
+    repositoryId: 2,
+    repositoryName: '개인 프로젝트2',
+    ownerId: 5,
+    ownerName: '슬기로운 개발자',
+    isShared: false,
+    shareLink: null,
+    createdAt: '2025-07-18T13:10:00Z',
+    updatedAt: '2025-07-22T13:10:00Z',
+    isFavorite: false,
+  },
+  {
+    repositoryId: 3,
+    repositoryName: '개인 프로젝트3',
+    ownerId: 5,
+    ownerName: '슬기로운 개발자',
+    isShared: false,
+    shareLink: null,
+    createdAt: '2025-07-19T08:00:00Z',
+    updatedAt: '2025-07-22T13:20:00Z',
+    isFavorite: true,
+  },
+  {
+    repositoryId: 4,
+    repositoryName: '개인 프로젝트4',
+    ownerId: 5,
+    ownerName: '슬기로운 개발자',
+    isShared: false,
+    shareLink: null,
+    createdAt: '2025-07-19T08:00:00Z',
+    updatedAt: '2025-07-22T13:20:00Z',
+    isFavorite: false,
+  },
+  {
+    repositoryId: 5,
+    repositoryName: '개인 프로젝트5',
+    ownerId: 5,
+    ownerName: '슬기로운 개발자',
+    isShared: false,
+    shareLink: null,
+    createdAt: '2025-07-20T11:00:00Z',
+    updatedAt: '2025-07-22T14:00:00Z',
+    isFavorite: true,
+  },
+  {
+    repositoryId: 6,
+    repositoryName: '개인 프로젝트6',
+    ownerId: 5,
+    ownerName: '슬기로운 개발자',
+    isShared: false,
+    shareLink: null,
+    createdAt: '2025-07-20T11:00:00Z',
+    updatedAt: '2025-07-22T14:00:00Z',
+    isFavorite: false,
+  },
+  {
+    repositoryId: 7,
+    repositoryName: '개인 프로젝트7',
+    ownerId: 5,
+    ownerName: '슬기로운 개발자',
+    isShared: false,
+    shareLink: null,
+    createdAt: '2025-07-20T14:30:00Z',
+    updatedAt: '2025-07-22T14:30:00Z',
+    isFavorite: false,
+  },
+];
 
 const MyRepositoriesPage = () => {
+  const [pagination, setPagination] = useState({
+    total: 10,
+    current: 1,
+    pageSize: 5,
+  });
+
+  const onPageChange = (page: number) => {
+    setPagination(prev => ({ ...prev, current: page }));
+  };
+  const onFavoriteClicked = (id: number) => {
+    console.log(`Favorite clicked for repository ID: ${id}`);
+  };
+
   return (
     <div className={styles.wrapper}>
       <div className={styles.topWrapper}>
@@ -20,13 +116,18 @@ const MyRepositoriesPage = () => {
       </div>
 
       <div className={styles.repositoriesWrapper}>
-        <Repository />
-        <Repository />
-        <Repository />
-        <Repository />
-        <Repository />
-        <Repository />
-        <Repository />
+        {tempList.map(repo => (
+          <Repository key={repo.repositoryId} info={repo} onFavoriteClicked={onFavoriteClicked} />
+        ))}
+      </div>
+
+      <div className={styles.paginationWrapper}>
+        <Pagination
+          maxVisiblePages={5}
+          totalPages={pagination.total}
+          currentPage={pagination.current}
+          onPageChange={onPageChange}
+        />
       </div>
     </div>
   );

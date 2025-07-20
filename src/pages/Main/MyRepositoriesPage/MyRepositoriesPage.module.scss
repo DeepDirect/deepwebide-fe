@@ -37,10 +37,15 @@
 
   .repositoriesWrapper {
     display: flex;
-    flex-flow: column nowrap;
     align-items: stretch;
     gap: 28px;
     box-sizing: border-box;
+    height: 85%;
     padding-top: 31px;
+    flex-flow: column nowrap;
+  }
+
+  .paginationWrapper {
+    margin-top: 2rem;
   }
 }
