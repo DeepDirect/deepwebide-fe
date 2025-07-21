@@ -81,3 +81,12 @@
     white-space: nowrap;
   }
 }
+
+.error {
+  margin-top: 0.2rem;
+  margin-left: 0.5rem;
+  font-size: $font-size-xxsmall;
+  font-weight: $font-weight-bold;
+  text-align: left;
+  color: $orange;
+}
