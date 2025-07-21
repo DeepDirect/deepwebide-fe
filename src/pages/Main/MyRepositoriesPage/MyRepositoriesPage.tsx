@@ -1,12 +1,13 @@
 import { useState } from 'react';
 
-import styles from './MyRepositoriesPage.module.scss';
+import FileIcon from '@/assets/icons/file.svg?react';
 
 import Button from '@/components/atoms/Button/Button';
-import FileIcon from '@/assets/icons/file.svg?react';
-import Repository from '@/components/Repository/Repository';
 import Toggle from '@/components/atoms/Toggle/Toggle';
 import Pagination from '@/components/Pagination/Pagination';
+import Repository from '@/components/Repository/Repository';
+
+import styles from './MyRepositoriesPage.module.scss';
 
 const tempList = [
   {
