@@ -11,7 +11,7 @@ export default function SignInPage() {
       <SignInForm />
 
       <div className={styles.links}>
-        <Link to="/" className={styles.link}>
+        <Link to="/find-id" className={styles.link}>
           아이디/비밀번호를 잊어버렸습니다..
         </Link>
         <Link to="/sign-up" className={`${styles.link} ${styles.linkWarning}`}>
