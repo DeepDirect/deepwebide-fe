@@ -5,7 +5,7 @@
   }
 }
 
-// 태블릿 & 데스크탑
+// 데스크탑: 769px 이상
 @mixin desktop {
   @media (width >= 769px) {
     @content;
