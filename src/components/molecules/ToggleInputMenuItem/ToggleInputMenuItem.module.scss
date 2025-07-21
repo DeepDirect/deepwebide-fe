@@ -1,0 +1,160 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+
+// 접힌 상태 (MenuItem과 동일한 스타일)
+.menuItem {
+  @include orange-circle-hover;
+  @include label-icon-row;
+
+  width: max-content;
+  min-width: 0;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+// 펼쳐진 상태 (InputMenuItem과 유사한 스타일)
+.container {
+  @include orange-circle-hover;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: max-content;
+  min-width: 150px;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+}
+
+.labelRow {
+  @include label-icon-row;
+
+  white-space: nowrap;
+}
+
+.label {
+  font-family: $font-family-primary;
+  font-size: $font-size-xsmall;
+  font-weight: $font-weight-medium;
+  color: $black-1;
+  user-select: none;
+}
+
+.iconWrapper {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+
+  &:hover,
+  &.iconHovered {
+    background-color: rgb(0 0 0 / 5%);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    box-shadow: 0 1px 4px rgb(0 0 0 / 10%);
+    transform: translateY(0);
+  }
+}
+
+.icon {
+  width: 16px;
+  height: 16px;
+  opacity: 0.7;
+  transition: all 0.2s ease;
+
+  .iconWrapper:hover &,
+  .iconWrapper.iconHovered & {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input {
+  box-sizing: border-box;
+  width: auto;
+  max-width: 100%;
+  min-width: 120px;
+  padding: 0.75rem 1rem;
+  border: 1px solid $gray-8;
+  border-radius: 6px;
+  overflow: hidden;
+  font-family: $font-family-primary;
+  font-size: $font-size-xsmall;
+  font-weight: $font-weight-regular;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: $black-1;
+  background-color: $white-2;
+  transition: all 0.2s ease;
+
+  &:focus {
+    border-color: $blue-1;
+    outline: none;
+    box-shadow: 0 0 0 2px rgb(55 79 255 / 10%);
+  }
+
+  &::placeholder {
+    color: $gray-6;
+  }
+
+  &.readOnlyInput {
+    color: $gray-6;
+    background-color: $gray-10;
+    cursor: default;
+
+    &:focus {
+      border-color: $gray-8;
+      box-shadow: none;
+    }
+  }
+
+  &[type='password'] {
+    padding-right: 2.5rem;
+  }
+}
+
+.passwordToggle {
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  padding: 0.25rem;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  transition: background-color 0.2s ease;
+  transform: translateY(-50%);
+  cursor: pointer;
+
+  &:hover {
+    background-color: rgb(0 0 0 / 5%);
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgb(55 79 255 / 10%);
+  }
+}
+
+.eyeIcon {
+  width: 16px;
+  height: 16px;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+
+  .passwordToggle:hover & {
+    opacity: 0.8;
+  }
+}
