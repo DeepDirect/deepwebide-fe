@@ -4,10 +4,17 @@ import { signInRoute } from './routes/auth/sign-in';
 import { signUpRoute } from './routes/auth/sign-up';
 import { findIdRoute } from './routes/auth/find-id';
 import { findIdCompleteRoute } from './routes/auth/find-id-complete';
+import { findPasswordRoute } from './routes/auth/find-password';
 import { mainLayoutRoute } from './routes/main/main-layout';
 import { myRepositoriesRoute } from './routes/main/my-repositories';
 
 export const routeTree = rootRoute.addChildren([
-  authLayoutRoute.addChildren([signInRoute, signUpRoute, findIdRoute, findIdCompleteRoute]),
+  authLayoutRoute.addChildren([
+    signInRoute,
+    signUpRoute,
+    findIdRoute,
+    findIdCompleteRoute,
+    findPasswordRoute,
+  ]),
   mainLayoutRoute.addChildren([myRepositoriesRoute]),
 ]);
