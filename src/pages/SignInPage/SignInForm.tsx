@@ -12,15 +12,22 @@ export default function SignInForm() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<SignInFormValues>({
     resolver: zodResolver(signInSchema),
+    mode: 'onChange',
   });
+
+  const email = watch('email');
+  const password = watch('password');
 
   const onSubmit = (data: SignInFormValues) => {
     console.log('로그인 요청', data);
     // 추후 api 연동 예정
   };
+
+  const isButtonDisabled = isSubmitting || !email || !password;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
@@ -39,7 +46,12 @@ export default function SignInForm() {
         </label>
       </div>
 
-      <Button variant="active" className={styles.loginBtn} type="submit" disabled={isSubmitting}>
+      <Button
+        variant={isButtonDisabled ? 'general' : 'active'}
+        className={styles.loginBtn}
+        type="submit"
+        disabled={isButtonDisabled}
+      >
         로그인
       </Button>
     </form>

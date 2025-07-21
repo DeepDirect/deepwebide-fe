@@ -30,7 +30,7 @@ export default function SignUpForm() {
   const phone = watch('phoneNumber');
   const phoneCode = watch('phoneCode');
 
-  // 타이머 로직 (간단한 60초 예시)
+  // 타이머 로직
   const startTimer = () => {
     setTimer(59);
     const interval = setInterval(() => {
