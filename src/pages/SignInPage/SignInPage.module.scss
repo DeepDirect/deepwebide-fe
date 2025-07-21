@@ -20,31 +20,10 @@
 }
 
 .text {
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
   font-size: $font-size-xsmall;
   font-weight: $font-weight-bold;
   color: $gray-6;
-}
-
-.formGroup {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  width: 100%;
-  margin-bottom: 2rem;
-}
-
-.subTitle {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-  font-size: $font-size-xsmall;
-  font-weight: $font-weight-bold;
-  color: $black-1;
-}
-
-.required {
-  color: $red;
 }
 
 .options {
@@ -95,12 +74,4 @@
     text-decoration: underline;
     color: $orange;
   }
-}
-
-.error {
-  margin-top: 0.2rem;
-  margin-left: 0.5rem;
-  font-size: $font-size-xxsmall;
-  font-weight: $font-weight-bold;
-  color: $orange;
 }

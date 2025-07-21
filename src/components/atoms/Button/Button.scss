@@ -18,41 +18,53 @@
     outline: none;
   }
 
+  &:disabled {
+    opacity: 1;
+    cursor: not-allowed;
+  }
+
+  // 활성화
   &--active {
     color: vars.$white-2;
     background-color: vars.$blue-3;
 
-    &:hover {
+    &:hover:not(:disabled) {
       background-color: #5a8bb5;
     }
 
-    &:active {
+    &:active:not(:disabled) {
       background-color: #4f7ea3;
+    }
+
+    &:disabled {
+      background-color: vars.$blue-4;
     }
   }
 
+  // 완료
   &--inactive {
     color: vars.$white-2;
     background-color: vars.$blue-2;
 
-    &:hover {
+    &:hover:not(:disabled) {
       background-color: #5a6a78;
     }
 
-    &:active {
+    &:active:not(:disabled) {
       background-color: #42525e;
     }
   }
 
+  // 일반
   &--general {
     color: vars.$white-2;
     background-color: vars.$blue-4;
 
-    &:hover {
+    &:hover:not(:disabled) {
       background-color: #9aa8b4;
     }
 
-    &:active {
+    &:active:not(:disabled) {
       background-color: #8b9ba8;
     }
   }
