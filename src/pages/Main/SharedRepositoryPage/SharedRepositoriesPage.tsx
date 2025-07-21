@@ -12,7 +12,7 @@ import styles from './SharedRepositoriesPage.module.scss';
 const tempList = [
   {
     repositoryId: 1,
-    repositoryName: '개인 프로젝트1',
+    repositoryName: '공유한 프로젝트1',
     ownerId: 5,
     ownerName: '슬기로운 개발자',
     isShared: false,
@@ -23,7 +23,7 @@ const tempList = [
   },
   {
     repositoryId: 2,
-    repositoryName: '개인 프로젝트2',
+    repositoryName: '공유한 프로젝트2',
     ownerId: 5,
     ownerName: '슬기로운 개발자',
     isShared: false,
@@ -34,7 +34,7 @@ const tempList = [
   },
   {
     repositoryId: 3,
-    repositoryName: '개인 프로젝트3',
+    repositoryName: '공유한 프로젝트3',
     ownerId: 5,
     ownerName: '슬기로운 개발자',
     isShared: false,
@@ -45,7 +45,7 @@ const tempList = [
   },
   {
     repositoryId: 4,
-    repositoryName: '개인 프로젝트4',
+    repositoryName: '공유한 프로젝트4',
     ownerId: 5,
     ownerName: '슬기로운 개발자',
     isShared: false,
@@ -56,7 +56,7 @@ const tempList = [
   },
   {
     repositoryId: 5,
-    repositoryName: '개인 프로젝트5',
+    repositoryName: '공유한 프로젝트5',
     ownerId: 5,
     ownerName: '슬기로운 개발자',
     isShared: false,
@@ -67,7 +67,7 @@ const tempList = [
   },
   {
     repositoryId: 6,
-    repositoryName: '개인 프로젝트6',
+    repositoryName: '공유한 프로젝트6',
     ownerId: 5,
     ownerName: '슬기로운 개발자',
     isShared: false,
@@ -78,7 +78,7 @@ const tempList = [
   },
   {
     repositoryId: 7,
-    repositoryName: '개인 프로젝트7',
+    repositoryName: '공유한 프로젝트7',
     ownerId: 5,
     ownerName: '슬기로운 개발자',
     isShared: false,
