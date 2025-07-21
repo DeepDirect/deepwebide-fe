@@ -1,14 +1,14 @@
 import React from 'react';
 import AlertDialog from '@/components/molecules/AlertDialog/AlertDialog';
 
-export interface LeaveSharedRepoAlertDialogProps {
+export interface DeleteFileAlertDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm?: () => void;
   onCancel?: () => void;
 }
 
-const LeaveSharedRepoAlertDialog: React.FC<LeaveSharedRepoAlertDialogProps> = ({
+const DeleteFileAlertDialog: React.FC<DeleteFileAlertDialogProps> = ({
   open,
   onOpenChange,
   onConfirm,
@@ -18,8 +18,8 @@ const LeaveSharedRepoAlertDialog: React.FC<LeaveSharedRepoAlertDialogProps> = ({
     <AlertDialog
       open={open}
       onOpenChange={onOpenChange}
-      title="공유받은 레포지토리에서 퇴장하시겠습니까?"
-      confirmText="퇴장하기"
+      title="파일을 삭제하시겠습니까?"
+      confirmText="삭제"
       cancelText="취소"
       onConfirm={onConfirm}
       onCancel={onCancel}
@@ -27,4 +27,4 @@ const LeaveSharedRepoAlertDialog: React.FC<LeaveSharedRepoAlertDialogProps> = ({
   );
 };
 
-export default LeaveSharedRepoAlertDialog;
+export default DeleteFileAlertDialog;

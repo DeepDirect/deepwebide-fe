@@ -1,14 +1,14 @@
 import React from 'react';
 import AlertDialog from '@/components/molecules/AlertDialog/AlertDialog';
 
-export interface ShareRepoAlertDialogProps {
+export interface UnsavedChangesAlertDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm?: () => void;
   onCancel?: () => void;
 }
 
-const ShareRepoAlertDialog: React.FC<ShareRepoAlertDialogProps> = ({
+const UnsavedChangesAlertDialog: React.FC<UnsavedChangesAlertDialogProps> = ({
   open,
   onOpenChange,
   onConfirm,
@@ -18,8 +18,8 @@ const ShareRepoAlertDialog: React.FC<ShareRepoAlertDialogProps> = ({
     <AlertDialog
       open={open}
       onOpenChange={onOpenChange}
-      title="개인 레포지토리를 공유하시겠습니까?"
-      confirmText="공유하기"
+      title="변경사항을 저장하시겠습니까?"
+      confirmText="저장하기"
       cancelText="취소"
       onConfirm={onConfirm}
       onCancel={onCancel}
@@ -27,4 +27,4 @@ const ShareRepoAlertDialog: React.FC<ShareRepoAlertDialogProps> = ({
   );
 };
 
-export default ShareRepoAlertDialog;
+export default UnsavedChangesAlertDialog;
