@@ -1,0 +1,13 @@
+// 모바일
+@mixin mobile {
+  @media (width <= 768px) {
+    @content;
+  }
+}
+
+// 태블릿 & 데스크탑
+@mixin desktop {
+  @media (width >= 769px) {
+    @content;
+  }
+}
