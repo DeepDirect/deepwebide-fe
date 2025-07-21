@@ -24,7 +24,7 @@ const Repository = ({ info, onFavoriteClicked }: RepositoryProps) => {
 
       <div className={styles.infoContainer}>
         <div className={styles.infoWrapper}>
-          <span>마지막 수정일: </span>
+          <span className={styles.updateTitle}>마지막 수정일: </span>
           <span className={styles.date}>
             {dayjs(info.updatedAt).locale('ko').format('YYYY-MM-DD')}
           </span>
