@@ -10,7 +10,6 @@
 }
 
 .title {
-  margin-top: 1rem;
   margin-bottom: 2.5rem;
   font-size: $font-size-xxxlarge;
   font-weight: $font-weight-bold;
@@ -20,7 +19,7 @@
 
 .email {
   width: 100%;
-  margin-bottom: 2.5rem;
+  margin-bottom: 3rem;
   font-size: $font-size-xsmall;
   font-weight: $font-weight-bold;
   text-align: center;
@@ -31,5 +30,4 @@
 
 .submitBtn {
   width: 100%;
-  margin-bottom: 1rem;
 }
