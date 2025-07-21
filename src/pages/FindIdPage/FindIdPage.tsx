@@ -10,7 +10,7 @@ export default function FindIdPage() {
       <FindIdForm />
 
       <div className={styles.links}>
-        <Link to="/" className={styles.link}>
+        <Link to="/find-password" className={styles.link}>
           비밀번호가 기억이 나지 않습니다..
         </Link>
         <Link to="/sign-in" className={`${styles.link} ${styles.linkWarning}`}>
