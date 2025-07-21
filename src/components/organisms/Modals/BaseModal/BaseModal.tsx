@@ -57,14 +57,23 @@ const BaseModal: React.FC<BaseModalProps> = ({
       <Dialog.Portal>
         <Dialog.Overlay className={styles.overlay} />
         <Dialog.Content className={`${styles.content} ${className}`}>
+          {/* 헤더 - 고정 */}
           <div className={styles.header}>
             <Dialog.Title className={styles.title}>{title}</Dialog.Title>
+            <Dialog.Description className="sr-only">
+              {/* 접근성 경고 해결을 위한 빈 설명 */}
+            </Dialog.Description>
           </div>
+
+          {/* 내용 - 자유롭게 사용 */}
           <div className={styles.body}>{children}</div>
+
+          {/* 푸터 - 고정 */}
           <div className={styles.footer}>
             <Button variant="active" onClick={handleConfirm} className={styles.confirmButton}>
               {confirmText}
             </Button>
+
             {showCancel && (
               <Button variant="general" onClick={handleCancel} className={styles.cancelButton}>
                 {cancelText}
