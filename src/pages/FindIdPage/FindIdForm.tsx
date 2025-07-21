@@ -60,7 +60,7 @@ export default function FindIdForm() {
       data.phoneNumber === '01012345678' &&
       data.phoneCode === '123456'
     ) {
-      //완료페이지로 email 전달하며 이동!
+      // 완료페이지로 email 전달하며 이동!
       navigate({
         to: '/find-id/complete',
         search: { email: 'goorm@email.com' },
