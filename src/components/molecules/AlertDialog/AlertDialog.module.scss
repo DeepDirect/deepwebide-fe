@@ -1,5 +1,6 @@
 @use '@/styles/variables' as *;
 
+// 오버레이 (배경)
 .overlay {
   position: fixed;
   z-index: $modal-overlay-z-index;
@@ -13,11 +14,11 @@
   top: 50%;
   left: 50%;
   z-index: $modal-z-index;
-  width: auto;
-  max-width: $modal-max-width;
-  min-width: $modal-min-width;
-  max-height: 85vh;
-  padding: $modal-padding;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 400px;
+  padding: 1.5rem;
   border: none;
   border-radius: $modal-border-radius;
   background: $modal-content-bg;
@@ -30,44 +31,37 @@
   }
 }
 
-.header {
-  margin-bottom: $modal-title-margin-bottom;
-  text-align: center;
-}
-
+// 제목
 .title {
-  margin: 0;
+  margin: 1rem 0 0;
+  overflow-wrap: break-word;
   font-family: $font-family-primary;
-  font-size: $font-size-medium;
-  font-weight: $font-weight-bold;
+  font-size: $font-size-small;
+  font-weight: $font-weight-medium;
   line-height: $default-line-height;
+  text-align: center;
   color: $black-1;
 }
 
-.srOnly {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  border: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  clip: rect(0, 0, 0, 0);
-}
-
-.body {
-  flex: 1;
-  width: 430px;
-  max-height: 60vh;
-  margin-bottom: $modal-content-margin-bottom;
-  overflow: auto;
+.description {
+  margin: 0;
   overflow-wrap: break-word;
+  font-family: $font-family-primary;
   font-size: $font-size-xsmall;
   font-weight: $font-weight-regular;
   line-height: $default-line-height;
-  word-break: break-all;
+  text-align: center;
   color: $gray-3;
+}
+
+// 버튼 컨테이너
+.buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $modal-button-gap;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
 }
 
 .confirmButton {
@@ -83,14 +77,6 @@
   &:hover {
     background-color: $gray-4;
   }
-}
-
-.footer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: $modal-button-gap;
-  margin-top: $modal-button-margin-top;
 }
 
 // 애니메이션

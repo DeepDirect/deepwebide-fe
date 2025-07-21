@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import BaseModal from '@/components/organisms/Modals/BaseModal/BaseModal';
 import Input from '@/components/atoms/Input/Input';
-import styles from './RepoNameChangeModal.module.scss';
+import styles from './ChangeRepoNameModal.module.scss';
 
-export interface RepoNameChangeModalProps {
+export interface ChangeRepoNameModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   currentName: string; // TODO: API에서 현재 레포지토리 이름을 가져와야 함
@@ -11,7 +11,7 @@ export interface RepoNameChangeModalProps {
   onCancel?: () => void;
 }
 
-const RepoNameChangeModal: React.FC<RepoNameChangeModalProps> = ({
+const ChangeRepoNameModal: React.FC<ChangeRepoNameModalProps> = ({
   open,
   onOpenChange,
   currentName,
@@ -70,4 +70,4 @@ const RepoNameChangeModal: React.FC<RepoNameChangeModalProps> = ({
   );
 };
 
-export default RepoNameChangeModal;
+export default ChangeRepoNameModal;
