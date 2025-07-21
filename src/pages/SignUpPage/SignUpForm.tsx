@@ -58,7 +58,7 @@ export default function SignUpForm() {
             disabled={!email || emailVerified}
             variant={emailVerified ? 'inactive' : 'active'}
           >
-            {emailVerified ? '인증 완료' : '이메일 확인'}
+            {emailVerified ? '중복 확인 완료' : '중복 확인'}
           </Button>
         </div>
       </FormField>
