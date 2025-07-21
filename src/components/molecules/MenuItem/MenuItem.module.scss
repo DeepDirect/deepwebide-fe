@@ -24,8 +24,7 @@
 
   &:hover,
   &.hovered {
-    padding-left: 1.5rem; // 동그라미 공간 확보
-    background-color: rgb(255 165 0 / 10%); // 연한 주황 배경
+    padding-left: 1.5rem;
 
     &::before {
       transform: translateY(-50%) scale(1);
@@ -44,7 +43,7 @@
 
   .menuItem:hover &,
   .menuItem.hovered & {
-    transform: translateX(4px); // 텍스트도 살짝 오른쪽으로
+    transform: translateX(4px);
   }
 }
 
