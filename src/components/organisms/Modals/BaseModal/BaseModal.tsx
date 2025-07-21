@@ -60,7 +60,7 @@ const BaseModal: React.FC<BaseModalProps> = ({
           {/* 헤더 - 고정 */}
           <div className={styles.header}>
             <Dialog.Title className={styles.title}>{title}</Dialog.Title>
-            <Dialog.Description className="sr-only">
+            <Dialog.Description className="srOnly">
               {/* 접근성 경고 해결을 위한 빈 설명 */}
             </Dialog.Description>
           </div>
