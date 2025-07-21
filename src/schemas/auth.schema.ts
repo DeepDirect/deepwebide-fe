@@ -55,6 +55,7 @@ export const signUpSchema = z
 
 export type SignUpFormValues = z.infer<typeof signUpSchema>;
 
+// 아이디 찾기 스키마
 export const findIdSchema = z.object({
   username: z.string().nonempty('이름을 입력해주세요.').min(2, '이름은 2자 이상이어야 합니다.'),
 
