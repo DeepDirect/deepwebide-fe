@@ -53,13 +53,14 @@
 }
 
 .favorite {
-  .thumb {
-    background-image: url('@/assets/icons/heart.svg');
-    background-repeat: no-repeat;
-    background-position: center;
+  .thumbIcon {
+    width: 17px;
+    transform: translate(3%, 4px);
   }
 
   &[data-state='checked'] .thumb {
-    background-position: center;
+    .thumbIcon {
+      color: $orange;
+    }
   }
 }

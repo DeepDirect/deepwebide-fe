@@ -1,0 +1,22 @@
+@use '@/styles/variables' as *;
+
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+  font-size: $font-size-medium;
+  flex-flow: row nowrap;
+
+  .pageButton {
+    margin: 0;
+    padding: 0;
+    font-size: $font-size-xsmall;
+    background: none;
+
+    &.active {
+      font-weight: bold;
+      cursor: default;
+    }
+  }
+}
