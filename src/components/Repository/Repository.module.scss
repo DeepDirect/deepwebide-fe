@@ -34,9 +34,11 @@
     flex-flow: row nowrap;
 
     .infoWrapper {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      // overflow: hidden;
+      // text-overflow: ellipsis;
+      // white-space: nowrap;
+      display: flex;
+      flex-flow: row wrap;
     }
 
     .iconWrapper {

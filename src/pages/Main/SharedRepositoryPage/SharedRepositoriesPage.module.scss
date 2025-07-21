@@ -3,8 +3,10 @@
 .wrapper {
   box-sizing: border-box;
   width: 100%;
+  min-width: fit-content;
   height: 100%;
   padding: 101px 67px 67px;
+  background: #fafafa;
 
   .topWrapper {
     display: flex;
