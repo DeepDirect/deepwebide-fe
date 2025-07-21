@@ -1,0 +1,103 @@
+@use '@/styles/variables' as *;
+
+// 오버레이 (배경)
+.overlay {
+  position: fixed;
+  z-index: $modal-overlay-z-index;
+  background: $modal-overlay-bg;
+  animation: fade-in $modal-transition-duration $modal-transition-easing;
+  inset: 0;
+}
+
+.content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: $modal-z-index;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 400px;
+  padding: 1.5rem;
+  border: none;
+  border-radius: $modal-border-radius;
+  background: $modal-content-bg;
+  box-shadow: $modal-shadow;
+  animation: slide-in $modal-transition-duration $modal-transition-easing;
+  transform: translate(-50%, -50%);
+
+  &:focus {
+    outline: none;
+  }
+}
+
+// 제목
+.title {
+  margin: 1rem 0 0;
+  overflow-wrap: break-word;
+  font-family: $font-family-primary;
+  font-size: $font-size-small;
+  font-weight: $font-weight-medium;
+  line-height: $default-line-height;
+  text-align: center;
+  color: $black-1;
+}
+
+.description {
+  margin: 0;
+  overflow-wrap: break-word;
+  font-family: $font-family-primary;
+  font-size: $font-size-xsmall;
+  font-weight: $font-weight-regular;
+  line-height: $default-line-height;
+  text-align: center;
+  color: $gray-3;
+}
+
+// 버튼 컨테이너
+.buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $modal-button-gap;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.confirmButton {
+  width: 94px;
+  height: 39px;
+}
+
+.cancelButton {
+  width: 94px;
+  height: 39px;
+  background-color: $gray-5;
+
+  &:hover {
+    background-color: $gray-4;
+  }
+}
+
+// 애니메이션
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
