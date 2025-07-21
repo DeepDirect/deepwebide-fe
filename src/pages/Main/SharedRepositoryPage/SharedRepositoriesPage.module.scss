@@ -6,6 +6,7 @@
   min-width: fit-content;
   height: 100%;
   padding: 101px 67px 67px;
+  overflow: hidden;
   background: #fafafa;
 
   .topWrapper {
@@ -42,9 +43,6 @@
     align-items: stretch;
     gap: 1.5rem;
     box-sizing: border-box;
-
-    // height: 85%;
-    // // padding-top: 31px;
     margin-top: 2rem;
     flex-flow: column nowrap;
   }
