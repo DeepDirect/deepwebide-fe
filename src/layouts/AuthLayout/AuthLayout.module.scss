@@ -13,10 +13,18 @@
 }
 
 .content {
+  align-content: center;
+  box-sizing: border-box;
   width: 985px;
-  height: 700px;
-  padding: 40px 32px;
-  border: 1px solid $blue-3;
+  min-height: 750px;
+  border: 3px solid $blue-3;
   border-radius: 10px;
   background-color: $white-2;
+}
+
+@media (width <= 768px) {
+  .content {
+    width: 90%;
+    padding: 0 20px;
+  }
 }

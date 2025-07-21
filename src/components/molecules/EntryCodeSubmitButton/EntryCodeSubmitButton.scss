@@ -1,0 +1,14 @@
+@use '@/styles/variables' as *;
+
+.entry-code-submit-button {
+  width: 325px;
+  height: 48px;
+
+  &__inner {
+    width: 100%;
+    height: 100%;
+    font-family: $font-family-inter;
+    font-size: $font-size-xsmall;
+    font-weight: $font-weight-bold;
+  }
+}
