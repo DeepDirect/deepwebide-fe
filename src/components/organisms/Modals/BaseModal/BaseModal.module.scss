@@ -1,0 +1,105 @@
+@use '@/styles/variables' as *;
+
+.overlay {
+  position: fixed;
+  z-index: $modal-overlay-z-index;
+  background: $modal-overlay-bg;
+  animation: fade-in $modal-transition-duration $modal-transition-easing;
+  inset: 0;
+}
+
+.content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: $modal-z-index;
+  width: auto;
+  max-width: $modal-max-width;
+  min-width: $modal-min-width;
+  max-height: 85vh;
+  padding: $modal-padding;
+  border: none;
+  border-radius: $modal-border-radius;
+  background: $modal-content-bg;
+  box-shadow: $modal-shadow;
+  animation: slide-in $modal-transition-duration $modal-transition-easing;
+  transform: translate(-50%, -50%);
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.header {
+  margin-bottom: $modal-title-margin-bottom;
+  text-align: center;
+}
+
+.title {
+  margin: 0;
+  font-family: $font-family-primary;
+  font-size: $font-size-medium;
+  font-weight: $font-weight-bold;
+  line-height: $default-line-height;
+  color: $black-1;
+}
+
+.body {
+  flex: 1;
+  width: 430px;
+  max-height: 60vh;
+  margin-bottom: $modal-content-margin-bottom;
+  overflow: auto;
+  overflow-wrap: break-word;
+  font-size: $font-size-xsmall;
+  font-weight: $font-weight-regular;
+  line-height: $default-line-height;
+  word-break: break-all;
+  color: $gray-3;
+}
+
+.confirmButton {
+  width: 94px;
+  height: 39px;
+}
+
+.cancelButton {
+  width: 94px;
+  height: 39px;
+  background-color: $gray-5;
+
+  &:hover {
+    background-color: $gray-4;
+  }
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $modal-button-gap;
+  margin-top: $modal-button-margin-top;
+}
+
+// 애니메이션
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}

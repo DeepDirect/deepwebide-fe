@@ -1,0 +1,51 @@
+@use '@/styles/variables' as *;
+
+.repoNameChangeModal {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  margin: 0;
+  font-family: $font-family-primary;
+  font-size: $font-size-xsmall;
+  font-weight: $font-weight-medium;
+  color: $black-1;
+}
+
+.disabledInput {
+  // 비활성화된 input 스타일 (현재 이름)
+  :global(.input) {
+    border: 1px solid $gray-8; // #d7d7d7
+    color: $gray-6; // #909090
+    background-color: $gray-10; // #f0f0f0
+    cursor: not-allowed;
+  }
+}
+
+.nameInput {
+  // 새 이름 입력 필드 스타일
+  :global(.input) {
+    border: 1px solid $gray-8;
+    color: $black-1;
+    background-color: $white-2;
+
+    &:focus {
+      border-color: $blue-1;
+      outline: none;
+      box-shadow: 0 0 0 2px rgb(55 79 255 / 10%);
+    }
+
+    &::placeholder {
+      font-weight: $font-weight-regular;
+      color: $gray-6;
+    }
+  }
+}

@@ -2,7 +2,6 @@
 
 .repositoryWrapper {
   display: flex;
-  flex-flow: row nowrap;
   align-items: center;
   justify-content: space-between;
   box-sizing: border-box;
@@ -16,6 +15,7 @@
   background-color: #ffffff;
   box-shadow: 1px 2px 4px rgb(0 0 0 / 25%);
   user-select: none;
+  flex-flow: row nowrap;
 
   .nameWrapper {
     flex: 1;
@@ -24,10 +24,10 @@
 
   .infoContainer {
     display: flex;
-    flex-flow: row nowrap;
     align-items: center;
     justify-content: flex-start;
     gap: 35px;
+    flex-flow: row nowrap;
 
     .iconWrapper {
       width: 24px;
