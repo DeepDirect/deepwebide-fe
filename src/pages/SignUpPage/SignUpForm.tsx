@@ -118,7 +118,7 @@ export default function SignUpForm() {
         type="submit"
         className={styles.submitBtn}
         disabled={isSubmitting || !emailVerified || !codeVerified}
-        variant={emailVerified && codeVerified ? 'active' : 'inactive'}
+        variant={emailVerified && codeVerified ? 'active' : 'general'}
       >
         회원가입
       </Button>
