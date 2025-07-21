@@ -1,0 +1,15 @@
+@use '@/styles/variables' as *;
+
+.invitation-link-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: $white-1;
+
+  &__content {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+  }
+}
