@@ -3,15 +3,20 @@
 .wrapper {
   box-sizing: border-box;
   width: 100%;
+  min-width: fit-content;
   height: 100%;
   padding: 101px 67px 67px;
+  overflow: hidden;
+  background: #fafafa;
 
   .topWrapper {
     display: flex;
     flex-direction: row;
     align-items: flex-end;
     justify-content: space-between;
+    gap: 1rem;
     width: 100%;
+    min-width: 430px;
 
     .title {
       font-size: $font-size-xxlarge;
@@ -40,9 +45,6 @@
     align-items: stretch;
     gap: 1.5rem;
     box-sizing: border-box;
-
-    // height: 85%;
-    // // padding-top: 31px;
     margin-top: 2rem;
     flex-flow: column nowrap;
   }
