@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signUpSchema } from '@/schemas/auth.schema';
 import type { SignUpFormValues } from '@/schemas/auth.schema';
+import { useNavigate } from '@tanstack/react-router';
 import Input from '@/components/atoms/Input/Input';
 import PasswordInput from '@/components/atoms/Input/PasswordInput';
 import Button from '@/components/atoms/Button/Button';
@@ -30,6 +31,8 @@ export default function SignUpForm() {
   const phone = watch('phoneNumber');
   const phoneCode = watch('phoneCode');
 
+  const navigate = useNavigate();
+
   // 타이머 로직
   const startTimer = () => {
     setTimer(59);
@@ -46,6 +49,7 @@ export default function SignUpForm() {
 
   const onSubmit = (data: SignUpFormValues) => {
     console.log('회원가입 요청', data);
+    navigate({ to: '/sign-up-complete' });
   };
 
   return (
