@@ -1,10 +1,11 @@
-import { Link, useSearch } from '@tanstack/react-router';
+import { useSearch, useNavigate } from '@tanstack/react-router';
 import { findIdCompleteRoute } from '@/router/routes/auth/find-id-complete';
 import styles from './FindIdCompletePage.module.scss';
 import Button from '@/components/atoms/Button/Button';
 
 export default function FindIdCompletePage() {
   const { email } = useSearch({ from: findIdCompleteRoute.id });
+  const navigate = useNavigate();
 
   return (
     <div className={styles.inner}>
@@ -12,16 +13,14 @@ export default function FindIdCompletePage() {
       <div className={styles.email}>
         <span>{email}</span>
       </div>
-      <Link to="/sign-in" style={{ width: '100%' }}>
-        <Button
-          className={styles.submitBtn}
-          variant="active"
-          type="button"
-          style={{ width: '100%' }}
-        >
-          로그인으로
-        </Button>
-      </Link>
+      <Button
+        className={styles.submitBtn}
+        variant="active"
+        type="button"
+        onClick={() => navigate({ to: '/sign-in' })}
+      >
+        로그인으로
+      </Button>
     </div>
   );
 }
