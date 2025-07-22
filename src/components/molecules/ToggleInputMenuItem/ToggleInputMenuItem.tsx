@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import styles from './ToggleInputMenuItem.module.scss';
 
 export interface ToggleInputMenuItemProps {
@@ -32,27 +32,6 @@ const ToggleInputMenuItem: React.FC<ToggleInputMenuItemProps> = ({
   const [isIconHovered, setIsIconHovered] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  // input 너비를 텍스트 내용에 맞게 조정
-  useEffect(() => {
-    if (inputRef.current && isExpanded) {
-      const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d');
-      if (context) {
-        const computedStyle = window.getComputedStyle(inputRef.current);
-        context.font = `${computedStyle.fontSize} ${computedStyle.fontFamily}`;
-
-        const displayValue = isPassword && !showPassword ? '*'.repeat(value.length) : value;
-        const textWidth = context.measureText(displayValue || placeholder).width;
-        const paddingWidth = 64; // left + right padding + 아이콘 공간
-        const minWidth = 150;
-        const calculatedWidth = Math.max(textWidth + paddingWidth, minWidth);
-
-        inputRef.current.style.width = `${calculatedWidth}px`;
-      }
-    }
-  }, [value, placeholder, isExpanded, isPassword, showPassword]);
 
   const handleToggle = () => {
     const newExpanded = !isExpanded;
@@ -115,7 +94,6 @@ const ToggleInputMenuItem: React.FC<ToggleInputMenuItemProps> = ({
       {/* Input 필드 */}
       <div className={styles.inputWrapper}>
         <input
-          ref={inputRef}
           type={isPassword && !showPassword ? 'password' : 'text'}
           value={value}
           placeholder={placeholder}
