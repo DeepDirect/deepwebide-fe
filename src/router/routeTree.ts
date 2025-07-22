@@ -6,6 +6,8 @@ import { signUpRoute } from './routes/auth/sign-up';
 import { signUpCompleteRoute } from './routes/auth/sign-up-complete';
 import { findIdRoute } from './routes/auth/find-id';
 import { findIdCompleteRoute } from './routes/auth/find-id-complete';
+import { findPasswordRoute } from './routes/auth/find-password';
+import { changePasswordRoute } from './routes/auth/find-password-change';
 import { mainLayoutRoute } from './routes/main/main-layout';
 import { myRepositoriesRoute } from './routes/main/my-repositories';
 import { SharedRepositoriesRoute } from './routes/main/shared-repositories';
@@ -19,6 +21,8 @@ export const routeTree = rootRoute.addChildren([
     signUpCompleteRoute,
     findIdRoute,
     findIdCompleteRoute,
+    findPasswordRoute,
+    changePasswordRoute,
   ]),
   mainLayoutRoute.addChildren([
     myRepositoriesRoute,

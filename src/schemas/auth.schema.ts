@@ -65,3 +65,29 @@ export const findIdSchema = z.object({
 });
 
 export type FindIdFormValues = z.infer<typeof findIdSchema>;
+
+// 비밀번호 찾기 스키마
+export const findPasswordSchema = z.object({
+  username: z.string().nonempty('이름을 입력해주세요.').min(2, '이름은 2자 이상이어야 합니다.'),
+
+  email: z.string().nonempty('이메일을 입력해주세요.').email('올바른 이메일 형식이 아닙니다.'),
+
+  phoneNumber: phoneNumberSchema,
+
+  phoneCode: phoneCodeSchema,
+});
+
+export type FindPasswordFormValues = z.infer<typeof findPasswordSchema>;
+
+// 비밀번호 변경 스키마
+export const changePasswordSchema = z
+  .object({
+    password: passwordSchema,
+    passwordCheck: z.string().nonempty('비밀번호 확인을 입력해주세요.'),
+  })
+  .refine(data => data.password === data.passwordCheck, {
+    path: ['passwordCheck'],
+    message: '비밀번호가 일치하지 않습니다.',
+  });
+
+export type ChangePasswordFormValues = z.infer<typeof changePasswordSchema>;
