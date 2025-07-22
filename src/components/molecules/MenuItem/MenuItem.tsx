@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import clsx from 'clsx';
 import styles from './MenuItem.module.scss';
 
 export interface MenuItemProps {
@@ -7,6 +8,7 @@ export interface MenuItemProps {
   iconAlt?: string;
   onClick?: () => void;
   className?: string;
+  variant?: 'default' | 'red' | 'green' | 'orange';
 }
 
 const MenuItem: React.FC<MenuItemProps> = ({
@@ -15,8 +17,8 @@ const MenuItem: React.FC<MenuItemProps> = ({
   iconAlt = '',
   onClick,
   className = '',
+  variant = 'default',
 }) => {
-  const [isHovered, setIsHovered] = useState(false);
   const [isIconHovered, setIsIconHovered] = useState(false);
 
   const handleIconClick = (e: React.MouseEvent) => {
@@ -27,15 +29,13 @@ const MenuItem: React.FC<MenuItemProps> = ({
   };
 
   return (
-    <div
-      className={`${styles.menuItem} ${isHovered ? styles.hovered : ''} ${className}`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    <div className={clsx(styles.menuItem, className)} data-variant={variant}>
       <span className={styles.label}>{label}</span>
 
       <div
-        className={`${styles.iconWrapper} ${isIconHovered ? styles.iconHovered : ''}`}
+        className={clsx(styles.iconWrapper, {
+          [styles.iconHovered]: isIconHovered,
+        })}
         onMouseEnter={() => setIsIconHovered(true)}
         onMouseLeave={() => setIsIconHovered(false)}
         onClick={handleIconClick}

@@ -5,14 +5,33 @@
   @include orange-circle-hover;
   @include label-icon-row;
 
+  width: max-content;
+  min-width: 0;
   padding: 0.75rem 1rem;
   border-radius: 6px;
+
+  &[data-variant='default'] .label {
+    color: $black-1;
+  }
+
+  &[data-variant='red'] .label {
+    color: $red;
+  }
+
+  &[data-variant='green'] .label {
+    color: $green;
+  }
+
+  &[data-variant='orange'] .label {
+    color: $orange;
+  }
 }
 
 .label {
   font-family: $font-family-primary;
   font-size: $font-size-xsmall;
   font-weight: $font-weight-medium;
+  white-space: nowrap;
   color: $black-1;
   user-select: none;
 }
