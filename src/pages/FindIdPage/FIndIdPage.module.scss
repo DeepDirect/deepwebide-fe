@@ -39,14 +39,24 @@
 
 .links {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   width: 100%;
-  margin-bottom: 1rem;
 }
 
 .link {
   font-size: $font-size-xxsmall;
   font-weight: $font-weight-bold;
+  text-decoration: none;
+  color: $gray-1;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+    color: $gray-1;
+  }
+}
+
+.linkWarning {
   text-decoration: none;
   color: $orange;
   cursor: pointer;
@@ -70,4 +80,13 @@
     width: 10.6rem;
     white-space: nowrap;
   }
+}
+
+.error {
+  margin-top: 0.2rem;
+  margin-left: 0.5rem;
+  font-size: $font-size-xxsmall;
+  font-weight: $font-weight-bold;
+  text-align: left;
+  color: $orange;
 }

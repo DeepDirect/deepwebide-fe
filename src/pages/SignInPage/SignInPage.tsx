@@ -11,10 +11,10 @@ export default function SignInPage() {
       <SignInForm />
 
       <div className={styles.links}>
-        <Link to="/" className={styles.link}>
+        <Link to="/find-id" className={styles.link}>
           아이디/비밀번호를 잊어버렸습니다..
         </Link>
-        <Link to="/" className={`${styles.link} ${styles.linkWarning}`}>
+        <Link to="/sign-up" className={`${styles.link} ${styles.linkWarning}`}>
           계정이 없습니다.. <span>회원가입 하러 가기</span>
         </Link>
       </div>
