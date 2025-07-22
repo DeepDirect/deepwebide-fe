@@ -2,6 +2,7 @@ import { rootRoute } from './root';
 import { authLayoutRoute } from './routes/auth/auth-layout';
 import { signInRoute } from './routes/auth/sign-in';
 import { signUpRoute } from './routes/auth/sign-up';
+import { signUpCompleteRoute } from './routes/auth/sign-up-complete';
 import { findIdRoute } from './routes/auth/find-id';
 import { findIdCompleteRoute } from './routes/auth/find-id-complete';
 import { mainLayoutRoute } from './routes/main/main-layout';
@@ -10,7 +11,13 @@ import { SharedRepositoriesRoute } from './routes/main/shared-repositories';
 import { SharedMeRepositoriesRoute } from './routes/main/shared-me-repositories';
 
 export const routeTree = rootRoute.addChildren([
-  authLayoutRoute.addChildren([signInRoute, signUpRoute, findIdRoute, findIdCompleteRoute]),
+  authLayoutRoute.addChildren([
+    signInRoute,
+    signUpRoute,
+    signUpCompleteRoute,
+    findIdRoute,
+    findIdCompleteRoute,
+  ]),
   mainLayoutRoute.addChildren([
     myRepositoriesRoute,
     SharedRepositoriesRoute,
