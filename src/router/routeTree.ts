@@ -1,4 +1,5 @@
 import { rootRoute } from './root';
+import { landingRoute } from './routes/landing/landing';
 import { authLayoutRoute } from './routes/auth/auth-layout';
 import { signInRoute } from './routes/auth/sign-in';
 import { signUpRoute } from './routes/auth/sign-up';
@@ -9,6 +10,7 @@ import { mainLayoutRoute } from './routes/main/main-layout';
 import { myRepositoriesRoute } from './routes/main/my-repositories';
 
 export const routeTree = rootRoute.addChildren([
+  landingRoute,
   authLayoutRoute.addChildren([
     signInRoute,
     signUpRoute,
