@@ -1,4 +1,5 @@
 import { rootRoute } from './root';
+import { landingRoute } from './routes/landing/landing';
 import { authLayoutRoute } from './routes/auth/auth-layout';
 import { signInRoute } from './routes/auth/sign-in';
 import { signUpRoute } from './routes/auth/sign-up';
@@ -13,6 +14,7 @@ import { SharedRepositoriesRoute } from './routes/main/shared-repositories';
 import { SharedMeRepositoriesRoute } from './routes/main/shared-me-repositories';
 
 export const routeTree = rootRoute.addChildren([
+  landingRoute,
   authLayoutRoute.addChildren([
     signInRoute,
     signUpRoute,
