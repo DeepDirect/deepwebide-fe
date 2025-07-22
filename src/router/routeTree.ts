@@ -7,6 +7,8 @@ import { findIdRoute } from './routes/auth/find-id';
 import { findIdCompleteRoute } from './routes/auth/find-id-complete';
 import { mainLayoutRoute } from './routes/main/main-layout';
 import { myRepositoriesRoute } from './routes/main/my-repositories';
+import { SharedRepositoriesRoute } from './routes/main/shared-repositories';
+import { SharedMeRepositoriesRoute } from './routes/main/shared-me-repositories';
 
 export const routeTree = rootRoute.addChildren([
   authLayoutRoute.addChildren([
@@ -16,5 +18,9 @@ export const routeTree = rootRoute.addChildren([
     findIdRoute,
     findIdCompleteRoute,
   ]),
-  mainLayoutRoute.addChildren([myRepositoriesRoute]),
+  mainLayoutRoute.addChildren([
+    myRepositoriesRoute,
+    SharedRepositoriesRoute,
+    SharedMeRepositoriesRoute,
+  ]),
 ]);

@@ -12,10 +12,11 @@ import type { RepositoryItem } from '@/types/Repository';
 
 type RepositoryProps = {
   info: RepositoryItem;
+  isSharedMe?: boolean;
   onFavoriteClicked: (id: number) => void;
 };
 
-const Repository = ({ info, onFavoriteClicked }: RepositoryProps) => {
+const Repository: React.FC<RepositoryProps> = ({ info, isSharedMe, onFavoriteClicked }) => {
   return (
     <div className={styles.repositoryWrapper}>
       <div className={styles.nameWrapper}>
@@ -23,8 +24,13 @@ const Repository = ({ info, onFavoriteClicked }: RepositoryProps) => {
       </div>
 
       <div className={styles.infoContainer}>
+        {isSharedMe && (
+          <div className={styles.infoWrapper}>
+            <span>{info.ownerName}</span>
+          </div>
+        )}
         <div className={styles.infoWrapper}>
-          <span>마지막 수정일: </span>
+          <span className={styles.updateTitle}>마지막 수정일: </span>
           <span className={styles.date}>
             {dayjs(info.updatedAt).locale('ko').format('YYYY-MM-DD')}
           </span>

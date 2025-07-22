@@ -10,11 +10,9 @@ const MainLayout = () => {
     <div className={styles.mainLayout}>
       <Header variant="main" />
 
-      <main className={styles.container}>
-        <Sidebar />
+      <Sidebar />
 
-        <Outlet />
-      </main>
+      <Outlet />
     </div>
   );
 };
