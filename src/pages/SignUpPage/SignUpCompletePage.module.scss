@@ -1,0 +1,35 @@
+@use '@/styles/variables.scss' as *;
+
+.inner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 500px;
+  margin: auto;
+}
+
+.form {
+  width: 100%;
+}
+
+.title {
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+  font-size: $font-size-xxxlarge;
+  font-weight: $font-weight-bold;
+  color: $blue-3;
+}
+
+.text {
+  margin-bottom: 2rem;
+  font-size: $font-size-xsmall;
+  font-weight: $font-weight-bold;
+  text-align: start;
+  color: $gray-1;
+}
+
+.Button {
+  width: 100%;
+  margin-bottom: 1rem;
+}
