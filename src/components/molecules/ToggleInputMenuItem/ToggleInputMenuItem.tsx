@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import clsx from 'clsx';
 import styles from './ToggleInputMenuItem.module.scss';
 
 export interface ToggleInputMenuItemProps {
@@ -56,7 +57,7 @@ const ToggleInputMenuItem: React.FC<ToggleInputMenuItemProps> = ({
   if (!isExpanded) {
     return (
       <div
-        className={`${styles.menuItem} ${isHovered ? styles.hovered : ''} ${className}`}
+        className={clsx(styles.menuItem, { [styles.hovered]: isHovered }, className)}
         onClick={handleToggle}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
@@ -64,7 +65,7 @@ const ToggleInputMenuItem: React.FC<ToggleInputMenuItemProps> = ({
         <span className={styles.label}>{label}</span>
 
         <div
-          className={`${styles.iconWrapper} ${isIconHovered ? styles.iconHovered : ''}`}
+          className={clsx(styles.iconWrapper, { [styles.iconHovered]: isIconHovered })}
           onMouseEnter={() => setIsIconHovered(true)}
           onMouseLeave={() => setIsIconHovered(false)}
         >
@@ -76,13 +77,13 @@ const ToggleInputMenuItem: React.FC<ToggleInputMenuItemProps> = ({
 
   // 펼쳐진 상태 (InputMenuItem과 유사하지만 패스워드 토글 추가)
   return (
-    <div className={`${styles.container} ${className}`}>
+    <div className={clsx(styles.container, className)}>
       {/* 라벨과 아이콘 */}
       <div className={styles.labelRow}>
         <span className={styles.label}>{label}</span>
 
         <div
-          className={`${styles.iconWrapper} ${isIconHovered ? styles.iconHovered : ''}`}
+          className={clsx(styles.iconWrapper, { [styles.iconHovered]: isIconHovered })}
           onMouseEnter={() => setIsIconHovered(true)}
           onMouseLeave={() => setIsIconHovered(false)}
           onClick={handleToggle}
@@ -99,7 +100,7 @@ const ToggleInputMenuItem: React.FC<ToggleInputMenuItemProps> = ({
           placeholder={placeholder}
           readOnly={readOnly}
           onChange={handleInputChange}
-          className={`${styles.input} ${readOnly ? styles.readOnlyInput : ''}`}
+          className={clsx(styles.input, { [styles.readOnlyInput]: readOnly })}
         />
 
         {/* 패스워드 보기/숨기기 아이콘 */}

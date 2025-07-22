@@ -1,4 +1,5 @@
 import React from 'react';
+import clsx from 'clsx';
 import styles from './MeatballModal.module.scss';
 
 export interface MeatballModalProps {
@@ -28,7 +29,7 @@ const MeatballModal: React.FC<MeatballModalProps> = ({
     <>
       <div className={styles.backdrop} onClick={handleBackdropClick} />
       <div
-        className={`${styles.content} ${className}`}
+        className={clsx(styles.content, className)}
         style={{
           top: position.top,
           left: position.left,
