@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
+import { useNavigate } from '@tanstack/react-router';
 import './LandingPage.scss';
 
 const LandingPage: React.FC = () => {
   const [isStarted, setIsStarted] = useState(false);
+  const navigate = useNavigate();
 
   const handleStartClick = () => {
     setIsStarted(true);
+    setTimeout(() => {
+      navigate({ to: '/sign-in' });
+    }, 1500);
   };
 
   return (
