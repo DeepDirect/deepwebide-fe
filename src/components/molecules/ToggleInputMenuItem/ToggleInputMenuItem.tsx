@@ -4,7 +4,9 @@ import styles from './ToggleInputMenuItem.module.scss';
 
 export interface ToggleInputMenuItemProps {
   label: string;
+  expandedLabel?: string; // NOTE: 펼쳐졌을 때 사용할 라벨
   iconPath: string;
+  expandedIconPath?: string; // NOTE: 펼쳐졌을 때 사용할 아이콘
   iconAlt?: string;
   value?: string;
   placeholder?: string;
@@ -12,13 +14,16 @@ export interface ToggleInputMenuItemProps {
   isPassword?: boolean;
   onChange?: (value: string) => void;
   onToggle?: (isExpanded: boolean) => void;
+  onIconClick?: () => void; // NOTE: 아이콘 클릭 이벤트 (복사 등)
   className?: string;
   initialExpanded?: boolean;
 }
 
 const ToggleInputMenuItem: React.FC<ToggleInputMenuItemProps> = ({
   label,
+  expandedLabel,
   iconPath,
+  expandedIconPath,
   iconAlt = '',
   value = '',
   placeholder = '',
@@ -26,6 +31,7 @@ const ToggleInputMenuItem: React.FC<ToggleInputMenuItemProps> = ({
   isPassword = false,
   onChange,
   onToggle,
+  onIconClick,
   className = '',
   initialExpanded = false,
 }) => {
@@ -42,6 +48,18 @@ const ToggleInputMenuItem: React.FC<ToggleInputMenuItemProps> = ({
     }
   };
 
+  const handleIconClick = () => {
+    if (isExpanded) {
+      // NOTE: 펼쳐진 상태에서 아이콘 클릭 시
+      if (onIconClick) {
+        onIconClick();
+      }
+    } else {
+      // NOTE: 접힌 상태에서 아이콘 클릭 시
+      handleToggle();
+    }
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (onChange && !readOnly) {
       onChange(e.target.value);
@@ -53,12 +71,11 @@ const ToggleInputMenuItem: React.FC<ToggleInputMenuItemProps> = ({
     setShowPassword(!showPassword);
   };
 
-  // 접힌 상태 (MenuItem과 동일)
+  // NOTE: 접힌 상태
   if (!isExpanded) {
     return (
       <div
         className={clsx(styles.menuItem, { [styles.hovered]: isHovered }, className)}
-        onClick={handleToggle}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -68,6 +85,7 @@ const ToggleInputMenuItem: React.FC<ToggleInputMenuItemProps> = ({
           className={clsx(styles.iconWrapper, { [styles.iconHovered]: isIconHovered })}
           onMouseEnter={() => setIsIconHovered(true)}
           onMouseLeave={() => setIsIconHovered(false)}
+          onClick={handleIconClick}
         >
           <img src={iconPath} alt={iconAlt} className={styles.icon} />
         </div>
@@ -75,20 +93,20 @@ const ToggleInputMenuItem: React.FC<ToggleInputMenuItemProps> = ({
     );
   }
 
-  // 펼쳐진 상태 (InputMenuItem과 유사하지만 패스워드 토글 추가)
+  // NOTE: 펼쳐진 상태 (InputMenuItem과 유사하지만 패스워드 토글 추가)
   return (
     <div className={clsx(styles.container, className)}>
       {/* 라벨과 아이콘 */}
       <div className={styles.labelRow}>
-        <span className={styles.label}>{label}</span>
+        <span className={styles.label}>{expandedLabel || label}</span>
 
         <div
           className={clsx(styles.iconWrapper, { [styles.iconHovered]: isIconHovered })}
           onMouseEnter={() => setIsIconHovered(true)}
           onMouseLeave={() => setIsIconHovered(false)}
-          onClick={handleToggle}
+          onClick={handleIconClick}
         >
-          <img src={iconPath} alt={iconAlt} className={styles.icon} />
+          <img src={expandedIconPath || iconPath} alt={iconAlt} className={styles.icon} />
         </div>
       </div>
 
