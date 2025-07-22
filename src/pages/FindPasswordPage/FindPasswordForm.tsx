@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useNavigate } from '@tanstack/react-router';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { findPasswordSchema, type FindPasswordFormValues } from '@/schemas/auth.schema';
 import Input from '@/components/atoms/Input/Input';
@@ -51,6 +52,8 @@ export default function FindPasswordForm() {
     // TODO: 실제 API 연동
   };
 
+  const navigate = useNavigate();
+
   const onSubmit = (data: FindPasswordFormValues) => {
     // TODO: 실제로 백엔드와 연동
     if (
@@ -59,8 +62,10 @@ export default function FindPasswordForm() {
       data.phoneNumber === '01012345678' &&
       data.phoneCode === '123456'
     ) {
-      // navigate({ to: '/find-password/complete' });
-      setFound(true);
+      navigate({
+        to: '/find-password/change',
+        search: { email: data.email },
+      });
     } else {
       setFound(false);
     }
