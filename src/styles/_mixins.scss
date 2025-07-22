@@ -11,3 +11,47 @@
     @content;
   }
 }
+
+// 주황색 동그라미 호버 효과
+@mixin orange-circle-hover {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s ease;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: orange;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(-50%) scale(0);
+  }
+
+  &:hover,
+  &.hovered {
+    padding-left: 1.5rem;
+
+    &::before {
+      transform: translateY(-50%) scale(1);
+    }
+
+    .label {
+      transform: translateX(4px);
+    }
+  }
+
+  .label {
+    transition: transform 0.2s ease;
+  }
+}
+
+// 라벨과 아이콘 나란히 배치
+@mixin label-icon-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; // 라벨과 아이콘 사이 간격
+}
