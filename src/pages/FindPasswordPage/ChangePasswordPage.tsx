@@ -31,7 +31,7 @@ export default function ChangePasswordPage() {
   const onSubmit = async (data: ChangePasswordFormValues) => {
     // 실제로 백엔드에 email과 새 password 전달!
     console.log('변경할 데이터:', { email, ...data });
-    alert('비밀번호가 변경되었습니다!');
+    alert('비밀번호 변경에 성공했습니다.');
     // 로그인 페이지로 이동 등
   };
 
