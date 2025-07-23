@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import clsx from 'clsx';
 import BaseModal from '@/components/organisms/Modals/BaseModal/BaseModal';
 import Input from '@/components/atoms/Input/Input';
 import Select from '@/components/atoms/Select/Select';
@@ -13,9 +12,9 @@ export interface CreateRepoModalProps {
 }
 
 const PROJECT_TYPES = [
-  { value: 'spring-boot', label: 'Spring Boot' },
-  { value: 'react', label: 'React' },
-  { value: 'fastapi', label: 'FastAPI' },
+  { value: 'Spring Boot', label: 'Spring Boot' },
+  { value: 'React', label: 'React' },
+  { value: 'FastAPI', label: 'FastAPI' },
 ];
 
 const CreateRepoModal: React.FC<CreateRepoModalProps> = ({
@@ -25,7 +24,7 @@ const CreateRepoModal: React.FC<CreateRepoModalProps> = ({
   onCancel,
 }) => {
   const [repoName, setRepoName] = useState('');
-  const [projectType, setProjectType] = useState('spring-boot');
+  const [projectType, setProjectType] = useState('Spring Boot');
 
   const handleConfirm = () => {
     // 레포지토리 이름이 비어있으면 아무것도 하지 않음
@@ -41,7 +40,7 @@ const CreateRepoModal: React.FC<CreateRepoModalProps> = ({
 
   const handleCancel = () => {
     setRepoName('');
-    setProjectType('spring-boot');
+    setProjectType('Spring Boot');
     if (onCancel) {
       onCancel();
     }
@@ -50,7 +49,7 @@ const CreateRepoModal: React.FC<CreateRepoModalProps> = ({
   const handleOpenChange = (open: boolean) => {
     if (!open) {
       setRepoName('');
-      setProjectType('spring-boot');
+      setProjectType('Spring Boot');
     }
     onOpenChange(open);
   };
@@ -66,9 +65,10 @@ const CreateRepoModal: React.FC<CreateRepoModalProps> = ({
       cancelText="취소"
       onConfirm={handleConfirm}
       onCancel={handleCancel}
-      className={clsx(styles.createRepoModalWrapper, {
-        [styles.confirmDisabled]: isConfirmDisabled,
-      })}
+      confirmVariant="active"
+      confirmDisabled={isConfirmDisabled}
+      confirmButtonType="submit"
+      className={styles.createRepoModalWrapper}
     >
       <div className={styles.createRepoModal}>
         <div className={styles.formGroup}>
