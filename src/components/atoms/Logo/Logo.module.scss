@@ -4,15 +4,17 @@
 
 .img {
   display: block;
-  width: 240px;
+  width: 58px;
   height: auto;
-  margin-left: 0;
-  transition: all 0.2s ease;
+  margin-left: -5px;
+  padding-bottom: 10px;
 }
 
-@media (width <= 768px) {
+@media (width >= 768px) {
   .img {
-    align-content: center;
-    width: 58px;
+    width: 240px;
+    margin-left: 0;
+    padding-bottom: 0;
+    transition-duration: 0.5s;
   }
 }

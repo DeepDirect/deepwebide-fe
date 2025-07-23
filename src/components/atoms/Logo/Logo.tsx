@@ -8,18 +8,14 @@ type LogoProps = {
   onClick?: () => void;
 };
 
-const Logo = ({ size = 240, clickable = false, onClick }: LogoProps) => {
-  const height = (size / 240) * 45;
-
+const Logo = ({ clickable = false, onClick }: LogoProps) => {
   return (
     <picture className={styles.wrapper}>
-      <source srcSet={smallLogo} media="(max-width: 768px)" />
+      <source srcSet={logo} media="(min-width: 768px)" />
       <img
         className={styles.img}
-        src={logo}
+        src={smallLogo}
         alt="DeepDirect 로고"
-        width={size}
-        height={height}
         style={{ cursor: clickable ? 'pointer' : 'default' }}
         onClick={onClick}
       />
