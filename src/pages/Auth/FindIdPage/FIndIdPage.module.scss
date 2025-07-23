@@ -9,10 +9,6 @@
   margin: auto;
 }
 
-.form {
-  width: 100%;
-}
-
 .title {
   margin-top: 1rem;
   font-size: $font-size-xxxlarge;
@@ -27,15 +23,12 @@
   color: $gray-6;
 }
 
-.options {
-  margin-bottom: 0.5rem;
-  font-size: $font-size-xsmall;
-}
+// TODO: 사용되지 않은 클래스 일 경우 제거 필요
 
-.submitBtn {
-  width: 100%;
-  margin-bottom: 1rem;
-}
+// .options {
+//   margin-bottom: 0.5rem;
+//   font-size: $font-size-xsmall;
+// }
 
 .links {
   display: flex;
@@ -65,28 +58,4 @@
     text-decoration: underline;
     color: $orange;
   }
-}
-
-.fieldWithButton {
-  display: flex;
-  gap: 0.5rem;
-  width: 100%;
-
-  input {
-    flex: 1;
-  }
-
-  button {
-    width: 10.6rem;
-    white-space: nowrap;
-  }
-}
-
-.error {
-  margin-top: 0.2rem;
-  margin-left: 0.5rem;
-  font-size: $font-size-xxsmall;
-  font-weight: $font-weight-bold;
-  text-align: left;
-  color: $orange;
 }

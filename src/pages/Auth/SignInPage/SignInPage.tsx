@@ -1,4 +1,4 @@
-import SignInForm from './SignInForm';
+import SignInForm from '@/features/Auth/SignInForm/SignInForm';
 import { Link } from '@tanstack/react-router';
 import styles from './SignInPage.module.scss';
 

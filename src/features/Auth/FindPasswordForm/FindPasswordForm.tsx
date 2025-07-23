@@ -1,39 +1,33 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { signUpSchema } from '@/schemas/auth.schema';
-import type { SignUpFormValues } from '@/schemas/auth.schema';
 import { useNavigate } from '@tanstack/react-router';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { findPasswordSchema, type FindPasswordFormValues } from '@/schemas/auth.schema';
 import Input from '@/components/atoms/Input/Input';
-import PasswordInput from '@/components/atoms/Input/PasswordInput';
 import Button from '@/components/atoms/Button/Button';
 import FormField from '@/components/molecules/FormField/FormField';
-import styles from './SignUpPage.module.scss';
+import styles from './FindPasswordForm.module.scss';
 
-export default function SignUpForm() {
+export default function FindPasswordForm() {
   const {
     register,
     handleSubmit,
     watch,
     formState: { errors, isSubmitting },
-  } = useForm<SignUpFormValues>({
-    resolver: zodResolver(signUpSchema),
+  } = useForm<FindPasswordFormValues>({
+    resolver: zodResolver(findPasswordSchema),
     mode: 'onChange',
   });
 
-  // 상태 관리
-  const [emailVerified, setEmailVerified] = useState(false);
   const [codeSent, setCodeSent] = useState(false);
   const [codeVerified, setCodeVerified] = useState(false);
   const [timer, setTimer] = useState(0);
+  const [found, setFound] = useState<boolean | null>(null);
 
-  const email = watch('email');
   const phone = watch('phoneNumber');
   const phoneCode = watch('phoneCode');
 
-  const navigate = useNavigate();
-
-  // 타이머 로직
+  // 인증번호 타이머
   const startTimer = () => {
     setTimer(59);
     const interval = setInterval(() => {
@@ -47,41 +41,44 @@ export default function SignUpForm() {
     }, 1000);
   };
 
-  const onSubmit = (data: SignUpFormValues) => {
-    console.log('회원가입 요청', data);
-    navigate({ to: '/sign-up/complete' });
+  const handleSendCode = () => {
+    setCodeSent(true);
+    startTimer();
+    // TODO: 실제 API 연동
+  };
+
+  const handleVerifyCode = () => {
+    setCodeVerified(true);
+    // TODO: 실제 API 연동
+  };
+
+  const navigate = useNavigate();
+
+  const onSubmit = (data: FindPasswordFormValues) => {
+    // TODO: 실제로 백엔드와 연동
+    if (
+      data.username === '구름' &&
+      data.email === 'goorm@email.com' &&
+      data.phoneNumber === '01012345678' &&
+      data.phoneCode === '123456'
+    ) {
+      navigate({
+        to: '/find-password/change',
+        search: { email: data.email },
+      });
+    } else {
+      setFound(false);
+    }
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
-      <FormField label="이메일" htmlFor="email" required error={errors.email?.message}>
-        <div className={styles.fieldWithButton}>
-          <Input id="email" {...register('email')} placeholder="user@goorm.com" />
-          <Button
-            onClick={() => setEmailVerified(true)}
-            disabled={!email || emailVerified}
-            variant={emailVerified ? 'inactive' : 'active'}
-          >
-            {emailVerified ? '중복 확인 완료' : '중복 확인'}
-          </Button>
-        </div>
-      </FormField>
-
       <FormField label="이름" htmlFor="username" required error={errors.username?.message}>
         <Input id="username" {...register('username')} placeholder="구름" />
       </FormField>
 
-      <FormField label="비밀번호" htmlFor="password" required error={errors.password?.message}>
-        <PasswordInput id="password" {...register('password')} placeholder="********" />
-      </FormField>
-
-      <FormField
-        label="비밀번호 확인"
-        htmlFor="passwordCheck"
-        required
-        error={errors.passwordCheck?.message}
-      >
-        <PasswordInput id="passwordCheck" {...register('passwordCheck')} placeholder="********" />
+      <FormField label="이메일" htmlFor="email" required error={errors.email?.message}>
+        <Input id="email" {...register('email')} placeholder="goorm@email.com" />
       </FormField>
 
       <FormField
@@ -93,10 +90,8 @@ export default function SignUpForm() {
         <div className={styles.fieldWithButton}>
           <Input id="phoneNumber" {...register('phoneNumber')} placeholder="01012345678" />
           <Button
-            onClick={() => {
-              setCodeSent(true);
-              startTimer();
-            }}
+            type="button"
+            onClick={handleSendCode}
             disabled={!phone || timer > 0}
             variant={codeSent ? 'inactive' : 'active'}
           >
@@ -109,7 +104,8 @@ export default function SignUpForm() {
         <div className={styles.fieldWithButton}>
           <Input id="phoneCode" {...register('phoneCode')} placeholder="123456" />
           <Button
-            onClick={() => setCodeVerified(true)}
+            type="button"
+            onClick={handleVerifyCode}
             disabled={!phoneCode || codeVerified}
             variant={codeVerified ? 'inactive' : 'active'}
           >
@@ -121,11 +117,15 @@ export default function SignUpForm() {
       <Button
         type="submit"
         className={styles.submitBtn}
-        disabled={isSubmitting || !emailVerified || !codeVerified}
-        variant={emailVerified && codeVerified ? 'active' : 'general'}
+        disabled={isSubmitting || !codeVerified}
+        variant={codeVerified ? 'active' : 'general'}
       >
-        회원가입
+        비밀번호 찾기
       </Button>
+
+      {found === false && (
+        <div className={styles.error}>입력하신 정보로 가입된 계정을 찾을 수 없습니다.</div>
+      )}
     </form>
   );
 }

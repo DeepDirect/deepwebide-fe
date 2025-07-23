@@ -1,0 +1,34 @@
+@use '@/styles/variables.scss' as *;
+
+.form {
+  width: 100%;
+}
+
+.submitBtn {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.fieldWithButton {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+
+  input {
+    flex: 1;
+  }
+
+  button {
+    width: 10.6rem;
+    white-space: nowrap;
+  }
+}
+
+.error {
+  margin-top: 0.2rem;
+  margin-left: 0.5rem;
+  font-size: $font-size-xxsmall;
+  font-weight: $font-weight-bold;
+  text-align: left;
+  color: $orange;
+}

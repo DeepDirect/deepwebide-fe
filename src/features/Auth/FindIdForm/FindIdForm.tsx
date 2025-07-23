@@ -6,7 +6,7 @@ import Input from '@/components/atoms/Input/Input';
 import Button from '@/components/atoms/Button/Button';
 import FormField from '@/components/molecules/FormField/FormField';
 import { useNavigate } from '@tanstack/react-router';
-import styles from './FindIdPage.module.scss';
+import styles from './FindIdForm.module.scss';
 
 export default function FindIdForm() {
   const {

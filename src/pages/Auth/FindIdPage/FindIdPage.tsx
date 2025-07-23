@@ -1,4 +1,4 @@
-import FindIdForm from './FindIdForm';
+import FindIdForm from '@/features/Auth/FindIdForm/FindIdForm';
 import { Link } from '@tanstack/react-router';
 import styles from './FindIdPage.module.scss';
 

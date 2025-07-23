@@ -1,4 +1,4 @@
-import FindPasswordForm from './FindPasswordForm';
+import FindPasswordForm from '@/features/Auth/FindPasswordForm/FindPasswordForm';
 import { Link } from '@tanstack/react-router';
 import styles from './FindPasswordPage.module.scss';
 

@@ -1,4 +1,4 @@
-import SignUpForm from './SignUpForm';
+import SignUpForm from '@/features/Auth/SignUpForm/SignUpForm';
 import { Link } from '@tanstack/react-router';
 import styles from './SignUpPage.module.scss';
 

@@ -1,0 +1,25 @@
+@use '@/styles/variables.scss' as *;
+
+.form {
+  width: 100%;
+}
+
+.options {
+  margin-bottom: 0.5rem;
+  font-size: $font-size-xsmall;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+}
+
+.checkbox input[type='checkbox'] {
+  transform: translateY(-0.05rem);
+}
+
+.loginBtn {
+  width: 100%;
+  margin-bottom: 1rem;
+}

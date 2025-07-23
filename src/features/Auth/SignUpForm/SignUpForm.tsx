@@ -1,33 +1,39 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from '@tanstack/react-router';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { findPasswordSchema, type FindPasswordFormValues } from '@/schemas/auth.schema';
+import { signUpSchema } from '@/schemas/auth.schema';
+import type { SignUpFormValues } from '@/schemas/auth.schema';
+import { useNavigate } from '@tanstack/react-router';
 import Input from '@/components/atoms/Input/Input';
+import PasswordInput from '@/components/atoms/Input/PasswordInput';
 import Button from '@/components/atoms/Button/Button';
 import FormField from '@/components/molecules/FormField/FormField';
-import styles from './FindPasswordPage.module.scss';
+import styles from './SignUpForm.module.scss';
 
-export default function FindPasswordForm() {
+export default function SignUpForm() {
   const {
     register,
     handleSubmit,
     watch,
     formState: { errors, isSubmitting },
-  } = useForm<FindPasswordFormValues>({
-    resolver: zodResolver(findPasswordSchema),
+  } = useForm<SignUpFormValues>({
+    resolver: zodResolver(signUpSchema),
     mode: 'onChange',
   });
 
+  // 상태 관리
+  const [emailVerified, setEmailVerified] = useState(false);
   const [codeSent, setCodeSent] = useState(false);
   const [codeVerified, setCodeVerified] = useState(false);
   const [timer, setTimer] = useState(0);
-  const [found, setFound] = useState<boolean | null>(null);
 
+  const email = watch('email');
   const phone = watch('phoneNumber');
   const phoneCode = watch('phoneCode');
 
-  // 인증번호 타이머
+  const navigate = useNavigate();
+
+  // 타이머 로직
   const startTimer = () => {
     setTimer(59);
     const interval = setInterval(() => {
@@ -41,44 +47,41 @@ export default function FindPasswordForm() {
     }, 1000);
   };
 
-  const handleSendCode = () => {
-    setCodeSent(true);
-    startTimer();
-    // TODO: 실제 API 연동
-  };
-
-  const handleVerifyCode = () => {
-    setCodeVerified(true);
-    // TODO: 실제 API 연동
-  };
-
-  const navigate = useNavigate();
-
-  const onSubmit = (data: FindPasswordFormValues) => {
-    // TODO: 실제로 백엔드와 연동
-    if (
-      data.username === '구름' &&
-      data.email === 'goorm@email.com' &&
-      data.phoneNumber === '01012345678' &&
-      data.phoneCode === '123456'
-    ) {
-      navigate({
-        to: '/find-password/change',
-        search: { email: data.email },
-      });
-    } else {
-      setFound(false);
-    }
+  const onSubmit = (data: SignUpFormValues) => {
+    console.log('회원가입 요청', data);
+    navigate({ to: '/sign-up/complete' });
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
+      <FormField label="이메일" htmlFor="email" required error={errors.email?.message}>
+        <div className={styles.fieldWithButton}>
+          <Input id="email" {...register('email')} placeholder="user@goorm.com" />
+          <Button
+            onClick={() => setEmailVerified(true)}
+            disabled={!email || emailVerified}
+            variant={emailVerified ? 'inactive' : 'active'}
+          >
+            {emailVerified ? '중복 확인 완료' : '중복 확인'}
+          </Button>
+        </div>
+      </FormField>
+
       <FormField label="이름" htmlFor="username" required error={errors.username?.message}>
         <Input id="username" {...register('username')} placeholder="구름" />
       </FormField>
 
-      <FormField label="이메일" htmlFor="email" required error={errors.email?.message}>
-        <Input id="email" {...register('email')} placeholder="goorm@email.com" />
+      <FormField label="비밀번호" htmlFor="password" required error={errors.password?.message}>
+        <PasswordInput id="password" {...register('password')} placeholder="********" />
+      </FormField>
+
+      <FormField
+        label="비밀번호 확인"
+        htmlFor="passwordCheck"
+        required
+        error={errors.passwordCheck?.message}
+      >
+        <PasswordInput id="passwordCheck" {...register('passwordCheck')} placeholder="********" />
       </FormField>
 
       <FormField
@@ -90,8 +93,10 @@ export default function FindPasswordForm() {
         <div className={styles.fieldWithButton}>
           <Input id="phoneNumber" {...register('phoneNumber')} placeholder="01012345678" />
           <Button
-            type="button"
-            onClick={handleSendCode}
+            onClick={() => {
+              setCodeSent(true);
+              startTimer();
+            }}
             disabled={!phone || timer > 0}
             variant={codeSent ? 'inactive' : 'active'}
           >
@@ -104,8 +109,7 @@ export default function FindPasswordForm() {
         <div className={styles.fieldWithButton}>
           <Input id="phoneCode" {...register('phoneCode')} placeholder="123456" />
           <Button
-            type="button"
-            onClick={handleVerifyCode}
+            onClick={() => setCodeVerified(true)}
             disabled={!phoneCode || codeVerified}
             variant={codeVerified ? 'inactive' : 'active'}
           >
@@ -117,15 +121,11 @@ export default function FindPasswordForm() {
       <Button
         type="submit"
         className={styles.submitBtn}
-        disabled={isSubmitting || !codeVerified}
-        variant={codeVerified ? 'active' : 'general'}
+        disabled={isSubmitting || !emailVerified || !codeVerified}
+        variant={emailVerified && codeVerified ? 'active' : 'general'}
       >
-        비밀번호 찾기
+        회원가입
       </Button>
-
-      {found === false && (
-        <div className={styles.error}>입력하신 정보로 가입된 계정을 찾을 수 없습니다.</div>
-      )}
     </form>
   );
 }
