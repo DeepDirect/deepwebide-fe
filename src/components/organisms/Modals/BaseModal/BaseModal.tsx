@@ -21,6 +21,11 @@ export interface BaseModalProps {
   onCancel?: () => void;
   showCancel?: boolean;
 
+  // 확인 버튼 상태 제어
+  confirmVariant?: 'active' | 'general' | 'inactive';
+  confirmDisabled?: boolean;
+  confirmButtonType?: 'button' | 'submit' | 'reset';
+
   // 스타일
   className?: string;
   showCloseButton?: boolean;
@@ -36,13 +41,18 @@ const BaseModal: React.FC<BaseModalProps> = ({
   onConfirm,
   onCancel,
   showCancel = true,
+  confirmVariant = 'active',
+  confirmDisabled = false,
+  confirmButtonType = 'button',
   className = '',
 }) => {
   const handleConfirm = () => {
-    if (onConfirm) {
+    if (onConfirm && !confirmDisabled) {
       onConfirm();
     }
-    onOpenChange(false);
+    if (!confirmDisabled) {
+      onOpenChange(false);
+    }
   };
 
   const handleCancel = () => {
@@ -70,7 +80,13 @@ const BaseModal: React.FC<BaseModalProps> = ({
 
           {/* 푸터 - 고정 */}
           <div className={styles.footer}>
-            <Button variant="active" onClick={handleConfirm} className={styles.confirmButton}>
+            <Button
+              variant={confirmVariant}
+              onClick={handleConfirm}
+              disabled={confirmDisabled}
+              type={confirmButtonType}
+              className={styles.confirmButton}
+            >
               {confirmText}
             </Button>
 

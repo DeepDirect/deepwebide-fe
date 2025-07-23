@@ -1,5 +1,5 @@
 import React from 'react';
-import MenuItem from '@/components/molecules/MenuItem/MenuItem';
+import MenuItem from '@/components/molecules/Modals/MenuItem/MenuItem';
 import MeatballModal from '@/components/organisms/Modals/MeatballModal/MeatballModal';
 
 export interface PrivateRepoMeatballModalProps {

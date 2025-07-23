@@ -21,7 +21,7 @@ const ChangeRepoNameModal: React.FC<ChangeRepoNameModalProps> = ({
   const [newName, setNewName] = useState(currentName);
 
   const handleConfirm = () => {
-    if (newName.trim()) {
+    if (newName.trim() && newName.trim() !== currentName) {
       onConfirm(newName.trim());
     }
   };
@@ -40,6 +40,9 @@ const ChangeRepoNameModal: React.FC<ChangeRepoNameModalProps> = ({
     onOpenChange(open);
   };
 
+  // 비활성화 조건: 새 이름이 비어있거나 기존 이름과 같을 때
+  const isConfirmDisabled = !newName.trim() || newName.trim() === currentName;
+
   return (
     <BaseModal
       open={open}
@@ -49,6 +52,9 @@ const ChangeRepoNameModal: React.FC<ChangeRepoNameModalProps> = ({
       cancelText="취소"
       onConfirm={handleConfirm}
       onCancel={handleCancel}
+      confirmVariant="active"
+      confirmDisabled={isConfirmDisabled}
+      confirmButtonType="submit"
     >
       <div className={styles.repoNameChangeModal}>
         <div className={styles.formGroup}>
