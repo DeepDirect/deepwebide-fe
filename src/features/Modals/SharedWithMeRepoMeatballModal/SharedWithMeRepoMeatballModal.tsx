@@ -1,6 +1,6 @@
 import React from 'react';
-import MenuItem from '@/components/molecules/MenuItem/MenuItem';
-import InputMenuItem from '@/components/molecules/InputMenuItem/InputMenuItem';
+import MenuItem from '@/components/molecules/Modals/MenuItem/MenuItem';
+import InputMenuItem from '@/components/molecules/Modals/InputMenuItem/InputMenuItem';
 import MeatballModal from '@/components/organisms/Modals/MeatballModal/MeatballModal';
 
 export interface SharedWithMeRepoMeatballModalProps {

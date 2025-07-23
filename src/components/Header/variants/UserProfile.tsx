@@ -1,5 +1,5 @@
 import styles from './HeaderVariant.module.scss';
-import ProfileDropdown from '@/components/molecules/ProfileDropdown/ProfileDropdown';
+import ProfileDropdown from '@/components/molecules/Modals/ProfileDropdown/ProfileDropdown';
 import moodHappyIcon from '@/assets/icons/mood-happy.svg';
 
 const UserProfile = () => {

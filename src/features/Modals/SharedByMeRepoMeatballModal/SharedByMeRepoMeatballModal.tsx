@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import MenuItem from '@/components/molecules/MenuItem/MenuItem';
-import InputMenuItem from '@/components/molecules/InputMenuItem/InputMenuItem';
-import ToggleInputMenuItem from '@/components/molecules/ToggleInputMenuItem/ToggleInputMenuItem';
+import MenuItem from '@/components/molecules/Modals/MenuItem/MenuItem';
+import InputMenuItem from '@/components/molecules/Modals/InputMenuItem/InputMenuItem';
+import ToggleInputMenuItem from '@/components/molecules/Modals/ToggleInputMenuItem/ToggleInputMenuItem';
 import MeatballModal from '@/components/organisms/Modals/MeatballModal/MeatballModal';
 
 export interface SharedByMeRepoMeatballModalProps {
