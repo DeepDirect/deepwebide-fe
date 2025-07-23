@@ -16,7 +16,7 @@ type RepositoryProps = {
   onFavoriteClicked: (id: number) => void;
 };
 
-const Repository: React.FC<RepositoryProps> = ({ info, isSharedMe, onFavoriteClicked }) => {
+const RepoListItem: React.FC<RepositoryProps> = ({ info, isSharedMe, onFavoriteClicked }) => {
   return (
     <div className={styles.repositoryWrapper}>
       <div className={styles.nameWrapper}>
@@ -55,4 +55,4 @@ const Repository: React.FC<RepositoryProps> = ({ info, isSharedMe, onFavoriteCli
   );
 };
 
-export default Repository;
+export default RepoListItem;
