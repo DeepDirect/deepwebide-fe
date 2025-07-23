@@ -49,7 +49,7 @@ export default function SignUpForm() {
 
   const onSubmit = (data: SignUpFormValues) => {
     console.log('회원가입 요청', data);
-    navigate({ to: '/sign-up-complete' });
+    navigate({ to: '/sign-up/complete' });
   };
 
   return (

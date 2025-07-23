@@ -2,7 +2,7 @@ import { useSearch } from '@tanstack/react-router';
 import { changePasswordSchema, type ChangePasswordFormValues } from '@/schemas/auth.schema';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { changePasswordRoute } from '@/router/routes/auth/find-password-change';
+import { changePasswordRoute } from '@/router/routes/auth/find-password/change';
 import PasswordInput from '@/components/atoms/Input/PasswordInput';
 import Button from '@/components/atoms/Button/Button';
 import FormField from '@/components/molecules/FormField';

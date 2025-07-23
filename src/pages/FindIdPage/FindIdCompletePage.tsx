@@ -1,5 +1,5 @@
 import { useSearch, useNavigate } from '@tanstack/react-router';
-import { findIdCompleteRoute } from '@/router/routes/auth/find-id-complete';
+import { findIdCompleteRoute } from '@/router/routes/auth/find-id/complete';
 import styles from './FindIdCompletePage.module.scss';
 import Button from '@/components/atoms/Button/Button';
 
