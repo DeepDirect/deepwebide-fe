@@ -1,20 +1,17 @@
 import { useState } from 'react';
 
-import FileIcon from '@/assets/icons/file.svg?react';
-
-import Button from '@/components/atoms/Button/Button';
 import Toggle from '@/components/atoms/Toggle/Toggle';
 import Pagination from '@/components/molecules/Pagination/Pagination';
-import Repository from '@/components/organisms/RepoListItem/RepoListItem';
+import RepoListItem from '@/components/organisms/RepoListItem/RepoListItem';
 
-import styles from './MyRepositoriesPage.module.scss';
+import styles from './SharedWithMeRepoPage.module.scss';
 
 const tempList = [
   {
     repositoryId: 1,
-    repositoryName: '개인 프로젝트1',
+    repositoryName: '공유받은 프로젝트1',
     ownerId: 5,
-    ownerName: '슬기로운 개발자',
+    ownerName: '고통받는 개발자',
     isShared: false,
     shareLink: null,
     createdAt: '2025-07-18T13:10:00Z',
@@ -23,9 +20,9 @@ const tempList = [
   },
   {
     repositoryId: 2,
-    repositoryName: '개인 프로젝트2',
+    repositoryName: '공유받은 프로젝트2',
     ownerId: 5,
-    ownerName: '슬기로운 개발자',
+    ownerName: '고통받는 개발자',
     isShared: false,
     shareLink: null,
     createdAt: '2025-07-18T13:10:00Z',
@@ -34,9 +31,9 @@ const tempList = [
   },
   {
     repositoryId: 3,
-    repositoryName: '개인 프로젝트3',
+    repositoryName: '공유받은 프로젝트3',
     ownerId: 5,
-    ownerName: '슬기로운 개발자',
+    ownerName: '고통받는 개발자',
     isShared: false,
     shareLink: null,
     createdAt: '2025-07-19T08:00:00Z',
@@ -45,9 +42,9 @@ const tempList = [
   },
   {
     repositoryId: 4,
-    repositoryName: '개인 프로젝트4',
+    repositoryName: '공유받은 프로젝트4',
     ownerId: 5,
-    ownerName: '슬기로운 개발자',
+    ownerName: '고통받는 개발자',
     isShared: false,
     shareLink: null,
     createdAt: '2025-07-19T08:00:00Z',
@@ -56,9 +53,9 @@ const tempList = [
   },
   {
     repositoryId: 5,
-    repositoryName: '개인 프로젝트5',
+    repositoryName: '공유받은 프로젝트5',
     ownerId: 5,
-    ownerName: '슬기로운 개발자',
+    ownerName: '고통받는 개발자',
     isShared: false,
     shareLink: null,
     createdAt: '2025-07-20T11:00:00Z',
@@ -67,9 +64,9 @@ const tempList = [
   },
   {
     repositoryId: 6,
-    repositoryName: '개인 프로젝트6',
+    repositoryName: '공유받은 프로젝트6',
     ownerId: 5,
-    ownerName: '슬기로운 개발자',
+    ownerName: '고통받는 개발자',
     isShared: false,
     shareLink: null,
     createdAt: '2025-07-20T11:00:00Z',
@@ -78,9 +75,9 @@ const tempList = [
   },
   {
     repositoryId: 7,
-    repositoryName: '개인 프로젝트7',
+    repositoryName: '공유받은 프로젝트7',
     ownerId: 5,
-    ownerName: '슬기로운 개발자',
+    ownerName: '고통받는 개발자',
     isShared: false,
     shareLink: null,
     createdAt: '2025-07-20T14:30:00Z',
@@ -89,7 +86,9 @@ const tempList = [
   },
 ]; // TODO: api 연동 후 제거
 
-const MyRepositoriesPage = () => {
+const isSharedMe = true;
+
+const SharedWithMeRepoPage = () => {
   const [pagination, setPagination] = useState({
     total: 10,
     current: 1,
@@ -106,19 +105,21 @@ const MyRepositoriesPage = () => {
   return (
     <div className={styles.wrapper}>
       <div className={styles.topWrapper}>
-        <h1 className={styles.title}>개인 레포</h1>
+        <h1 className={styles.title}>공유받은 레포</h1>
 
         <div className={styles.buttonWrapper}>
           <Toggle variant="favorite" />
-          <Button className={styles.repoButton}>
-            <FileIcon className={styles.iconImage} />새 레포지토리 생성
-          </Button>
         </div>
       </div>
 
       <div className={styles.repositoriesWrapper}>
         {tempList.map(repo => (
-          <Repository key={repo.repositoryId} info={repo} onFavoriteClicked={onFavoriteClicked} />
+          <RepoListItem
+            key={repo.repositoryId}
+            isSharedMe={isSharedMe}
+            info={repo}
+            onFavoriteClicked={onFavoriteClicked}
+          />
         ))}
       </div>
 
@@ -134,4 +135,4 @@ const MyRepositoriesPage = () => {
   );
 };
 
-export default MyRepositoriesPage;
+export default SharedWithMeRepoPage;

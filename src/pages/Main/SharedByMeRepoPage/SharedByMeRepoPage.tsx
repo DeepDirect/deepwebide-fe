@@ -2,9 +2,9 @@ import { useState } from 'react';
 
 import Toggle from '@/components/atoms/Toggle/Toggle';
 import Pagination from '@/components/molecules/Pagination/Pagination';
-import Repository from '@/components/organisms/RepoListItem/RepoListItem';
+import RepoListItem from '@/components/organisms/RepoListItem/RepoListItem';
 
-import styles from './SharedRepositoriesPage.module.scss';
+import styles from './SharedByMeRepoPage.module.scss';
 
 const tempList = [
   {
@@ -86,7 +86,7 @@ const tempList = [
   },
 ]; // TODO: api 연동 후 제거
 
-const SharedRepositoriesPage = () => {
+const SharedByMeRepoPage = () => {
   const [pagination, setPagination] = useState({
     total: 10,
     current: 1,
@@ -112,7 +112,7 @@ const SharedRepositoriesPage = () => {
 
       <div className={styles.repositoriesWrapper}>
         {tempList.map(repo => (
-          <Repository key={repo.repositoryId} info={repo} onFavoriteClicked={onFavoriteClicked} />
+          <RepoListItem key={repo.repositoryId} info={repo} onFavoriteClicked={onFavoriteClicked} />
         ))}
       </div>
 
@@ -128,4 +128,4 @@ const SharedRepositoriesPage = () => {
   );
 };
 
-export default SharedRepositoriesPage;
+export default SharedByMeRepoPage;
