@@ -2,7 +2,7 @@ import styles from './Header.module.scss';
 import Logo from '@/components/atoms/Logo/Logo';
 import UserProfile from './variants/UserProfile';
 import RepoHeader from './variants/RepoHeader';
-import Toggle from '../atoms/Toggle/Toggle';
+import Toggle from '@/components/atoms/Toggle/Toggle';
 
 type HeaderProps = {
   variant: 'auth' | 'main' | 'repo';

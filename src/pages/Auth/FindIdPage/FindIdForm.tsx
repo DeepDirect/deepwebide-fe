@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { findIdSchema, type FindIdFormValues } from '@/schemas/auth.schema';
 import Input from '@/components/atoms/Input/Input';
 import Button from '@/components/atoms/Button/Button';
-import FormField from '@/components/molecules/FormField';
+import FormField from '@/components/molecules/FormField/FormField';
 import { useNavigate } from '@tanstack/react-router';
 import styles from './FindIdPage.module.scss';
 

@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { changePasswordRoute } from '@/router/routes/auth/find-password/change';
 import PasswordInput from '@/components/atoms/Input/PasswordInput';
 import Button from '@/components/atoms/Button/Button';
-import FormField from '@/components/molecules/FormField';
+import FormField from '@/components/molecules/FormField/FormField';
 import styles from './ChangePasswordPage.module.scss';
 
 export default function ChangePasswordPage() {

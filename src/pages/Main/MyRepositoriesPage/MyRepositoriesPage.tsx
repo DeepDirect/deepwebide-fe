@@ -4,8 +4,8 @@ import FileIcon from '@/assets/icons/file.svg?react';
 
 import Button from '@/components/atoms/Button/Button';
 import Toggle from '@/components/atoms/Toggle/Toggle';
-import Pagination from '@/components/Pagination/Pagination';
-import Repository from '@/components/Repository/Repository';
+import Pagination from '@/components/molecules/Pagination/Pagination';
+import Repository from '@/components/organisms/RepoListItem/RepoListItem';
 
 import styles from './MyRepositoriesPage.module.scss';
 

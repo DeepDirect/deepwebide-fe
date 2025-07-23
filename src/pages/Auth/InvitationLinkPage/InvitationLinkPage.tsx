@@ -1,5 +1,5 @@
 import React from 'react';
-import Header from '@/components/Header/Header';
+import Header from '@/components/organisms/Header/Header';
 import InvitationLinkForm from '@/components/organisms/InvitationLinkForm/InvitationLinkForm';
 
 import './InvitationLinkPage.scss';

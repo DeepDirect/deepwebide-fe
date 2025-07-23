@@ -1,6 +1,6 @@
 import { createRoute } from '@tanstack/react-router';
 import { findIdRoute } from './index';
-import FindIdCompletePage from '@/pages/Auth/FindIdPage/FindIdCompletePage';
+import FindIdCompletePage from '@/pages/Auth/FindIdCompletePage/FindIdCompletePage';
 
 export const findIdCompleteRoute = createRoute({
   getParentRoute: () => findIdRoute,

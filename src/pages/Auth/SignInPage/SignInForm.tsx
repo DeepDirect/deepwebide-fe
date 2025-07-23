@@ -5,7 +5,7 @@ import type { SignInFormValues } from '@/schemas/auth.schema';
 import Input from '@/components/atoms/Input/Input';
 import PasswordInput from '@/components/atoms/Input/PasswordInput';
 import Button from '@/components/atoms/Button/Button';
-import FormField from '@/components/molecules/FormField';
+import FormField from '@/components/molecules/FormField/FormField';
 import styles from './SignInPage.module.scss';
 
 export default function SignInForm() {

@@ -2,7 +2,7 @@ import 'dayjs/locale/ko';
 
 import dayjs from 'dayjs';
 
-import styles from './Repository.module.scss';
+import styles from './RepoListItem.module.scss';
 
 import HeartIcon from '@/assets/icons/heart.svg?react';
 import FillHeartIcon from '@/assets/icons/fill-heart.svg?react';

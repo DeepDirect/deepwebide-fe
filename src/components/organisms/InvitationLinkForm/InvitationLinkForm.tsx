@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import PasswordInput from '@/components/atoms/Input/PasswordInput';
-import InvitationFormActions from './InvitationFormActions/InvitationFormActions';
+import InvitationFormActions from '@/components/molecules/InvitationFormActions/InvitationFormActions';
 
 import './InvitationLinkForm.scss';
 

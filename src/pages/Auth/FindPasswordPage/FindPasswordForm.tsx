@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { findPasswordSchema, type FindPasswordFormValues } from '@/schemas/auth.schema';
 import Input from '@/components/atoms/Input/Input';
 import Button from '@/components/atoms/Button/Button';
-import FormField from '@/components/molecules/FormField';
+import FormField from '@/components/molecules/FormField/FormField';
 import styles from './FindPasswordPage.module.scss';
 
 export default function FindPasswordForm() {
