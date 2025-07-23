@@ -1,6 +1,6 @@
 import { createRoute } from '@tanstack/react-router';
 import { authLayoutRoute } from '../auth-layout';
-import FindIdPage from '@/pages/FindIdPage/FindIdPage';
+import FindIdPage from '@/pages/Auth/FindIdPage/FindIdPage';
 import { findIdCompleteRoute } from './complete';
 
 export const findIdRoute = createRoute({
