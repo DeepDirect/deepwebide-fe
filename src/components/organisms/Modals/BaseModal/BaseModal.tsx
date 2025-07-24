@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Dialog } from 'radix-ui';
 import Button from '@/components/atoms/Button/Button';
 import styles from './BaseModal.module.scss';
@@ -46,6 +46,62 @@ const BaseModal: React.FC<BaseModalProps> = ({
   confirmButtonType = 'button',
   className = '',
 }) => {
+  // 배경 없이 스크롤만 차단
+  useEffect(() => {
+    if (open) {
+      // 스크롤바 너비 계산
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+
+      // body 스크롤 방지 + 스크롤바 공간 보정
+      document.body.style.overflow = 'hidden';
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+
+      // fixed 요소들(헤더 등)에도 패딩 적용 - 더 구체적으로
+      const headerSelectors = [
+        'header',
+        '[class*="Header"]',
+        '[class*="header"]',
+        // CSS Modules 해시가 포함된 클래스도 찾기
+        '[class*="Header_header"]',
+        '[class*="header_header"]',
+      ];
+
+      const fixedElements: HTMLElement[] = [];
+      headerSelectors.forEach(selector => {
+        document.querySelectorAll(selector).forEach(el => {
+          if (!fixedElements.includes(el as HTMLElement)) {
+            fixedElements.push(el as HTMLElement);
+          }
+        });
+      });
+
+      fixedElements.forEach(el => {
+        // 기존 paddingRight 값 저장
+        const computedStyle = window.getComputedStyle(el);
+        el.dataset.originalPaddingRight =
+          el.style.paddingRight || computedStyle.paddingRight || '0px';
+
+        // 현재 패딩에 스크롤바 너비 추가
+        const currentPadding = parseInt(computedStyle.paddingRight) || 0;
+        el.style.paddingRight = `${currentPadding + scrollbarWidth}px`;
+      });
+
+      return () => {
+        // 모달 닫힘 시 모든 스타일 복원
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+
+        // fixed 요소들 패딩 복원
+        fixedElements.forEach(element => {
+          const el = element as HTMLElement;
+          const originalPadding = el.dataset.originalPaddingRight || '0px';
+          el.style.paddingRight = originalPadding;
+          delete el.dataset.originalPaddingRight;
+        });
+      };
+    }
+  }, [open]);
+
   const handleConfirm = () => {
     if (onConfirm && !confirmDisabled) {
       onConfirm();
@@ -65,7 +121,7 @@ const BaseModal: React.FC<BaseModalProps> = ({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className={styles.overlay} />
+        {/* Dialog.Overlay를 아예 제거 */}
         <Dialog.Content className={`${styles.content} ${className}`}>
           {/* 헤더 - 고정 */}
           <div className={styles.header}>
