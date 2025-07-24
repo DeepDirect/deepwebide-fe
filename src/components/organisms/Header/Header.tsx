@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router';
 import styles from './Header.module.scss';
 import Logo from '@/components/atoms/Logo/Logo';
 import UserProfile from './variants/UserProfile';
@@ -12,7 +13,9 @@ const Header = ({ variant }: HeaderProps) => {
   return (
     <header className={styles.header}>
       <div className={styles.left}>
-        <Logo size={240} clickable />
+        <Link to="/main" title="메인페이지">
+          <Logo size={240} clickable />
+        </Link>
       </div>
 
       {variant === 'repo' && (
