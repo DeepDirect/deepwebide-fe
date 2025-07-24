@@ -7,6 +7,7 @@ import Button from '@/components/atoms/Button/Button';
 import Toggle from '@/components/atoms/Toggle/Toggle';
 import Pagination from '@/components/molecules/Pagination/Pagination';
 import RepoListItem from '@/components/organisms/RepoListItem/RepoListItem';
+import CreateRepoModal from '@/features/Modals/CreateRepoModal/CreateRepoModal';
 
 import MainPageType from '@/constants/enums/MainPageType.enum';
 
@@ -100,14 +101,35 @@ const PrivateRepoPage = () => {
     pageSize: 5,
   }); // TODO: api 연동 후 받은 데이터로 변경
 
+  // NOTE: 레포 생성 모달 열림 여부
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
   const handlePageChange = (page: number) => {
     setPagination(prev => ({ ...prev, current: page }));
   };
+
   const handleFavoriteClick = (id: number) => {
     console.log(`Favorite clicked for repository ID: ${id}`);
   };
+
   const handleRepoClick = (repoId: number) => {
     navigate({ to: '/$repoId', params: { repoId } });
+  };
+
+  // 새 레포지토리 생성 버튼 클릭
+  const handleCreateRepoClick = () => {
+    setIsCreateModalOpen(true);
+  };
+
+  // 레포지토리 생성 확인
+  const handleCreateRepoConfirm = (data: { name: string; projectType: string }) => {
+    console.log('새 레포지토리 생성:', data);
+    // TODO: API 호출하여 레포지토리 생성 기능 API 연결 필요
+    setIsCreateModalOpen(false);
+  };
+  // 레포지토리 생성 취소
+  const handleCreateRepoCancel = () => {
+    setIsCreateModalOpen(false);
   };
 
   return (
@@ -117,7 +139,7 @@ const PrivateRepoPage = () => {
 
         <div className={styles.buttonWrapper}>
           <Toggle variant="favorite" />
-          <Button className={styles.repoButton}>
+          <Button className={styles.repoButton} onClick={handleCreateRepoClick}>
             <FileIcon className={styles.iconImage} />새 레포지토리 생성
           </Button>
         </div>
@@ -143,6 +165,14 @@ const PrivateRepoPage = () => {
           handlePageChange={handlePageChange}
         />
       </div>
+
+      {/* 레포지토리 생성 모달 */}
+      <CreateRepoModal
+        open={isCreateModalOpen}
+        onOpenChange={setIsCreateModalOpen}
+        onConfirm={handleCreateRepoConfirm}
+        onCancel={handleCreateRepoCancel}
+      />
     </div>
   );
 };
