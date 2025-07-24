@@ -42,6 +42,7 @@
   &.active {
     border: 1px solid vars.$blue-3;
     color: vars.$blue-3;
+    cursor: default;
   }
 
   .iconImage {
