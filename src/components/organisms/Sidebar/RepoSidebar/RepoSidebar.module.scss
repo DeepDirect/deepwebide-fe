@@ -1,12 +1,15 @@
 @use '@/styles/variables' as vars;
 
 .sidebar {
+  position: absolute;
+  top: 56px;
+  left: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
   width: 44px;
-  height: 1024px;
+  height: calc(100vh - 82px); // top이랑 bottom padding 된 높이인 24px까지 제외
   padding: 12px 0;
   background-color: vars.$gray-9;
 
