@@ -39,6 +39,11 @@
     color: vars.$blue-3;
   }
 
+  &.active {
+    border: 1px solid vars.$blue-3;
+    color: vars.$blue-3;
+  }
+
   .iconImage {
     flex-shrink: 0;
     width: 20px;
