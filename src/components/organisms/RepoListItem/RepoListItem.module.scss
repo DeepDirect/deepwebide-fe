@@ -25,6 +25,15 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+
+    &.nameButton {
+      cursor: pointer;
+      user-select: none;
+
+      &:hover {
+        font-weight: bold;
+      }
+    }
   }
 
   .infoContainer {
@@ -35,6 +44,10 @@
     flex-flow: row nowrap;
 
     .infoWrapper {
+      &.updateWrapper {
+        white-space: nowrap;
+      }
+
       @include desktop {
         display: flex;
         flex-flow: row wrap;
