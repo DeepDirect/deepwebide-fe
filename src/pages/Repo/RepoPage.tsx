@@ -40,11 +40,10 @@ export function RepoPage() {
       {/* 에디터 + 터미널 그룹 */}
       <div className={styles.editorGroup}>
         {/* 코드 에디터 */}
-
-        <div className={styles.tabSection}>
+        <div className={styles.editorSection}>
           <TabBar repoId={repoId} />
+          <div>에디터</div>
         </div>
-        <div className={styles.editorSection}></div>
 
         {/* 터미널 */}
         <div className={styles.terminalSection}></div>

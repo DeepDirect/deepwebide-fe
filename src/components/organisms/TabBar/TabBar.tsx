@@ -2,6 +2,7 @@ import { useTabStore } from '@/stores/tabStore';
 import styles from './TabBar.module.scss';
 import clsx from 'clsx';
 import { useNavigate } from '@tanstack/react-router';
+import closeIcon from '@/assets/icons/close.svg';
 
 interface TabBarProps {
   repoId: string;
@@ -79,12 +80,15 @@ const TabBar = ({ repoId }: TabBarProps) => {
           className={clsx(styles.tab, { [styles.active]: tab.isActive })}
           onClick={() => handleTabClick(tab)}
         >
-          <span className={styles.tabName}>
-            {tab.name}
-            {tab.isDirty && '*'}
-          </span>
+          <div
+            className={clsx(styles.statusIndicator, {
+              [styles.dirty]: tab.isDirty,
+              [styles.saved]: !tab.isDirty,
+            })}
+          ></div>
+          <span className={styles.tabName}>{tab.name}</span>
           <button className={styles.closeBtn} onClick={e => handleTabClose(e, tab.id)}>
-            ×
+            <img src={closeIcon} alt="닫기 아이콘" width={15} height={15} />
           </button>
         </div>
       ))}
