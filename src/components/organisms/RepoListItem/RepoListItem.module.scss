@@ -2,6 +2,7 @@
 @use '@/styles/mixins' as *;
 
 .repositoryWrapper {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
