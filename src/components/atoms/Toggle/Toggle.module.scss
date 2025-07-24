@@ -55,7 +55,7 @@
 .favorite {
   .thumbIcon {
     width: 17px;
-    transform: translate(3%, 4px);
+    transform: translate(-2%, 4px);
   }
 
   &[data-state='checked'] .thumb {
