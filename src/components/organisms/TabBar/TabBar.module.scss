@@ -1,0 +1,24 @@
+@use '@/styles/variables' as *;
+
+.tabBar {
+  display: flex;
+  height: 40px;
+  padding: 0 8px;
+  overflow-x: auto;
+  white-space: nowrap;
+  background-color: $gray-9;
+}
+
+.tab {
+  align-content: center;
+  width: 150px;
+  background-color: $gray-10;
+}
+
+.active {
+  background-color: $white-1;
+}
+
+.closeBtn {
+  background: transparent;
+}
