@@ -1,0 +1,82 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+
+.infoSection {
+  max-width: 1000px;
+  min-width: 1000px;
+  font-family: $font-family-silkscreen;
+  color: $black-1;
+  user-select: none;
+
+  @include mobile {
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .nameIcon {
+    width: $font-size-xlarge;
+    height: $font-size-xlarge;
+  }
+
+  .sectionTitleWrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: $font-size-xxsmall;
+    height: 92px;
+
+    .sectionTitle {
+      font-size: $font-size-xlarge;
+    }
+  }
+
+  .grid {
+    display: grid;
+    align-items: center;
+    grid-template-columns: 0.3fr 1fr;
+    width: 50%;
+    transition-duration: 0.5s;
+    gap: 0 2rem;
+    grid-auto-rows: 74px;
+
+    @include mobile {
+      gap: 1rem;
+      width: 100%;
+      transition-duration: 0.5s;
+    }
+  }
+
+  .label {
+    font-size: $font-size-small;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  .value {
+    justify-content: flex-end;
+    font-size: $font-size-xsmall;
+    text-align: right;
+    white-space: nowrap;
+    word-break: break-all;
+
+    &.nameWrapper {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      width: 100%;
+      font-size: $font-size-xsmall;
+
+      .editButton {
+        margin: 0;
+        margin-left: 1rem;
+        padding: 0;
+        background: none;
+
+        .icon {
+          width: 20px;
+          height: 20px;
+        }
+      }
+    }
+  }
+}
