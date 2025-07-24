@@ -3,8 +3,9 @@ import styles from './TabBar.module.scss';
 import clsx from 'clsx';
 
 const TabBar = () => {
-  const tabStore = useTabStore();
-  const { openTabs, closeTab, activateTab } = tabStore;
+  const openTabs = useTabStore(state => state.openTabs);
+  const closeTab = useTabStore(state => state.closeTab);
+  const activateTab = useTabStore(state => state.activateTab);
 
   return (
     <div className={styles.tabBar}>
@@ -12,7 +13,11 @@ const TabBar = () => {
         <div
           key={tab.id}
           className={clsx(styles.tab, { [styles.active]: tab.isActive })}
-          onClick={() => activateTab(tab.id)}
+          onClick={() => {
+            if (!tab.isActive) {
+              activateTab(tab.id);
+            }
+          }}
         >
           <span className={styles.tabName}>
             {tab.name}
