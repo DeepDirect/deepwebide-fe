@@ -1,8 +1,11 @@
 import { useState } from 'react';
+import { useNavigate } from '@tanstack/react-router';
 
 import Toggle from '@/components/atoms/Toggle/Toggle';
 import Pagination from '@/components/molecules/Pagination/Pagination';
 import RepoListItem from '@/components/organisms/RepoListItem/RepoListItem';
+
+import MainPageType from '@/constants/enums/MainPageType.enum';
 
 import styles from './SharedByMeRepoPage.module.scss';
 
@@ -87,17 +90,21 @@ const tempList = [
 ]; // TODO: api 연동 후 제거
 
 const SharedByMeRepoPage = () => {
+  const navigate = useNavigate();
   const [pagination, setPagination] = useState({
     total: 10,
     current: 1,
     pageSize: 5,
   }); // TODO: api 연동 후 받은 데이터로 변경
 
-  const onPageChange = (page: number) => {
+  const handlePageChange = (page: number) => {
     setPagination(prev => ({ ...prev, current: page }));
   };
-  const onFavoriteClicked = (id: number) => {
+  const handleFavoriteClick = (id: number) => {
     console.log(`Favorite clicked for repository ID: ${id}`);
+  };
+  const handleRepoClick = (repoId: number) => {
+    navigate({ to: '/$repoId', params: { repoId } });
   };
 
   return (
@@ -112,7 +119,13 @@ const SharedByMeRepoPage = () => {
 
       <div className={styles.repositoriesWrapper}>
         {tempList.map(repo => (
-          <RepoListItem key={repo.repositoryId} info={repo} onFavoriteClicked={onFavoriteClicked} />
+          <RepoListItem
+            key={repo.repositoryId}
+            info={repo}
+            pageType={MainPageType.SHARED_BY_ME}
+            handleFavoriteClick={handleFavoriteClick}
+            handleRepoClick={handleRepoClick}
+          />
         ))}
       </div>
 
@@ -121,7 +134,7 @@ const SharedByMeRepoPage = () => {
           maxVisiblePages={5}
           totalPages={pagination.total}
           currentPage={pagination.current}
-          onPageChange={onPageChange}
+          handlePageChange={handlePageChange}
         />
       </div>
     </div>

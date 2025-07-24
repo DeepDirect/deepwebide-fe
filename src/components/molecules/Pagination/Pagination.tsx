@@ -4,14 +4,14 @@ type PaginationProps = {
   maxVisiblePages: number;
   totalPages: number;
   currentPage: number;
-  onPageChange: (page: number) => void;
+  handlePageChange: (page: number) => void;
 };
 
 const Pagination = ({
   maxVisiblePages,
   totalPages,
   currentPage,
-  onPageChange,
+  handlePageChange,
 }: PaginationProps) => {
   const currentGroup = Math.floor((currentPage - 1) / maxVisiblePages);
   const startPage = currentGroup * maxVisiblePages + 1;
@@ -26,7 +26,7 @@ const Pagination = ({
     <div className={styles.container}>
       <button
         className={styles.pageButton}
-        onClick={() => onPageChange(currentPage - 1)}
+        onClick={() => handlePageChange(currentPage - 1)}
         disabled={currentPage === 1}
       >
         <svg
@@ -49,7 +49,7 @@ const Pagination = ({
         <button
           key={page}
           className={`${styles.pageButton} ${page === currentPage ? styles.active : ''}`}
-          onClick={() => onPageChange(page)}
+          onClick={() => handlePageChange(page)}
         >
           {page}
         </button>
@@ -57,7 +57,7 @@ const Pagination = ({
 
       <button
         className={styles.pageButton}
-        onClick={() => onPageChange(currentPage + 1)}
+        onClick={() => handlePageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
       >
         <svg

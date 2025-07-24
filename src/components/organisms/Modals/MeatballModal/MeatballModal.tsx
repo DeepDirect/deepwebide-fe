@@ -7,7 +7,7 @@ export interface MeatballModalProps {
   onOpenChange?: (open: boolean) => void;
   children: React.ReactNode;
   className?: string;
-  position?: { top: number; left: number };
+  position?: { top?: number; bottom?: number; left?: number; right?: number };
 }
 
 const MeatballModal: React.FC<MeatballModalProps> = ({
@@ -28,13 +28,7 @@ const MeatballModal: React.FC<MeatballModalProps> = ({
   return (
     <>
       <div className={styles.backdrop} onClick={handleBackdropClick} />
-      <div
-        className={clsx(styles.content, className)}
-        style={{
-          top: position.top,
-          left: position.left,
-        }}
-      >
+      <div className={clsx(styles.content, className)} style={position}>
         {children}
       </div>
     </>

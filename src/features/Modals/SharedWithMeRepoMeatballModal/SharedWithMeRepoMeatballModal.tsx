@@ -6,7 +6,7 @@ import MeatballModal from '@/components/organisms/Modals/MeatballModal/MeatballM
 export interface SharedWithMeRepoMeatballModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  position?: { top: number; left: number };
+  position?: { top?: number; bottom?: number; left?: number; right?: number };
   shareLink?: string;
   onShareLinkCopy?: () => void;
   onLeaveRepository?: () => void;
@@ -16,7 +16,7 @@ export interface SharedWithMeRepoMeatballModalProps {
 const SharedWithMeRepoMeatballModal: React.FC<SharedWithMeRepoMeatballModalProps> = ({
   open,
   onOpenChange,
-  position = { top: 0, left: 0 },
+  position,
   shareLink = '',
   onShareLinkCopy,
   onLeaveRepository,
