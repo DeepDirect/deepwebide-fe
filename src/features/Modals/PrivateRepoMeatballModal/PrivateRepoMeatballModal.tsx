@@ -5,7 +5,7 @@ import MeatballModal from '@/components/organisms/Modals/MeatballModal/MeatballM
 export interface PrivateRepoMeatballModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  position?: { top: number; left: number };
+  position?: { top?: number; bottom?: number; left?: number; right?: number };
   onRename?: () => void;
   onShare?: () => void;
   onDelete?: () => void;
@@ -15,7 +15,7 @@ export interface PrivateRepoMeatballModalProps {
 const PrivateRepoMeatballModal: React.FC<PrivateRepoMeatballModalProps> = ({
   open,
   onOpenChange,
-  position = { top: 0, left: 0 },
+  position,
   onRename,
   onShare,
   onDelete,
