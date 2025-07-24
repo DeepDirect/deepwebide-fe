@@ -70,13 +70,13 @@ const SharedByMeRepoMeatballModal: React.FC<SharedByMeRepoMeatballModalProps> = 
     >
       <MenuItem
         label="이름 변경하기"
-        iconPath="src/assets/icons/edit-box.svg"
+        iconPath="/src/assets/icons/edit-box.svg"
         onClick={handleRename}
       />
 
       <InputMenuItem
         label="공유 링크"
-        iconPath="src/assets/icons/copy.svg"
+        iconPath="/src/assets/icons/copy.svg"
         value={shareLink}
         readOnly
         onIconClick={handleShareLinkCopy}
@@ -86,8 +86,8 @@ const SharedByMeRepoMeatballModal: React.FC<SharedByMeRepoMeatballModalProps> = 
         key={open ? 'open' : 'closed'}
         label="입장 코드 확인하기"
         expandedLabel="입장 코드"
-        iconPath="src/assets/icons/arrow-down-box.svg"
-        expandedIconPath="src/assets/icons/copy.svg"
+        iconPath="/src/assets/icons/arrow-down-box.svg"
+        expandedIconPath="/src/assets/icons/copy.svg"
         value={entryCode}
         isPassword={true}
         readOnly
@@ -103,7 +103,7 @@ const SharedByMeRepoMeatballModal: React.FC<SharedByMeRepoMeatballModalProps> = 
 
       <MenuItem
         label="공유 취소하기"
-        iconPath="src/assets/icons/mail-off.svg"
+        iconPath="/src/assets/icons/mail-off.svg"
         onClick={handleCancelShare}
         variant="orange"
       />
