@@ -5,6 +5,6 @@ import PrivateRepoPage from '@/pages/Main/PrivateRepoPage/PrivateRepoPage';
 
 export const PrivateRepoPageRoute = createRoute({
   getParentRoute: () => mainLayoutRoute,
-  path: '/main/private-repo',
+  path: 'private-repo',
   component: PrivateRepoPage,
 });

@@ -1,12 +1,15 @@
-import { createRoute } from '@tanstack/react-router';
+import { createRoute, Outlet } from '@tanstack/react-router';
 import { authLayoutRoute } from '../auth-layout';
 import FindPasswordPage from '@/pages/Auth/FindPasswordPage/FindPasswordPage';
-import { changePasswordRoute } from './change';
 
-export const findPasswordRoute = createRoute({
+export const findPasswordLayoutRoute = createRoute({
   getParentRoute: () => authLayoutRoute,
   path: 'find-password',
-  component: FindPasswordPage,
+  component: () => <Outlet />,
 });
 
-findPasswordRoute.addChildren([changePasswordRoute]);
+export const findPasswordFormRoute = createRoute({
+  getParentRoute: () => findPasswordLayoutRoute,
+  path: '/',
+  component: FindPasswordPage,
+});

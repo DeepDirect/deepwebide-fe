@@ -5,6 +5,6 @@ import SharedByMeRepoPage from '@/pages/Main/SharedByMeRepoPage/SharedByMeRepoPa
 
 export const SharedByMeRepoRoute = createRoute({
   getParentRoute: () => mainLayoutRoute,
-  path: '/main/shared-by-me-repo',
+  path: 'shared-by-me-repo',
   component: SharedByMeRepoPage,
 });

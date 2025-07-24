@@ -1,9 +1,9 @@
 import { createRoute } from '@tanstack/react-router';
-import { signUpRoute } from './index';
+import { signUpLayoutRoute } from './index';
 import SignUpCompletePage from '@/pages/Auth/SignUpCompletePage/SignUpCompletePage';
 
 export const signUpCompleteRoute = createRoute({
-  getParentRoute: () => signUpRoute,
+  getParentRoute: () => signUpLayoutRoute,
   path: 'complete',
   component: SignUpCompletePage,
 });
