@@ -13,4 +13,9 @@ export const repoPageRoute = createRoute({
   getParentRoute: () => repoLayoutRoute,
   path: '/',
   component: RepoPage,
+  validateSearch: (search: Record<string, unknown>) => {
+    return {
+      file: (search.file as string) || undefined,
+    };
+  },
 });

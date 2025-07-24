@@ -5,8 +5,10 @@ import clsx from 'clsx';
 import Header from '@/components/organisms/Header/Header';
 import { Sidebar } from '@/components/organisms/Sidebar/RepoSidebar/RepoSidebar';
 import { useThemeStore } from '@/stores/themeStore';
+import { useMockRepoInitializer } from '@/hooks/useMockRepoInitializer';
 
 export function RepoLayout() {
+  useMockRepoInitializer();
   const { isDarkMode } = useThemeStore();
 
   return (
