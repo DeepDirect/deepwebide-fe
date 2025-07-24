@@ -163,8 +163,8 @@
 
   .checkCodeWrapper {
     display: flex;
-    flex-flow: row nowrap;
     align-items: center;
+    flex-flow: row nowrap;
   }
 
   .buttonWrapper {
@@ -199,6 +199,10 @@
       border: 1px solid $orange;
       border-radius: 12px;
       color: $orange;
+    }
+
+    .shareButton {
+      padding: 8px 25px;
     }
   }
 }
