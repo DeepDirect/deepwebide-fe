@@ -15,4 +15,5 @@ export interface OpenTab {
   path: string;
   isActive: boolean;
   isDirty: boolean;
+  content?: string;
 }
