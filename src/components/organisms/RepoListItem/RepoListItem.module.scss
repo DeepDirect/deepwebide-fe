@@ -50,10 +50,14 @@
 
       @include desktop {
         display: flex;
+        align-items: center;
         flex-flow: row wrap;
       }
 
       .updateTitle {
+        margin-right: 3px;
+        font-size: $font-size-xxsmall;
+
         @include mobile {
           display: none;
         }

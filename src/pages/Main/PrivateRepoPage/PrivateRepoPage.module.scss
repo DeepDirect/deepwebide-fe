@@ -7,7 +7,7 @@
   min-width: fit-content;
   height: 100%;
   padding: 101px 67px 1rem 111px;
-  background: #fafafa;
+  background-color: $white-1;
 
   @include mobile {
     padding: 3rem 1rem 1rem calc(1rem + 44px);
