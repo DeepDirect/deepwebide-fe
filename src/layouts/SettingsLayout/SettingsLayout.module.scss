@@ -1,0 +1,40 @@
+@use '@/styles/mixins' as *;
+@use '@/styles/variables' as *;
+
+.settingsLayout {
+  display: grid;
+  grid-template:
+    'header header' 56px
+    'sidebar content' calc(100vh - 56px) / 44px 1fr;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: $white-1;
+}
+
+:global(header) {
+  z-index: 100;
+  grid-area: header;
+}
+
+:global(aside),
+:global(.sidebar) {
+  z-index: 50;
+  grid-area: sidebar;
+}
+
+:global(.content-area) {
+  position: relative;
+  grid-area: content;
+  box-sizing: border-box;
+  height: calc(100vh - 56px);
+  padding-top: 62px;
+  padding-right: 90px;
+  padding-left: 97px;
+  overflow: hidden;
+
+  @include mobile {
+    padding-right: 1rem;
+    padding-left: 1rem;
+  }
+}
