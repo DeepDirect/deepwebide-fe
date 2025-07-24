@@ -1,0 +1,46 @@
+@use '@/styles/variables' as *;
+
+.tabBar {
+  display: flex;
+  height: 40px;
+  padding: 0 8px;
+  overflow-x: auto;
+  white-space: nowrap;
+  background-color: $gray-9;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 150px;
+  background-color: $gray-10;
+}
+
+.tab:hover {
+  cursor: pointer;
+}
+
+.active {
+  background-color: $white-1;
+}
+
+.closeBtn {
+  background: transparent;
+}
+
+.statusIndicator {
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+
+  &.saved {
+    background-color: $blue-3; // 파란색 (저장됨)
+  }
+
+  &.dirty {
+    background-color: $orange; // 주황색 (수정됨)
+  }
+}
