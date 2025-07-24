@@ -1,5 +1,3 @@
-import 'dayjs/locale/ko';
-
 import styles from './MemberSection.module.scss';
 
 import MemberIcon from '@/assets/icons/member.svg?react';
@@ -31,13 +29,13 @@ const MemberSection = ({ members }: memberSectionProps) => {
     <section className={styles.infoSection}>
       <div className={styles.sectionTitleWrapper}>
         <MemberIcon className={styles.nameIcon} />
-        <h2 className={styles.sectionTitle}>Member</h2>
+        <h2 className={styles.sectionTitle}>MEMBER</h2>
       </div>
       <div className={styles.grid}>
         {sortedMembers.map(member => (
           <>
             <div key={member.userId} className={styles.label}>
-              {member.role}
+              {member.role.toUpperCase()}
             </div>
 
             <div key={member.userId} className={styles.member}>

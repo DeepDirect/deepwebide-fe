@@ -39,9 +39,9 @@
     display: grid;
     align-items: center;
     grid-template-columns: 1fr 1fr 1fr;
+    gap: 0 2rem;
     width: 50%;
     transition-duration: 0.5s;
-    gap: 0 2rem;
     grid-auto-rows: 78px;
 
     @include mobile {
