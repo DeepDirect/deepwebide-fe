@@ -1,13 +1,10 @@
 import styles from './SharedByMeSettingsPage.module.scss';
-import InfoSection from '@/components/molecules/Settings/InfoSection/InfoSection';
-import MemberSection from '@/components/molecules/Settings/MemberSection/MemberSection';
+import InfoSection from '@/components/organisms/Settings/InfoSection/InfoSection';
+import MemberSection from '@/components/organisms/Settings/MemberSection/MemberSection';
+import ShareSection from '@/components/organisms/Settings/ShareSection/ShareSection';
+import type { MemberItem } from '@/types/MemberItem';
 
-type memberSectionProps = {
-  userId: number;
-  nickname: string;
-  profileImageUrl: string;
-  role: 'OWNER' | 'MEMBER';
-}[];
+type memberSectionProps = MemberItem[];
 
 const SharedByMeSettingsPage = () => {
   const members: memberSectionProps = [
@@ -46,6 +43,8 @@ const SharedByMeSettingsPage = () => {
       />
 
       <MemberSection members={members} />
+
+      <ShareSection shareLink="https://example.com/shared-link" />
     </div>
   );
 };
