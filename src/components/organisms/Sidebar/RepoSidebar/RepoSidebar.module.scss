@@ -5,8 +5,11 @@
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
+  box-sizing: border-box;
   width: 44px;
-  height: 1024px;
+
+  // height: 1024px;
+  height: calc(100vh - 56px);
   padding: 12px 0;
   background-color: vars.$gray-9;
 
