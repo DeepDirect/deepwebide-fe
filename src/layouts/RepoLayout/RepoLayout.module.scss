@@ -11,6 +11,12 @@
   background-color: $white-1;
 }
 
+.RepoLayoutWithChat {
+  grid-template:
+    'header header header' 56px
+    'sidebar content chat' calc(100vh - 56px) / auto 1fr 452px;
+}
+
 .RepoLayoutDark {
   background-color: $gray-1;
 }
@@ -29,6 +35,12 @@
 :global(.content-area) {
   position: relative;
   grid-area: content;
+  height: calc(100vh - 56px);
+  overflow: hidden;
+}
+
+.chatContainer {
+  grid-area: chat;
   height: calc(100vh - 56px);
   overflow: hidden;
 }
