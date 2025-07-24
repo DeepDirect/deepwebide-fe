@@ -5,6 +5,8 @@ import Toggle from '@/components/atoms/Toggle/Toggle';
 import Pagination from '@/components/molecules/Pagination/Pagination';
 import RepoListItem from '@/components/organisms/RepoListItem/RepoListItem';
 
+import MainPageType from '@/constants/enums/MainPageType.enum';
+
 import styles from './SharedByMeRepoPage.module.scss';
 
 const tempList = [
@@ -120,6 +122,7 @@ const SharedByMeRepoPage = () => {
           <RepoListItem
             key={repo.repositoryId}
             info={repo}
+            pageType={MainPageType.SHARED_BY_ME}
             handleFavoriteClick={handleFavoriteClick}
             handleRepoClick={handleRepoClick}
           />

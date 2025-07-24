@@ -5,6 +5,8 @@ import Toggle from '@/components/atoms/Toggle/Toggle';
 import Pagination from '@/components/molecules/Pagination/Pagination';
 import RepoListItem from '@/components/organisms/RepoListItem/RepoListItem';
 
+import MainPageType from '@/constants/enums/MainPageType.enum';
+
 import styles from './SharedWithMeRepoPage.module.scss';
 
 const tempList = [
@@ -87,8 +89,6 @@ const tempList = [
   },
 ]; // TODO: api 연동 후 제거
 
-const isSharedMe = true;
-
 const SharedWithMeRepoPage = () => {
   const navigate = useNavigate();
   const [pagination, setPagination] = useState({
@@ -121,7 +121,7 @@ const SharedWithMeRepoPage = () => {
         {tempList.map(repo => (
           <RepoListItem
             key={repo.repositoryId}
-            isSharedMe={isSharedMe}
+            pageType={MainPageType.SHARED_WITH_ME}
             info={repo}
             handleFavoriteClick={handleFavoriteClick}
             handleRepoClick={handleRepoClick}

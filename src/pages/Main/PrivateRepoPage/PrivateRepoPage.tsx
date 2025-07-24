@@ -8,6 +8,8 @@ import Toggle from '@/components/atoms/Toggle/Toggle';
 import Pagination from '@/components/molecules/Pagination/Pagination';
 import RepoListItem from '@/components/organisms/RepoListItem/RepoListItem';
 
+import MainPageType from '@/constants/enums/MainPageType.enum';
+
 import styles from './PrivateRepoPage.module.scss';
 
 const tempList = [
@@ -126,6 +128,7 @@ const PrivateRepoPage = () => {
           <RepoListItem
             key={repo.repositoryId}
             info={repo}
+            pageType={MainPageType.PRIVATE_REPO}
             handleFavoriteClick={handleFavoriteClick}
             handleRepoClick={handleRepoClick}
           />
