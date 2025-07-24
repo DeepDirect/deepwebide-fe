@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from '@tanstack/react-router';
 
 import FileIcon from '@/assets/icons/file.svg?react';
 
@@ -90,6 +91,7 @@ const tempList = [
 ]; // TODO: api 연동 후 제거
 
 const PrivateRepoPage = () => {
+  const navigate = useNavigate();
   const [pagination, setPagination] = useState({
     total: 10,
     current: 1,
@@ -101,6 +103,9 @@ const PrivateRepoPage = () => {
   };
   const handleFavoriteClick = (id: number) => {
     console.log(`Favorite clicked for repository ID: ${id}`);
+  };
+  const handleRepoClick = (repoId: number) => {
+    navigate({ to: '/$repoId', params: { repoId } });
   };
 
   return (
@@ -122,6 +127,7 @@ const PrivateRepoPage = () => {
             key={repo.repositoryId}
             info={repo}
             handleFavoriteClick={handleFavoriteClick}
+            handleRepoClick={handleRepoClick}
           />
         ))}
       </div>

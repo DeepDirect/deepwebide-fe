@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from '@tanstack/react-router';
 
 import Toggle from '@/components/atoms/Toggle/Toggle';
 import Pagination from '@/components/molecules/Pagination/Pagination';
@@ -87,6 +88,7 @@ const tempList = [
 ]; // TODO: api 연동 후 제거
 
 const SharedByMeRepoPage = () => {
+  const navigate = useNavigate();
   const [pagination, setPagination] = useState({
     total: 10,
     current: 1,
@@ -98,6 +100,9 @@ const SharedByMeRepoPage = () => {
   };
   const handleFavoriteClick = (id: number) => {
     console.log(`Favorite clicked for repository ID: ${id}`);
+  };
+  const handleRepoClick = (repoId: number) => {
+    navigate({ to: '/$repoId', params: { repoId } });
   };
 
   return (
@@ -116,6 +121,7 @@ const SharedByMeRepoPage = () => {
             key={repo.repositoryId}
             info={repo}
             handleFavoriteClick={handleFavoriteClick}
+            handleRepoClick={handleRepoClick}
           />
         ))}
       </div>

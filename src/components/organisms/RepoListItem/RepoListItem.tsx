@@ -14,12 +14,22 @@ type RepositoryProps = {
   info: RepositoryItem;
   isSharedMe?: boolean;
   handleFavoriteClick: (id: number) => void;
+  handleRepoClick: (id: number) => void;
 };
 
-const RepoListItem: React.FC<RepositoryProps> = ({ info, isSharedMe, handleFavoriteClick }) => {
+const RepoListItem: React.FC<RepositoryProps> = ({
+  info,
+  isSharedMe,
+  handleFavoriteClick,
+  handleRepoClick,
+}) => {
   return (
     <div className={styles.repositoryWrapper}>
-      <div role="button" className={`${styles.nameWrapper} ${styles.nameButton}`}>
+      <div
+        role="button"
+        className={`${styles.nameWrapper} ${styles.nameButton}`}
+        onClick={() => handleRepoClick(info.repositoryId)}
+      >
         <span>{info.repositoryName}</span>
       </div>
 
