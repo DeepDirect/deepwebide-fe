@@ -1,0 +1,204 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+
+.shareSection {
+  max-width: 1000px;
+  min-width: 1000px;
+  font-family: $font-family-silkscreen;
+  color: $black-1;
+  user-select: none;
+
+  @include mobile {
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .nameIcon {
+    width: $font-size-xlarge;
+    height: $font-size-xlarge;
+  }
+
+  .sectionTitleWrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: $font-size-xxsmall;
+    height: 92px;
+
+    .sectionTitle {
+      font-size: $font-size-xlarge;
+    }
+  }
+
+  .flex {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0 2rem;
+    width: 50%;
+    height: 92px;
+    transition-duration: 0.5s;
+
+    &.entryCodeWrapper,
+    &.unshareWrapper {
+      width: 65%;
+    }
+
+    @include mobile {
+      gap: 1rem;
+      width: 100%;
+      min-width: 0;
+      transition-duration: 0.5s;
+
+      &.entryCodeWrapper,
+      &.unshareWrapper {
+        width: 100%;
+        transition-duration: 0.5s;
+      }
+
+      &.unshareWrapper {
+        color: $orange;
+      }
+    }
+  }
+
+  .label {
+    font-size: $font-size-small;
+    text-align: left;
+    white-space: nowrap;
+
+    &.textOrange {
+      color: $orange;
+    }
+
+    &.textBlue {
+      color: $blue-1;
+    }
+  }
+
+  .shareLinkWrapper {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: flex-end;
+    font-size: $font-size-xsmall;
+    text-align: right;
+    white-space: nowrap;
+    word-break: break-all;
+
+    .labelWrapper {
+      @include label-icon-row;
+
+      .iconLabel {
+        font-size: $font-size-xsmall;
+      }
+
+      .iconWrapper {
+        &:hover {
+          opacity: 1;
+          transform: scale(1.1);
+        }
+
+        .labelIcon {
+          width: $font-size-small;
+          height: $font-size-small;
+          cursor: pointer;
+        }
+      }
+
+      &.nameWrapper {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        width: 100%;
+        font-size: $font-size-xsmall;
+
+        .editButton {
+          margin: 0;
+          margin-left: 1rem;
+          padding: 0;
+          background: none;
+
+          .icon {
+            width: 20px;
+            height: 20px;
+          }
+        }
+      }
+    }
+
+    .input {
+      box-sizing: border-box;
+      width: 100%;
+      max-width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid $gray-8;
+      border-radius: 6px;
+      overflow: hidden;
+      font-family: $font-family-primary;
+      font-size: $font-size-xsmall;
+      font-weight: $font-weight-regular;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: $black-1;
+      color: $gray-6;
+      background-color: $white-2;
+      background-color: $gray-10;
+      transition: all 0.2s ease;
+      cursor: default;
+      user-select: none;
+
+      &:focus {
+        border-color: $gray-8;
+        box-shadow: none;
+      }
+    }
+  }
+
+  .checkCodeWrapper {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+  }
+
+  .buttonWrapper {
+    height: 3rem;
+
+    .reissueButton,
+    .unshareButton,
+    .shareButton {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 25px;
+      font-size: $font-size-small;
+      background: none;
+
+      .buttonIcon {
+        width: 24px;
+        height: 24px;
+        margin-right: 10px;
+      }
+    }
+
+    .reissueButton,
+    .shareButton {
+      border: 1px solid $blue-1;
+      border-radius: 12px;
+      color: $blue-1;
+    }
+
+    .unshareButton {
+      border: 1px solid $orange;
+      border-radius: 12px;
+      color: $orange;
+    }
+  }
+}
