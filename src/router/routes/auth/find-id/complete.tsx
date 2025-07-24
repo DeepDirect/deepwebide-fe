@@ -1,12 +1,9 @@
 import { createRoute } from '@tanstack/react-router';
-import { findIdRoute } from './index';
-import FindIdCompletePage from '@/pages/FindIdPage/FindIdCompletePage';
+import { findIdLayoutRoute } from './index';
+import FindIdCompletePage from '@/pages/Auth/FindIdCompletePage/FindIdCompletePage';
 
 export const findIdCompleteRoute = createRoute({
-  getParentRoute: () => findIdRoute,
+  getParentRoute: () => findIdLayoutRoute,
   path: 'complete',
   component: FindIdCompletePage,
-  validateSearch: search => ({
-    email: String(search.email ?? ''),
-  }),
 });

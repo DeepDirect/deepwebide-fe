@@ -1,12 +1,15 @@
-import { createRoute } from '@tanstack/react-router';
+import { createRoute, Outlet } from '@tanstack/react-router';
 import { authLayoutRoute } from '../auth-layout';
-import FindIdPage from '@/pages/FindIdPage/FindIdPage';
-import { findIdCompleteRoute } from './complete';
+import FindIdPage from '@/pages/Auth/FindIdPage/FindIdPage';
 
-export const findIdRoute = createRoute({
+export const findIdLayoutRoute = createRoute({
   getParentRoute: () => authLayoutRoute,
   path: 'find-id',
-  component: FindIdPage,
+  component: () => <Outlet />,
 });
 
-findIdRoute.addChildren([findIdCompleteRoute]);
+export const findIdFormRoute = createRoute({
+  getParentRoute: () => findIdLayoutRoute,
+  path: '/',
+  component: FindIdPage,
+});

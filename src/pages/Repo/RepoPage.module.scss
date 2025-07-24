@@ -1,0 +1,68 @@
+@use '@/styles/variables' as *;
+
+.repoPage {
+  display: flex;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+// 파일 구조 섹션 (항상 전체 너비의 25%)
+.fileSection {
+  flex: 0 0 25%;
+  box-sizing: border-box;
+  min-width: 0;
+  border-right: 1px solid #e9ecef;
+  overflow: hidden;
+  background-color: #f8f9fa;
+}
+
+// 에디터 + 터미널 그룹 (항상 전체 너비의 75%)
+.editorGroup {
+  display: flex;
+  flex: 0 0 75%;
+  flex-direction: column;
+  box-sizing: border-box;
+  min-width: 0;
+  height: 100%; // 전체 높이 사용
+  overflow: hidden;
+}
+
+// 코드 에디터 (항상 그룹 높이의 70%)
+.editorSection {
+  flex: 0 0 70%;
+  box-sizing: border-box;
+  min-height: 0;
+  border-bottom: 1px solid #e9ecef;
+  overflow: hidden;
+  background-color: #ffffff;
+}
+
+// 터미널 (항상 그룹 높이의 30%)
+.terminalSection {
+  flex: 0 0 30%;
+  box-sizing: border-box;
+  min-height: 0;
+  overflow: hidden;
+  background-color: #343a40;
+}
+
+@media screen and (width <= 769px) {
+  .fileSection {
+    display: none;
+  }
+
+  .editorGroup {
+    flex: 1;
+    width: 100%;
+  }
+
+  .editorSection {
+    flex: 1;
+  }
+
+  .terminalSection {
+    flex: 0 0 150px;
+  }
+}

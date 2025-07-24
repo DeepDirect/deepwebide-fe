@@ -1,6 +1,6 @@
 import { Outlet } from '@tanstack/react-router';
 import styles from './AuthLayout.module.scss';
-import Header from '@/components/Header/Header';
+import Header from '@/components/organisms/Header/Header';
 
 const AuthLayout = () => {
   return (
