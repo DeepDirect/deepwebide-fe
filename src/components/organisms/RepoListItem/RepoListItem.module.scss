@@ -2,6 +2,7 @@
 @use '@/styles/mixins' as *;
 
 .repositoryWrapper {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -25,6 +26,15 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+
+    &.nameButton {
+      cursor: pointer;
+      user-select: none;
+
+      &:hover {
+        font-weight: bold;
+      }
+    }
   }
 
   .infoContainer {
@@ -35,12 +45,20 @@
     flex-flow: row nowrap;
 
     .infoWrapper {
+      &.updateWrapper {
+        white-space: nowrap;
+      }
+
       @include desktop {
         display: flex;
+        align-items: center;
         flex-flow: row wrap;
       }
 
       .updateTitle {
+        margin-right: 3px;
+        font-size: $font-size-xxsmall;
+
         @include mobile {
           display: none;
         }

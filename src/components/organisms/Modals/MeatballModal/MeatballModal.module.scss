@@ -11,7 +11,7 @@
 }
 
 .content {
-  position: fixed;
+  position: absolute;
   z-index: $modal-z-index;
   width: max-content;
   max-width: 480px;

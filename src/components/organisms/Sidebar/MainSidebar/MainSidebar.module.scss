@@ -9,7 +9,7 @@
   justify-content: space-between;
   box-sizing: border-box;
   width: 44px;
-  height: 100vh;
+  height: calc(100vh - 56px);
   padding: 12px 0;
   background-color: #ffffff;
   box-shadow: vars.$shadow;
@@ -37,6 +37,12 @@
   &:hover {
     border: 1px solid vars.$blue-3;
     color: vars.$blue-3;
+  }
+
+  &.active {
+    border: 1px solid vars.$blue-3;
+    color: vars.$blue-3;
+    cursor: default;
   }
 
   .iconImage {
