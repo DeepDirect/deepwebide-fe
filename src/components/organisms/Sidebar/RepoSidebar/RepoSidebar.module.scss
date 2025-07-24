@@ -9,7 +9,7 @@
   align-items: center;
   justify-content: space-between;
   width: 44px;
-  height: calc(100vh - 82px); // top이랑 bottom padding 된 높이인 24px까지 제외
+  height: calc(100vh - 80px); // top 56px + 상하 padding 24px까지 제외
   padding: 12px 0;
   background-color: vars.$gray-9;
 
