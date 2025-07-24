@@ -95,10 +95,10 @@ const SharedWithMeRepoPage = () => {
     pageSize: 5,
   }); // TODO: api 연동 후 받은 데이터로 변경
 
-  const onPageChange = (page: number) => {
+  const handlePageChange = (page: number) => {
     setPagination(prev => ({ ...prev, current: page }));
   };
-  const onFavoriteClicked = (id: number) => {
+  const handleFavoriteClick = (id: number) => {
     console.log(`Favorite clicked for repository ID: ${id}`);
   };
 
@@ -118,7 +118,7 @@ const SharedWithMeRepoPage = () => {
             key={repo.repositoryId}
             isSharedMe={isSharedMe}
             info={repo}
-            onFavoriteClicked={onFavoriteClicked}
+            handleFavoriteClick={handleFavoriteClick}
           />
         ))}
       </div>
@@ -128,7 +128,7 @@ const SharedWithMeRepoPage = () => {
           maxVisiblePages={5}
           totalPages={pagination.total}
           currentPage={pagination.current}
-          onPageChange={onPageChange}
+          handlePageChange={handlePageChange}
         />
       </div>
     </div>

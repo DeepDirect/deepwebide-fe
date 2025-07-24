@@ -93,10 +93,10 @@ const SharedByMeRepoPage = () => {
     pageSize: 5,
   }); // TODO: api 연동 후 받은 데이터로 변경
 
-  const onPageChange = (page: number) => {
+  const handlePageChange = (page: number) => {
     setPagination(prev => ({ ...prev, current: page }));
   };
-  const onFavoriteClicked = (id: number) => {
+  const handleFavoriteClick = (id: number) => {
     console.log(`Favorite clicked for repository ID: ${id}`);
   };
 
@@ -112,7 +112,11 @@ const SharedByMeRepoPage = () => {
 
       <div className={styles.repositoriesWrapper}>
         {tempList.map(repo => (
-          <RepoListItem key={repo.repositoryId} info={repo} onFavoriteClicked={onFavoriteClicked} />
+          <RepoListItem
+            key={repo.repositoryId}
+            info={repo}
+            handleFavoriteClick={handleFavoriteClick}
+          />
         ))}
       </div>
 
@@ -121,7 +125,7 @@ const SharedByMeRepoPage = () => {
           maxVisiblePages={5}
           totalPages={pagination.total}
           currentPage={pagination.current}
-          onPageChange={onPageChange}
+          handlePageChange={handlePageChange}
         />
       </div>
     </div>
