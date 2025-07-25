@@ -35,23 +35,43 @@ button {
   cursor: pointer;
 }
 
-// light / dark mode header
+// light / dark mode CSS variables
 :root {
-  // light mode
+  // light mode - header
   --header-bg: #{variables.$white-2};
   --header-text: #{variables.$gray-5};
   --header-path-bg: #{variables.$gray-10};
   --header-chat-bg: #{variables.$white-2};
   --header-chat-icon: #{variables.$gray-5};
   --header-username: #{variables.$gray-5};
+
+  // light mode - resizer & file section
+  --resizer-bg: transparent;
+  --resizer-hover-bg: #{variables.$blue-4};
+  --resizer-active-bg: #{variables.$blue-3};
+  --resizer-border: #{variables.$gray-8};
+  --resizer-handle: #{variables.$gray-6};
+  --resizer-active-handle: #{variables.$white-2};
+  --resizer-shadow: rgb(0 0 0 / 8%);
+  --file-section-bg: #{variables.$white-1};
 }
 
 .dark {
-  // dark mode
+  // dark mode - header
   --header-bg: #{variables.$gray-1};
   --header-text: #{variables.$white-2};
   --header-path-bg: #{variables.$gray-3};
   --header-chat-bg: #{variables.$gray-5};
   --header-chat-icon: #{variables.$white-2};
   --header-username: #{variables.$white-1};
+
+  // dark mode - resizer & file section
+  --resizer-bg: transparent;
+  --resizer-hover-bg: #{variables.$gray-4};
+  --resizer-active-bg: #{variables.$blue-3};
+  --resizer-border: #{variables.$gray-4};
+  --resizer-handle: #{variables.$gray-6};
+  --resizer-active-handle: #{variables.$gray-1};
+  --resizer-shadow: rgb(255 255 255 / 5%);
+  --file-section-bg: #{variables.$gray-2};
 }
