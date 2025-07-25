@@ -22,5 +22,15 @@
     ".env.example",
     ".prettierignore"
   ],
-  "words": ["eslint", "stylelint", "prettierrc", "pnpm", "vite", "zustand", "tanstack", "Avenir"]
+  "words": [
+    "eslint",
+    "stylelint",
+    "prettierrc",
+    "pnpm",
+    "vite",
+    "zustand",
+    "tanstack",
+    "Avenir",
+    "Resizer"
+  ]
 }
