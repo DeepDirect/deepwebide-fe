@@ -13,6 +13,13 @@ import { SharedWithMeRepoRoute } from './routes/main/shared-with-me-repo';
 import { repoLayoutRoute, repoPageRoute } from './routes/$repoId';
 import { signUpLayoutRoute, signUpFormRoute } from './routes/auth/sign-up';
 import { signUpCompleteRoute } from './routes/auth/sign-up/complete';
+import {
+  settingsLayoutRoute,
+  settingsIndexRoute,
+  privateSettingsRoute,
+  sharedByMeSettingsRoute,
+  sharedWithMeSettingsRoute,
+} from './routes/settings/settings';
 
 export const routeTree = rootRoute.addChildren([
   landingRoute,
@@ -29,4 +36,10 @@ export const routeTree = rootRoute.addChildren([
     SharedWithMeRepoRoute,
   ]),
   repoLayoutRoute.addChildren([repoPageRoute]),
+  settingsLayoutRoute.addChildren([
+    settingsIndexRoute,
+    privateSettingsRoute,
+    sharedByMeSettingsRoute,
+    sharedWithMeSettingsRoute,
+  ]),
 ]);

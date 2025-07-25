@@ -76,7 +76,7 @@ $shadow-under: 0 2px 4px rgb(0 0 0 / 25%);
 
 // Modal Variables (모달 변수들)
 // Modal Background
-$modal-overlay-bg: rgb(0 0 0 / 50%); // 반투명 검은색 배경
+$modal-overlay-bg: rgb(0 0 0 / 30%); // 반투명 검은색 배경
 $modal-content-bg: $white-2;
 
 // Modal Sizes
@@ -87,8 +87,8 @@ $modal-border-radius: 10px;
 
 // Modal Shadows
 $modal-shadow:
-  23px 23px 70px #cccccc,
-  -23px -23px 70px #ffffff;
+  0 10px 25px rgb(0 0 0 / 15%),
+  0 20px 48px rgb(0 0 0 / 15%);
 
 // Modal Spacing
 $modal-title-margin-bottom: 3rem;
