@@ -45,31 +45,33 @@ const SharedWithMeSettingsPage = () => {
         <h2 className={styles.title}>SETTINGS</h2>
       </div>
 
-      <div className={styles.sectionLabel}>
-        <div className={styles.label}>
-          <InfoIcon className={styles.icon} />
-          <span>INFO</span>
+      <div className={styles.sectionsWrapper}>
+        <div className={styles.sectionLabel}>
+          <div className={styles.label}>
+            <InfoIcon className={styles.icon} />
+            <span>INFO</span>
+          </div>
+          <div className={styles.label}>
+            <MemberIcon className={styles.icon} />
+            <span>MEMBER</span>
+          </div>
+          <div className={styles.label}>
+            <ShareIcon className={styles.icon} />
+            <span>SHARE</span>
+          </div>
         </div>
-        <div className={styles.label}>
-          <MemberIcon className={styles.icon} />
-          <span>MEMBER</span>
+
+        <div className={styles.contentArea}>
+          <InfoSection
+            name="공유받은 레포 프로젝트13"
+            createdAt="2025-07-18T13:10:00Z"
+            updatedAt="2025-07-21T13:10:00Z"
+          />
+
+          <MemberSection members={members} />
+
+          <ShareSection shareLink="https://example.com/shared-link" />
         </div>
-        <div className={styles.label}>
-          <ShareIcon className={styles.icon} />
-          <span>SHARE</span>
-        </div>
-      </div>
-
-      <div className={styles.contentArea}>
-        <InfoSection
-          name="공유받은 레포 프로젝트13"
-          createdAt="2025-07-18T13:10:00Z"
-          updatedAt="2025-07-21T13:10:00Z"
-        />
-
-        <MemberSection members={members} />
-
-        <ShareSection shareLink="https://example.com/shared-link" />
       </div>
     </div>
   );
