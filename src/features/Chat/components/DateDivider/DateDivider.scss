@@ -1,0 +1,22 @@
+@use '@/styles/variables' as *;
+
+.date-divider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px;
+}
+
+.date-divider__text {
+  position: relative;
+  padding: 0 15px;
+  font-size: $font-size-xxxsmall;
+  font-weight: $font-weight-medium;
+  color: $black-1;
+  background-color: transparent;
+
+  .dark & {
+    color: $white-2;
+  }
+}

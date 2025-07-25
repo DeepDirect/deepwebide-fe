@@ -1,4 +1,5 @@
 import { Outlet } from '@tanstack/react-router';
+import { useState } from 'react';
 import styles from './RepoLayout.module.scss';
 import clsx from 'clsx';
 
@@ -6,18 +7,35 @@ import Header from '@/components/organisms/Header/Header';
 import { Sidebar } from '@/components/organisms/Sidebar/RepoSidebar/RepoSidebar';
 import { useThemeStore } from '@/stores/themeStore';
 import { useMockRepoInitializer } from '@/hooks/useMockRepoInitializer';
+import Chat from '@/features/Chat/Chat';
 
 export function RepoLayout() {
+  const [isChatOpen, setIsChatOpen] = useState(false);
+
   useMockRepoInitializer();
   const { isDarkMode } = useThemeStore();
 
+  const handleChatToggle = () => {
+    setIsChatOpen(prev => !prev);
+  };
+
   return (
-    <div className={clsx(styles.RepoLayout, { [styles.RepoLayoutDark]: isDarkMode })}>
-      <Header variant="repo" />
+    <div
+      className={clsx(styles.RepoLayout, {
+        [styles.RepoLayoutDark]: isDarkMode,
+        [styles.RepoLayoutWithChat]: isChatOpen,
+      })}
+    >
+      <Header variant="repo" onChatButtonClick={handleChatToggle} />
       <Sidebar />
       <main className="content-area">
         <Outlet />
       </main>
+      {isChatOpen && (
+        <div className={styles.chatContainer}>
+          <Chat />
+        </div>
+      )}
     </div>
   );
 }
