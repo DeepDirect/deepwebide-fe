@@ -2,7 +2,11 @@ import styles from './RepoHeader.module.scss';
 import MessageTextIcon from '@/assets/icons/message-text.svg?react';
 import NoteMultipleIcon from '@/assets/icons/note-multiple.svg?react';
 
-const RepoHeader = () => {
+interface RepoHeaderProps {
+  onChatButtonClick?: () => void;
+}
+
+const RepoHeader = ({ onChatButtonClick }: RepoHeaderProps) => {
   return (
     <div className={styles.container}>
       <div className={styles.center}>
@@ -11,7 +15,7 @@ const RepoHeader = () => {
           <NoteMultipleIcon className={styles.icon} />
         </div>
 
-        <button className={styles.chatButton} onClick={() => console.log('채팅 열기')}>
+        <button className={styles.chatButton} onClick={onChatButtonClick}>
           <MessageTextIcon className={styles.icon} />
         </button>
       </div>

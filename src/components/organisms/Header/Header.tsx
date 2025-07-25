@@ -7,9 +7,10 @@ import Toggle from '@/components/atoms/Toggle/Toggle';
 
 type HeaderProps = {
   variant: 'auth' | 'main' | 'repo';
+  onChatButtonClick?: () => void;
 };
 
-const Header = ({ variant }: HeaderProps) => {
+const Header = ({ variant, onChatButtonClick }: HeaderProps) => {
   return (
     <header className={styles.header}>
       <div className={styles.left}>
@@ -20,7 +21,7 @@ const Header = ({ variant }: HeaderProps) => {
 
       {variant === 'repo' && (
         <div className={styles.center}>
-          <RepoHeader />
+          <RepoHeader onChatButtonClick={onChatButtonClick} />
         </div>
       )}
 
