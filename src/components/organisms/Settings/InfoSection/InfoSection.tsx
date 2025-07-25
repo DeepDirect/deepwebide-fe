@@ -31,12 +31,12 @@ const InfoSection = ({ name, createdAt, updatedAt }: infoSectionProps) => {
 
         <div className={styles.label}>CREATED AT</div>
         <div className={styles.value}>
-          {dayjs(createdAt).locale('ko').format('YYYY-MM-DD HH:MM:ss')}
+          {dayjs(createdAt).locale('ko').format('YYYY년 MM월 DD일 HH시 MM분')}
         </div>
 
         <div className={styles.label}>UPDATED AT</div>
         <div className={styles.value}>
-          {dayjs(updatedAt).locale('ko').format('YYYY-MM-DD HH:MM:ss')}
+          {dayjs(updatedAt).locale('ko').format('YYYY년 MM월 DD일 HH시 MM분')}
         </div>
       </div>
     </section>
