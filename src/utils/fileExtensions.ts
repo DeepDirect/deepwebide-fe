@@ -1,7 +1,8 @@
 import codeIcon from '@/assets/icons/code.svg';
 import scriptIcon from '@/assets/icons/script.svg';
 import fileAltIcon from '@/assets/icons/file-alt.svg';
-import fileIcon from '@/assets/icons/file.svg';
+import notesIcon from '@/assets/icons/notes.svg';
+import fileOffIcon from '@/assets/icons/file-off.svg';
 import colorsSwatchIcon from '@/assets/icons/colors-swatch.svg';
 import articleIcon from '@/assets/icons/article.svg';
 import slidersIcon from '@/assets/icons/sliders.svg';
@@ -67,9 +68,9 @@ export const getFileIcon = (fileName: string): string => {
 
     // 기타
     md: articleIcon,
-    txt: fileIcon,
+    txt: notesIcon,
     html: codeIcon,
   };
 
-  return iconMap[extension || ''] || fileIcon;
+  return iconMap[extension || ''] || fileOffIcon;
 };
