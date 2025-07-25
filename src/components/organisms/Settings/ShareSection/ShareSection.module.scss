@@ -2,25 +2,47 @@
 @use '@/styles/mixins' as *;
 
 .shareSection {
-  max-width: 1000px;
-  min-width: 1000px;
   font-family: $font-family-silkscreen;
   color: $black-1;
   user-select: none;
 
   @include mobile {
-    max-width: 100%;
-    min-width: 0;
+    width: 100%;
+  }
+
+  .nameIcon {
+    width: 30px;
+    height: 30px;
   }
 
   .icon {
     width: 20px;
     height: 20px;
+    margin-left: 7px;
   }
 
-  .nameIcon {
-    width: $font-size-xlarge;
-    height: $font-size-xlarge;
+  .buttonIcon {
+    width: 24px;
+    height: 24px;
+    margin-right: 10px;
+  }
+
+  .labelIcon {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+  }
+
+  .orangeColor {
+    color: $orange;
+  }
+
+  .blueColor {
+    color: $blue-1;
+  }
+
+  .label {
+    width: 143px;
   }
 
   .sectionTitleWrapper {
@@ -35,128 +57,25 @@
     }
   }
 
-  .flex {
+  .itemWrapper {
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    gap: 0 2rem;
-    width: 50%;
+    width: 700px;
     height: 92px;
-    transition-duration: 0.5s;
-
-    &.entryCodeWrapper,
-    &.unshareWrapper {
-      width: 65%;
-    }
 
     @include mobile {
       gap: 1rem;
       width: 100%;
-      min-width: 0;
-      transition-duration: 0.5s;
+    }
 
-      &.entryCodeWrapper,
-      &.unshareWrapper {
+    &.entryCodeWrapper,
+    &.unshareWrapper {
+      width: 883px;
+
+      @include mobile {
         width: 100%;
-        transition-duration: 0.5s;
-      }
-
-      &.unshareWrapper {
-        color: $orange;
-      }
-    }
-  }
-
-  .label {
-    font-size: $font-size-small;
-    text-align: left;
-    white-space: nowrap;
-
-    &.textOrange {
-      color: $orange;
-    }
-
-    &.textBlue {
-      color: $blue-1;
-    }
-  }
-
-  .shareLinkWrapper {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    justify-content: flex-end;
-    font-size: $font-size-xsmall;
-    text-align: right;
-    white-space: nowrap;
-    word-break: break-all;
-
-    .labelWrapper {
-      @include label-icon-row;
-
-      .iconLabel {
-        font-size: $font-size-xsmall;
-      }
-
-      .iconWrapper {
-        &:hover {
-          opacity: 1;
-          transform: scale(1.1);
-        }
-
-        .labelIcon {
-          width: $font-size-small;
-          height: $font-size-small;
-          cursor: pointer;
-        }
-      }
-
-      &.nameWrapper {
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        width: 100%;
-        font-size: $font-size-xsmall;
-
-        .editButton {
-          margin: 0;
-          margin-left: 1rem;
-          padding: 0;
-          background: none;
-
-          .icon {
-            width: 20px;
-            height: 20px;
-          }
-        }
-      }
-    }
-
-    .input {
-      box-sizing: border-box;
-      width: 100%;
-      max-width: 100%;
-      padding: 0.75rem 1rem;
-      border: 1px solid $gray-8;
-      border-radius: 6px;
-      overflow: hidden;
-      font-family: $font-family-primary;
-      font-size: $font-size-xsmall;
-      font-weight: $font-weight-regular;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      color: $black-1;
-      color: $gray-6;
-      background-color: $white-2;
-      background-color: $gray-10;
-      transition: all 0.2s ease;
-      cursor: default;
-      user-select: none;
-
-      &:focus {
-        border-color: $gray-8;
-        box-shadow: none;
       }
     }
   }
@@ -164,12 +83,59 @@
   .checkCodeWrapper {
     display: flex;
     align-items: center;
+    width: 338px;
     flex-flow: row nowrap;
   }
 
-  .buttonWrapper {
-    height: 3rem;
+  .linkWrapper {
+    width: 424px;
 
+    @include mobile {
+      width: 100%;
+    }
+
+    .labelWrapper {
+      display: flex;
+
+      .iconWrapper {
+        &:hover {
+          opacity: 1;
+          transform: scale(1.1);
+        }
+      }
+    }
+  }
+
+  .input {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 424px;
+    padding: 0.75rem 1rem;
+    border: 1px solid $gray-8;
+    border-radius: 6px;
+    overflow: hidden;
+    font-family: $font-family-primary;
+    font-size: $font-size-xsmall;
+    font-weight: $font-weight-regular;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: $gray-6;
+    background-color: $gray-10;
+    transition: all 0.2s ease;
+    cursor: default;
+    user-select: none;
+
+    @include mobile {
+      max-width: none;
+    }
+
+    &:focus {
+      border-color: $gray-8;
+      box-shadow: none;
+    }
+  }
+
+  .buttonWrapper {
     .reissueButton,
     .unshareButton,
     .shareButton {
@@ -177,32 +143,28 @@
       flex-direction: row;
       align-items: center;
       justify-content: center;
+      width: fit-content;
       padding: 12px 25px;
       font-size: $font-size-small;
+      white-space: nowrap;
       background: none;
-
-      .buttonIcon {
-        width: 24px;
-        height: 24px;
-        margin-right: 10px;
-      }
     }
+  }
 
-    .reissueButton,
-    .shareButton {
-      border: 1px solid $blue-1;
-      border-radius: 12px;
-      color: $blue-1;
-    }
+  .reissueButton,
+  .shareButton {
+    border: 1px solid $blue-1;
+    border-radius: 12px;
+    color: $blue-1;
+  }
 
-    .unshareButton {
-      border: 1px solid $orange;
-      border-radius: 12px;
-      color: $orange;
-    }
+  .unshareButton {
+    border: 1px solid $orange;
+    border-radius: 12px;
+    color: $orange;
+  }
 
-    .shareButton {
-      padding: 8px 25px;
-    }
+  .shareButton {
+    padding: 8px 25px;
   }
 }

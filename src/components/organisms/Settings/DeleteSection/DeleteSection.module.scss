@@ -2,15 +2,12 @@
 @use '@/styles/mixins' as *;
 
 .deleteSection {
-  max-width: 1000px;
-  min-width: 1000px;
   font-family: $font-family-silkscreen;
   color: $black-1;
   user-select: none;
 
   @include mobile {
-    max-width: 100%;
-    min-width: 0;
+    width: 100%;
   }
 
   .icon {
@@ -42,7 +39,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 0 2rem;
-    width: 50%;
+    width: 700px;
     height: 92px;
     transition-duration: 0.5s;
 

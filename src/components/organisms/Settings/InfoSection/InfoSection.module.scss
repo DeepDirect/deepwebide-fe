@@ -2,15 +2,12 @@
 @use '@/styles/mixins' as *;
 
 .infoSection {
-  max-width: 1000px;
-  min-width: 1000px;
   font-family: $font-family-silkscreen;
   color: $black-1;
   user-select: none;
 
   @include mobile {
-    max-width: 100%;
-    min-width: 0;
+    width: 100%;
   }
 
   .nameIcon {
@@ -35,7 +32,7 @@
     align-items: center;
     grid-template-columns: 0.3fr 1fr;
     gap: 0 2rem;
-    width: 50%;
+    width: 700px;
     transition-duration: 0.5s;
     grid-auto-rows: 74px;
 
@@ -68,7 +65,7 @@
 
       .editButton {
         margin: 0;
-        margin-left: 1rem;
+        margin-left: 28px;
         padding: 0;
         background: none;
 

@@ -28,26 +28,24 @@ const ShareSection = ({ shareLink, onShareLinkCopy }: shareSectionProps) => {
       </div>
 
       {/* 링크 공유 */}
-      <div className={styles.flex}>
+      <div className={styles.itemWrapper}>
         <div className={styles.label}>SHARE LINK</div>
 
-        <div className={styles.shareLinkWrapper}>
+        <div className={styles.linkWrapper}>
           <div className={styles.labelWrapper}>
             <span className={styles.iconLabel}>공유 링크</span>
 
             <div className={styles.iconWrapper} onClick={handleShareLinkCopy}>
-              <CopyIcon className={styles.labelIcon} />
+              <CopyIcon className={styles.icon} />
             </div>
           </div>
 
-          <div>
-            <input type="text" value={shareLink} readOnly className={styles.input} />
-          </div>
+          <input type="text" value={shareLink} readOnly className={styles.input} />
         </div>
       </div>
 
       {/* 입장 코드 */}
-      <div className={`${styles.flex} ${styles.entryCodeWrapper}`}>
+      <div className={`${styles.itemWrapper} ${styles.entryCodeWrapper}`}>
         <div className={styles.label}>ENTRY CODE</div>
 
         <div className={styles.checkCodeWrapper}>
@@ -69,8 +67,8 @@ const ShareSection = ({ shareLink, onShareLinkCopy }: shareSectionProps) => {
       </div>
 
       {/* 링크 공유 취소 */}
-      <div className={`${styles.flex} ${styles.unshareWrapper}`}>
-        <div className={`${styles.label} ${styles.textOrange}`}>ENTRY CODE</div>
+      <div className={`${styles.itemWrapper} ${styles.unshareWrapper}`}>
+        <div className={`${styles.label} ${styles.orangeColor}`}>UNSHARE</div>
 
         <div className={styles.buttonWrapper}>
           <button
@@ -86,8 +84,8 @@ const ShareSection = ({ shareLink, onShareLinkCopy }: shareSectionProps) => {
       </div>
 
       {/* 레포 떠나기 */}
-      <div className={`${styles.flex}`}>
-        <div className={`${styles.label} ${styles.textOrange}`}>LEAVE HERE</div>
+      <div className={`${styles.itemWrapper}`}>
+        <div className={`${styles.label} ${styles.orangeColor}`}>LEAVE HERE</div>
 
         <div className={styles.buttonWrapper}>
           <button
@@ -103,8 +101,8 @@ const ShareSection = ({ shareLink, onShareLinkCopy }: shareSectionProps) => {
       </div>
 
       {/* 공유하기 */}
-      <div className={`${styles.flex}`}>
-        <div className={`${styles.label} ${styles.textBlue}`}>SHARE</div>
+      <div className={`${styles.itemWrapper}`}>
+        <div className={`${styles.label} ${styles.blueColor}`}>SHARE</div>
 
         <div className={styles.buttonWrapper}>
           <button
