@@ -1,4 +1,3 @@
-// src/pages/Repo/RepoPage.module.scss
 @use '@/styles/variables' as *;
 
 .repoPage {
@@ -8,8 +7,8 @@
   height: 100%;
   overflow: hidden;
 
-  // 리사이징 중일 때 전체 컨테이너 스타일
-  &.resizing {
+  // 수평 리사이징 중일 때 전체 컨테이너 스타일
+  &.horizontalResizing {
     cursor: col-resize;
     user-select: none;
 
@@ -17,7 +16,7 @@
       pointer-events: none; // 리사이징 중 다른 요소들의 이벤트 방지
     }
 
-    .resizer {
+    .horizontalResizer {
       background-color: var(--resizer-active-bg);
     }
   }
@@ -53,9 +52,12 @@
 .resizer {
   position: relative;
   flex-shrink: 0;
-  width: 6px;
   background-color: var(--resizer-bg);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.horizontalResizer {
+  width: 6px;
   cursor: col-resize;
 
   &::before {
@@ -90,30 +92,80 @@
   }
 }
 
+.verticalResizer {
+  width: 100%;
+  height: 6px;
+  cursor: row-resize;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 2px;
+    border-top: 1px dotted var(--resizer-handle);
+    border-bottom: 1px dotted var(--resizer-handle);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    transform: translate(-50%, -50%);
+  }
+
+  &:hover {
+    background-color: var(--resizer-hover-bg);
+
+    &::before {
+      opacity: 1;
+    }
+  }
+
+  &:active {
+    background-color: var(--resizer-active-bg);
+
+    &::before {
+      border-color: var(--resizer-active-handle);
+      opacity: 1;
+    }
+  }
+}
+
 // 에디터 + 터미널 그룹 (동적 너비)
 .editorGroup {
   display: flex;
   flex-direction: column;
-  flex-shrink: 0; // NOTE: 크기 조절 시 축소되지 않도록
+  flex-shrink: 0; // 크기 조절 시 축소되지 않도록
   box-sizing: border-box;
   min-width: 0;
   height: 100%;
   overflow: hidden;
+
+  // 수직 리사이징 중일 때 스타일
+  &.verticalResizing {
+    cursor: row-resize;
+    user-select: none;
+
+    * {
+      pointer-events: none;
+    }
+
+    .verticalResizer {
+      background-color: var(--resizer-active-bg);
+    }
+  }
 }
 
 // 코드 에디터
 .editorSection {
-  flex: 0 0 70%;
+  flex-shrink: 0;
   box-sizing: border-box;
   min-height: 0;
-  border-bottom: 1px solid #e9ecef;
   overflow: hidden;
   background-color: #ffffff;
 }
 
 // 터미널
 .terminalSection {
-  flex: 0 0 30%;
+  flex-shrink: 0;
   box-sizing: border-box;
   min-height: 0;
   overflow: hidden;
@@ -125,7 +177,7 @@
     display: none;
   }
 
-  .resizer {
+  .horizontalResizer {
     display: none;
   }
 
@@ -134,10 +186,14 @@
   }
 
   .editorSection {
-    flex: 1;
+    height: calc(100% - 150px) !important; // 터미널 높이 고정
+  }
+
+  .verticalResizer {
+    display: none;
   }
 
   .terminalSection {
-    flex: 0 0 150px;
+    height: 150px !important; // 모바일에서 터미널 높이 고정
   }
 }
