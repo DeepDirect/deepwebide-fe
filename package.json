@@ -28,6 +28,7 @@
     "axios": "^1.10.0",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.13",
+    "monaco-editor": "^0.52.2",
     "pixelarticons": "^1.8.1",
     "radix-ui": "^1.4.2",
     "react": "^19.1.0",

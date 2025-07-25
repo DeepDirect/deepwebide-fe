@@ -47,6 +47,9 @@ importers:
       dayjs:
         specifier: ^1.11.13
         version: 1.11.13
+      monaco-editor:
+        specifier: ^0.52.2
+        version: 0.52.2
       pixelarticons:
         specifier: ^1.8.1
         version: 1.8.1
