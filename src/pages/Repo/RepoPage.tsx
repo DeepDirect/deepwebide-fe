@@ -1,6 +1,7 @@
 import { useParams, useSearch } from '@tanstack/react-router';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useTabStore } from '@/stores/tabStore';
+import { useResizer } from '@/hooks/useResizer';
 import styles from './RepoPage.module.scss';
 import TabBar from '@/components/organisms/TabBar/TabBar';
 
@@ -11,6 +12,18 @@ export function RepoPage() {
   const filePath = search.file;
 
   const { openTabs, activateTab } = useTabStore();
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const {
+    width: fileSectionWidth,
+    isResizing,
+    startResize,
+  } = useResizer({
+    initialWidth: 25,
+    minWidth: 10,
+    maxWidth: 50,
+    containerRef,
+  });
 
   useEffect(() => {
     if (filePath && repoId) {
@@ -33,12 +46,17 @@ export function RepoPage() {
   }, [filePath, repoId, openTabs, activateTab]);
 
   return (
-    <div className={styles.repoPage}>
+    <div ref={containerRef} className={`${styles.repoPage} ${isResizing ? styles.resizing : ''}`}>
       {/* 파일 구조 섹션 */}
-      <div className={styles.fileSection}></div>
+      <div className={styles.fileSection} style={{ width: `${fileSectionWidth}%` }}>
+        {/* 파일 트리 내용 */}
+      </div>
+
+      {/* 리사이저 */}
+      <div className={styles.resizer} onMouseDown={startResize} />
 
       {/* 에디터 + 터미널 그룹 */}
-      <div className={styles.editorGroup}>
+      <div className={styles.editorGroup} style={{ width: `${100 - fileSectionWidth}%` }}>
         {/* 코드 에디터 */}
         <div className={styles.editorSection}>
           <TabBar repoId={repoId} />
