@@ -47,7 +47,7 @@ button {
 
   // light mode - resizer & file section
   --resizer-bg: transparent;
-  --resizer-hover-bg: #{variables.$blue-4};
+  --resizer-hover-bg: #60a5fa;
   --resizer-active-bg: #{variables.$blue-3};
   --resizer-border: #{variables.$gray-8};
   --resizer-handle: #{variables.$gray-6};
@@ -67,7 +67,7 @@ button {
 
   // dark mode - resizer & file section
   --resizer-bg: transparent;
-  --resizer-hover-bg: #{variables.$gray-4};
+  --resizer-hover-bg: #{variables.$gray-7};
   --resizer-active-bg: #{variables.$blue-3};
   --resizer-border: #{variables.$gray-4};
   --resizer-handle: #{variables.$gray-6};
