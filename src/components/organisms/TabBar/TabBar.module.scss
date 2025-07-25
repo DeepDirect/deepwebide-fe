@@ -3,31 +3,121 @@
 .tabBar {
   display: flex;
   height: 40px;
-  padding: 0 8px;
+  padding: 0;
+  border-bottom: 1px solid $gray-8;
   overflow-x: auto;
   white-space: nowrap;
   background-color: $gray-9;
+
+  // 스크롤바 스타일링
+  &::-webkit-scrollbar {
+    height: 3px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: $gray-9;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 3px;
+    background: $gray-6;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: $gray-5;
+  }
 }
 
 .tab {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 9px;
-  width: 150px;
+  justify-content: space-between;
+  gap: 8px;
+  max-width: 200px;
+  min-width: 120px;
+  padding: 0 16px;
+  border-right: 1px solid $gray-8;
+  font-size: $font-size-xxsmall;
+  font-weight: $font-weight-medium;
+  color: $gray-5;
   background-color: $gray-10;
-}
-
-.tab:hover {
+  transition: all 0.2s ease;
   cursor: pointer;
+  user-select: none;
+
+  &:hover {
+    color: $gray-2;
+    background-color: $gray-8;
+  }
+
+  &:first-child {
+    border-left: none;
+  }
 }
 
 .active {
-  background-color: $white-1;
+  border-bottom: 2px solid $orange;
+  color: $black-1;
+  background-color: $white-2;
+
+  &:hover {
+    color: $black-1;
+    background-color: $white-2;
+  }
+}
+
+.tabContent {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.fileIcon {
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+
+  // 픽셀아트 아이콘의 선명함을 위해
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+.tabName {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .closeBtn {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: none;
+  border-radius: 3px;
   background: transparent;
+  opacity: 0.6;
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    background: rgb(0 0 0 / 10%);
+    opacity: 1;
+  }
+
+  img {
+    width: 10px;
+    height: 10px;
+  }
 }
 
 .statusIndicator {
@@ -35,12 +125,52 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
+  transition: all 0.2s ease;
 
   &.saved {
-    background-color: $blue-3; // 파란색 (저장됨)
+    background-color: $blue-3;
+    opacity: 0.8;
   }
 
   &.dirty {
-    background-color: $orange; // 주황색 (수정됨)
+    background-color: $orange;
+    opacity: 1;
+    animation: pulse 2s infinite;
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.6;
+  }
+}
+
+// 반응형 디자인
+@media (width <= 768px) {
+  .tab {
+    max-width: 150px;
+    min-width: 100px;
+    padding: 0 12px;
+    font-size: 11px;
+  }
+
+  .closeBtn {
+    width: 16px;
+    height: 16px;
+
+    img {
+      width: 8px;
+      height: 8px;
+    }
+  }
+
+  .statusIndicator {
+    width: 5px;
+    height: 5px;
   }
 }
