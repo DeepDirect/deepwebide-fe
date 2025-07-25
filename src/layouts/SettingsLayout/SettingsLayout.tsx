@@ -11,11 +11,15 @@ const SettingsLayout = () => {
 
   return (
     <div className={styles.settingsLayout}>
-      <Header variant="auth" />
+      <header className={styles.header}>
+        <Header variant="auth" />
+      </header>
 
-      <Sidebar />
+      <aside className={styles.sidebar}>
+        <Sidebar />
+      </aside>
 
-      <main className="content-area">
+      <main className={styles.contentArea}>
         <Outlet />
       </main>
     </div>
