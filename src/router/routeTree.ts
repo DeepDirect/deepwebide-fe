@@ -15,6 +15,7 @@ import { signUpLayoutRoute, signUpFormRoute } from './routes/auth/sign-up';
 import { signUpCompleteRoute } from './routes/auth/sign-up/complete';
 import {
   settingsLayoutRoute,
+  settingsIndexRoute,
   privateSettingsRoute,
   sharedByMeSettingsRoute,
   sharedWithMeSettingsRoute,
