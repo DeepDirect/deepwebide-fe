@@ -4,7 +4,7 @@ import MemberIcon from '@/assets/icons/member.svg?react';
 import OwnerIcon from '@/assets/icons/owner.svg?react';
 import ScissorIcon from '@/assets/icons/scissor.svg?react';
 
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 
 type memberSectionProps = {
   members: {
@@ -33,17 +33,15 @@ const MemberSection = ({ members }: memberSectionProps) => {
       </div>
       <div className={styles.grid}>
         {sortedMembers.map(member => (
-          <>
-            <div key={member.userId} className={styles.label}>
-              {member.role.toUpperCase()}
-            </div>
+          <React.Fragment key={member.userId}>
+            <div className={styles.label}>{member.role.toUpperCase()}</div>
 
-            <div key={member.userId} className={styles.member}>
+            <div className={styles.member}>
               <img src={member.profileImageUrl} className={styles.profile} />
 
               <span className={styles.nickname}>{member.nickname}</span>
             </div>
-            <div key={member.userId} className={styles.iconWrapper}>
+            <div className={styles.iconWrapper}>
               {member.role === 'OWNER' ? (
                 <OwnerIcon className={styles.icon} />
               ) : (
@@ -52,7 +50,7 @@ const MemberSection = ({ members }: memberSectionProps) => {
                 </button>
               )}
             </div>
-          </>
+          </React.Fragment>
         ))}
       </div>
     </section>
