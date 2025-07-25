@@ -36,6 +36,7 @@ export const routeTree = rootRoute.addChildren([
   ]),
   repoLayoutRoute.addChildren([repoPageRoute]),
   settingsLayoutRoute.addChildren([
+    settingsIndexRoute,
     privateSettingsRoute,
     sharedByMeSettingsRoute,
     sharedWithMeSettingsRoute,
