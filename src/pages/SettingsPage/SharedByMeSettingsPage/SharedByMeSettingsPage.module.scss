@@ -2,51 +2,43 @@
 @use '@/styles/mixins' as *;
 
 .sharedByMeSettingsPage {
-  display: grid;
-  grid-template-rows: auto 1fr;
-  grid-template-columns: 228px 1fr;
-  box-sizing: border-box;
-  width: 100%;
-  height: 100%;
+  display: flex;
+  justify-content: flex-start;
+  min-width: fit-content;
   font-family: $font-family-silkscreen;
   text-align: left;
-  user-select: none;
-
-  @include mobile {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    justify-content: flex-start;
-  }
+  flex-flow: column nowrap;
 
   .icon {
     width: 24px;
     height: 24px;
   }
 
-  .redColor {
-    color: $red;
+  .titleIcon {
+    width: 35px;
+    height: 35px;
+  }
+
+  .sectionsWrapper {
+    display: flex;
   }
 
   .titleWrapper {
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     grid-column: 1 / span 2;
     gap: 10px;
     height: 68px;
     border-bottom: 1px solid $gray-1;
     font-size: $font-size-medium;
     flex-flow: row nowrap;
-
-    .titleIcon {
-      width: 35px;
-      height: 35px;
-    }
   }
 
   .sectionLabel {
     display: flex;
     flex-direction: column;
+    width: 228px;
     border-right: 1px solid $gray-1;
     font-size: $font-size-small;
 
@@ -68,10 +60,8 @@
     justify-content: flex-start;
     gap: 86px;
     box-sizing: border-box;
-    padding: 1rem;
     padding: 17px 34px;
     border-radius: 8px;
-    background-color: #f9f9f9;
     flex-flow: column nowrap;
 
     @include mobile {
