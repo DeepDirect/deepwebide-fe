@@ -7,8 +7,8 @@ export const mainLayoutRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: 'main',
   component: MainLayout,
-  beforeLoad: ctx => {
-    const { auth } = ctx.context as { auth: AuthState };
+  beforeLoad: ({ context, location }) => {
+    const { auth } = context as { auth: AuthState };
 
     if (!auth.isLoggedIn) {
       throw redirect({
