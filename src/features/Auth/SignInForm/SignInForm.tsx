@@ -9,6 +9,7 @@ import FormField from '@/components/molecules/FormField/FormField';
 import styles from './SignInForm.module.scss';
 import { useNavigate } from '@tanstack/react-router';
 import { useAuthStore } from '@/stores/authStore';
+import { useEffect } from 'react';
 
 export default function SignInForm() {
   const {
@@ -21,7 +22,7 @@ export default function SignInForm() {
     mode: 'onChange',
   });
   const navigate = useNavigate();
-  const { signin } = useAuthStore();
+  const { signin, isLoggedIn } = useAuthStore();
 
   const email = watch('email');
   const password = watch('password');
@@ -33,6 +34,10 @@ export default function SignInForm() {
     signin();
     navigate({ to: '/main' });
   };
+
+  useEffect(() => {
+    if (isLoggedIn) navigate({ to: '/main' });
+  }, [isLoggedIn]);
 
   const isButtonDisabled = isSubmitting || !email || !password;
 
