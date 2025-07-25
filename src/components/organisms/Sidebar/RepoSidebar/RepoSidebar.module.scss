@@ -1,6 +1,7 @@
 @use '@/styles/variables' as vars;
 
 .sidebar {
+  z-index: 9;
   display: flex;
   flex-direction: column;
   align-items: center;

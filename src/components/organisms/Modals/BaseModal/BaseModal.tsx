@@ -1,6 +1,7 @@
 import React from 'react';
 import { Dialog } from 'radix-ui';
 import Button from '@/components/atoms/Button/Button';
+import { useScrollLock } from '@/hooks/useScrollLock';
 import styles from './BaseModal.module.scss';
 
 export interface BaseModalProps {
@@ -46,6 +47,8 @@ const BaseModal: React.FC<BaseModalProps> = ({
   confirmButtonType = 'button',
   className = '',
 }) => {
+  useScrollLock(open);
+
   const handleConfirm = () => {
     if (onConfirm && !confirmDisabled) {
       onConfirm();
@@ -70,9 +73,7 @@ const BaseModal: React.FC<BaseModalProps> = ({
           {/* 헤더 - 고정 */}
           <div className={styles.header}>
             <Dialog.Title className={styles.title}>{title}</Dialog.Title>
-            <Dialog.Description className="srOnly">
-              {/* 접근성 경고 해결을 위한 빈 설명 */}
-            </Dialog.Description>
+            <Dialog.Description className="srOnly" />
           </div>
 
           {/* 내용 - 자유롭게 사용 */}
