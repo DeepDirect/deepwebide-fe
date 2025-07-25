@@ -31,10 +31,22 @@
 
 // 코드 에디터 (항상 그룹 높이의 70%)
 .editorSection {
-  flex: 0 70%;
+  display: flex;
+  flex: 0 0 70%;
+  flex-direction: column;
   box-sizing: border-box;
   min-height: 0;
   overflow: hidden;
+}
+
+.tabBarContainer {
+  flex: 0 0 auto;
+  height: 40px;
+  overflow: hidden;
+}
+
+.editorContainer {
+  flex: 1;
 }
 
 // 터미널 (항상 그룹 높이의 30%)

@@ -42,13 +42,17 @@ export function RepoPage() {
       <div className={styles.editorGroup}>
         {/* 코드 에디터 */}
         <div className={styles.editorSection}>
-          <TabBar repoId={repoId} />
-          <MonacoCollaborativeEditor
-            repoId={repoId}
-            enableCollaboration={true}
-            userId="current-user-id"
-            userName="사용자명"
-          />
+          <div className={styles.tabBarContainer}>
+            <TabBar repoId={repoId} />
+          </div>
+          <div className={styles.editorContainer}>
+            <MonacoCollaborativeEditor
+              repoId={repoId}
+              enableCollaboration={true}
+              userId="current-user-id"
+              userName="사용자명"
+            />
+          </div>
         </div>
 
         {/* 터미널 */}

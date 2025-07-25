@@ -302,8 +302,8 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
             scrollbar: {
               vertical: 'visible',
               horizontal: 'visible',
-              verticalScrollbarSize: 14,
-              horizontalScrollbarSize: 14,
+              verticalScrollbarSize: 13,
+              horizontalScrollbarSize: 13,
             },
           }}
         />

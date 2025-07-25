@@ -16,6 +16,20 @@
   height: 100%;
   padding-top: 1rem;
   overflow: hidden;
+
+  :global {
+    .monaco-scrollable-element > .scrollbar {
+      &.vertical .slider,
+      &.horizontal .slider {
+        border-radius: 6px !important;
+        background-color: $gray-6 !important;
+
+        &:hover {
+          background-color: $gray-5 !important;
+        }
+      }
+    }
+  }
 }
 
 // 로딩 상태
