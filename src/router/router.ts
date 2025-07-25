@@ -1,11 +1,19 @@
 import { createRouter } from '@tanstack/react-router';
 import { routeTree } from './routeTree';
-import { useAuthStore } from '@/stores/authStore';
+import type { AuthState } from '@/types/authState.types';
 
-const auth = useAuthStore.getState();
+/*
+이전 코드
 export const router = createRouter({
   routeTree,
   context: {
-    auth,
+    auth: undefined as unknown as AuthState,
   },
 });
+*/
+
+export const createAppRouter = (auth: AuthState) =>
+  createRouter({
+    routeTree,
+    context: { auth },
+  });
