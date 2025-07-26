@@ -1,9 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
-import { apiClient } from '@/api/client';
 import type { UseQueryOptions } from '@tanstack/react-query';
+
 import type { AxiosError } from 'axios';
-import type { RepositoryResponse, RepositoryRequest } from '@/schemas/main.schema';
-import type { RepositoryQueryURL } from '@/types/main.types';
+
+import { apiClient } from '@/api/client';
+
+import type { RepositoryRequest, RepositoryResponse } from '@/schemas/main.schema';
+import type { RepositoryQueryURL } from '@/types/apiEndpoints.types';
 
 const useGetRepository = (
   url: RepositoryQueryURL,
