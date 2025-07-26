@@ -1,0 +1,170 @@
+@use '@/styles/variables' as *;
+
+.collaborativeEditor {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  font-family: Monaco, Menlo, 'Ubuntu Mono', monospace;
+  background: $white-2;
+}
+
+// 에디터 컨테이너
+.editorContainer {
+  position: relative;
+  flex: 1;
+  height: 100%;
+  overflow: hidden;
+
+  :global {
+    .monaco-scrollable-element > .scrollbar {
+      &.vertical .slider,
+      &.horizontal .slider {
+        border-radius: 6px !important;
+        background-color: $gray-6 !important;
+
+        &:hover {
+          background-color: $gray-5 !important;
+        }
+      }
+    }
+  }
+}
+
+// 로딩 상태
+.editorLoading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  height: 100%;
+  color: $black-1;
+  background: $white-2;
+
+  span {
+    font-size: $font-size-xsmall;
+    font-weight: $font-weight-medium;
+    color: $gray-5;
+  }
+}
+
+.loadingSpinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid $gray-8;
+  border-top: 3px solid $blue-1;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+// 플레이스홀더
+.editorPlaceholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 40px;
+  color: $black-1;
+  background: $white-2;
+}
+
+.placeholderContent {
+  max-width: 400px;
+  text-align: center;
+}
+
+.placeholderIcon {
+  margin-bottom: 16px;
+  font-size: 48px;
+  opacity: 0.7;
+}
+
+.placeholderContent h3 {
+  margin: 0 0 12px;
+  font-size: $font-size-small;
+  font-weight: $font-weight-semi-bold;
+  color: $black-1;
+}
+
+.placeholderContent p {
+  margin: 0 0 8px;
+  font-size: $font-size-xsmall;
+  line-height: $default-line-height;
+  color: $gray-5;
+}
+
+.collaborationNote {
+  margin-top: 16px !important;
+  padding: 8px 12px;
+  border: 1px solid $blue-3;
+  border-radius: 4px;
+  font-size: $font-size-xxsmall !important;
+  font-weight: $font-weight-medium;
+  color: $orange !important;
+  background: $white-1;
+}
+
+.collaborationStatus {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  border-bottom: 1px solid $gray-8;
+  font-size: $font-size-xxsmall;
+  font-weight: $font-weight-medium;
+  color: $gray-5;
+  background: $white-1;
+
+  span:first-child {
+    color: $blue-1;
+  }
+
+  span:not(:first-child) {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 6px;
+    border: 1px solid $gray-8;
+    border-radius: 12px;
+    font-size: 11px;
+    background: $white-2;
+  }
+}
+
+// 반응형 디자인
+@media (width <= 768px) {
+  .collaborativeEditor {
+    height: 100%;
+  }
+
+  .editorContainer {
+    height: 100%;
+  }
+
+  .placeholderContent {
+    padding: 20px;
+
+    h3 {
+      font-size: $font-size-xsmall;
+    }
+
+    p {
+      font-size: $font-size-xxsmall;
+    }
+  }
+
+  .placeholderIcon {
+    font-size: 36px;
+  }
+}

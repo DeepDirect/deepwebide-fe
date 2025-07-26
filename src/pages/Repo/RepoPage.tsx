@@ -4,6 +4,7 @@ import { useTabStore } from '@/stores/tabStore';
 import { useResizer } from '@/hooks/useResizer';
 import styles from './RepoPage.module.scss';
 import TabBar from '@/components/organisms/TabBar/TabBar';
+import MonacoCollaborativeEditor from '@/components/organisms/CodeEditor/MonacoCollaborativeEditor';
 
 export function RepoPage() {
   const params = useParams({ strict: false });
@@ -83,9 +84,18 @@ export function RepoPage() {
         style={{ width: `calc(100% - ${fileSectionWidth})` }}
       >
         {/* 코드 에디터 */}
-        <div className={styles.editorSection} style={{ height: editorSectionHeight }}>
-          <TabBar repoId={repoId} />
-          <div>에디터</div>
+        <div className={styles.editorSection}>
+          <div className={styles.tabBarContainer}>
+            <TabBar repoId={repoId} />
+          </div>
+          <div className={styles.editorContainer}>
+            <MonacoCollaborativeEditor
+              repoId={repoId}
+              enableCollaboration={true}
+              userId="current-user-id"
+              userName="사용자명"
+            />
+          </div>
         </div>
 
         {/* 수직 리사이저 */}

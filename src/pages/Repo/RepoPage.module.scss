@@ -156,11 +156,22 @@
 
 // 코드 에디터
 .editorSection {
-  flex-shrink: 0;
+  display: flex;
+  flex: 0 0 70%;
+  flex-direction: column;
   box-sizing: border-box;
   min-height: 0;
   overflow: hidden;
-  background-color: #ffffff;
+}
+
+.tabBarContainer {
+  flex: 0 0 auto;
+  height: 40px;
+  overflow: hidden;
+}
+
+.editorContainer {
+  flex: 1;
 }
 
 // 터미널
