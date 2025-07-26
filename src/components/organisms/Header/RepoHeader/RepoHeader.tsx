@@ -25,14 +25,31 @@ const RepoHeader = ({ onChatButtonClick }: RepoHeaderProps) => {
           <NoteMultipleIcon className={styles.icon} />
         </div>
 
-        <button className={styles.chatButton} onClick={onChatButtonClick}>
+        <button
+          className={`${styles.chatButton} ${styles.centerChatButton}`}
+          onClick={onChatButtonClick}
+        >
           <MessageTextIcon className={styles.icon} />
         </button>
       </div>
 
       <div className={styles.right}>
-        <Toggle variant="theme" />
-        <UserProfile variant="darkModeSupport" />
+        <div className={styles.toggleWrapper}>
+          <Toggle variant="theme" />
+        </div>
+
+        <button
+          className={`${styles.chatButton} ${styles.rightChatButton}`}
+          onClick={onChatButtonClick}
+        >
+          <MessageTextIcon className={styles.icon} />
+        </button>
+
+        <UserProfile
+          variant="darkModeSupport"
+          showChatButton={true}
+          onChatButtonClick={onChatButtonClick}
+        />
       </div>
     </header>
   );

@@ -1,13 +1,20 @@
 import { useNavigate } from '@tanstack/react-router';
 import styles from './UserProfile.module.scss';
 import ProfileDropdown from '@/components/molecules/Modals/ProfileDropdown/ProfileDropdown';
+import MessageTextIcon from '@/assets/icons/message-text.svg?react';
 import moodHappyIcon from '@/assets/icons/mood-happy.svg';
 
 interface UserProfileProps {
   variant?: 'lightModeOnly' | 'darkModeSupport';
+  showChatButton?: boolean;
+  onChatButtonClick?: () => void;
 }
 
-const UserProfile = ({ variant = 'lightModeOnly' }: UserProfileProps) => {
+const UserProfile = ({
+  variant = 'lightModeOnly',
+  showChatButton = false,
+  onChatButtonClick,
+}: UserProfileProps) => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -19,6 +26,12 @@ const UserProfile = ({ variant = 'lightModeOnly' }: UserProfileProps) => {
 
   return (
     <div className={styles.profileArea}>
+      {showChatButton && (
+        <button className={styles.chatButton} onClick={onChatButtonClick}>
+          <MessageTextIcon className={styles.chatIcon} />
+        </button>
+      )}
+
       <ProfileDropdown onLogout={handleLogout}>
         <button
           className={`${styles.profileButton} ${variant === 'darkModeSupport' ? styles.darkModeSupport : styles.lightModeOnly}`}

@@ -18,7 +18,12 @@
 
 .left {
   display: flex;
+  align-items: center;
   justify-self: start;
+  width: 240px;
+  min-width: 0;
+  height: 56px;
+  padding-left: 0;
 }
 
 .center {
@@ -26,21 +31,43 @@
   align-items: center;
   justify-self: center;
   gap: 1rem;
+  min-width: 0;
+  height: 56px;
   white-space: nowrap;
+
+  // 1200px 이하에서 center 영역 숨기기
+  @media (width <= 1200px) {
+    display: none;
+  }
 }
 
 .pathArea {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  max-width: 400px;
+  min-width: 0;
   padding: 0.5rem 6rem;
   border-radius: 8px;
   font-size: $font-size-xsmall;
   color: var(--header-text);
   background-color: var(--header-path-bg);
+
+  @media (width <= 1400px) {
+    max-width: 300px;
+    padding: 0.5rem 3rem;
+  }
+}
+
+.path {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .icon {
+  flex-shrink: 0;
   width: 18px;
   height: 18px;
 }
@@ -48,6 +75,7 @@
 .chatButton {
   position: relative;
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   width: 29px;
@@ -60,9 +88,48 @@
   cursor: pointer;
 }
 
+// 중앙의 채팅 버튼 (큰 화면에서만 표시)
+.centerChatButton {
+  @media (width <= 1200px) {
+    display: none;
+  }
+}
+
+// 오른쪽 채팅 버튼 (중간 크기 화면에서만 표시)
+.rightChatButton {
+  display: none;
+
+  // 1200px 이하에서 표시 (center가 사라질 때)
+  @media (width <= 1200px) {
+    display: flex;
+  }
+
+  // 900px 이하에서 숨기기 (toggle이 사라질 때)
+  @media (width <= 900px) {
+    display: none;
+  }
+}
+
 .right {
   display: flex;
   align-items: center;
   justify-self: end;
   gap: 1rem;
+  min-width: 0;
+  height: 56px;
+
+  @media (width <= 768px) {
+    gap: 0.5rem;
+  }
+}
+
+.toggleWrapper {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+
+  // 900px 이하에서 toggle 숨기기
+  @media (width <= 900px) {
+    display: none;
+  }
 }
