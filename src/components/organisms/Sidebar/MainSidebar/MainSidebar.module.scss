@@ -12,8 +12,8 @@
   width: 44px;
   height: calc(100vh - 56px);
   padding: 12px 0;
-  background-color: #ffffff;
-  box-shadow: vars.$shadow;
+  border-right: 1px solid vars.$gray-8;
+  background-color: vars.$gray-10;
 }
 
 .top {
@@ -36,14 +36,21 @@
   cursor: pointer;
 
   &:hover {
-    border: 1px solid vars.$blue-3;
-    color: vars.$blue-3;
+    border: none;
+    color: vars.$white-1;
+    background-color: vars.$gray-5;
   }
 
   &.active {
-    border: 1px solid vars.$blue-3;
-    color: vars.$blue-3;
-    cursor: default;
+    border: none;
+    color: vars.$white-1;
+    background-color: vars.$orange;
+
+    &:hover {
+      border: none;
+      color: vars.$white-1;
+      background-color: vars.$gray-5;
+    }
   }
 
   .iconImage {

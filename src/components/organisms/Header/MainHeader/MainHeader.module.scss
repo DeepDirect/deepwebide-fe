@@ -12,17 +12,18 @@
   width: 100%;
   height: 56px;
   padding: 0 1rem;
-  background-color: var(--header-bg);
+  background-color: $white-2;
   box-shadow: $shadow-under;
 }
 
 .left {
   display: flex;
+  align-items: center;
   justify-self: start;
-}
-
-.center {
-  justify-self: center;
+  width: 240px;
+  min-width: 0;
+  height: 56px;
+  padding-left: 0;
 }
 
 .right {
@@ -30,4 +31,10 @@
   align-items: center;
   justify-self: end;
   gap: 1rem;
+  min-width: 0;
+  height: 56px;
+
+  @media (width <= 768px) {
+    gap: 0.5rem;
+  }
 }

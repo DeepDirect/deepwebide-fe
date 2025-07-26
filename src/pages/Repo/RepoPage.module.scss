@@ -7,13 +7,12 @@
   height: 100%;
   overflow: hidden;
 
-  // 수평 리사이징 중일 때 전체 컨테이너 스타일
   &.horizontalResizing {
     cursor: col-resize;
     user-select: none;
 
     * {
-      pointer-events: none; // 리사이징 중 다른 요소들의 이벤트 방지
+      pointer-events: none;
     }
 
     .horizontalResizer {
@@ -24,7 +23,7 @@
 
 .fileSection {
   position: relative;
-  flex-shrink: 0; // NOTE: 크기 조절 시 축소되지 않도록
+  flex-shrink: 0;
   box-sizing: border-box;
   min-width: 0;
   border-right: 1px solid var(--resizer-border);
@@ -57,7 +56,7 @@
 }
 
 .horizontalResizer {
-  z-index: 10; // 다른 요소들보다 위에 위치하도록
+  z-index: 10;
   width: 6px;
   cursor: col-resize;
 
@@ -97,36 +96,42 @@
     position: absolute;
     top: 0;
     left: -2px;
-    width: 10px; // 실제 6px보다 넓은 호버 영역
+    width: 10px;
     height: 100%;
     cursor: col-resize;
   }
 }
 
-// 에디터 + 터미널 그룹 (동적 너비, 최소 너비 460px)
 .editorGroup {
   display: flex;
   flex-direction: column;
-  flex-shrink: 0;
+  flex-shrink: 1;
   box-sizing: border-box;
   min-width: 460px;
   height: 100%;
   overflow: hidden;
+
+  @media (width <= 1400px) {
+    min-width: 420px;
+  }
+
+  @media (width <= 1200px) {
+    min-width: 380px;
+  }
 }
 
-// 코드 에디터 (터미널 높이를 제외한 나머지 공간)
 .editorSection {
   display: flex;
-  flex: 1; // 터미널을 제외한 나머지 공간 차지
+  flex: 1;
   flex-direction: column;
   box-sizing: border-box;
-  min-height: 0;
+  min-height: 200px;
   border-bottom: 1px solid #e9ecef;
   overflow: hidden;
   background-color: $white-1;
 
-  // 세로 공간이 부족할 때 에디터가 전체 높이를 차지
   @media screen and (height <= 600px) {
+    min-height: 150px;
     border-bottom: none;
   }
 }
@@ -139,16 +144,24 @@
 
 .editorContainer {
   flex: 1;
+  min-height: 0;
 }
 
 .terminalSection {
-  flex: 0 0 273px; // 고정 높이 200px
+  flex: 0 0 273px;
   box-sizing: border-box;
   overflow: hidden;
   background-color: #343a40;
 
-  // 세로 공간이 부족할 때 터미널 숨김
+  @media screen and (height <= 700px) {
+    flex: 0 0 200px;
+  }
+
   @media screen and (height <= 600px) {
+    flex: 0 0 150px;
+  }
+
+  @media screen and (height <= 500px) {
     display: none;
   }
 }
@@ -169,10 +182,11 @@
 
   .editorSection {
     flex: 1;
+    min-height: 200px;
     border-bottom: 1px solid #e9ecef;
   }
 
   .terminalSection {
-    flex: 0 0 273px;
+    flex: 0 0 200px;
   }
 }

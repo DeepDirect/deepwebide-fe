@@ -1,11 +1,11 @@
 import { Outlet } from '@tanstack/react-router';
 import styles from './AuthLayout.module.scss';
-import Header from '@/components/organisms/Header/Header';
+import AuthHeader from '@/components/organisms/Header/AuthHeader/AuthHeader';
 
 const AuthLayout = () => {
   return (
     <div className={styles.container}>
-      <Header variant="auth" />
+      <AuthHeader />
       <main className={styles.content}>
         <Outlet />
       </main>
