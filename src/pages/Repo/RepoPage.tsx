@@ -5,6 +5,7 @@ import { useResizer } from '@/hooks/useResizer';
 import styles from './RepoPage.module.scss';
 import TabBar from '@/components/organisms/TabBar/TabBar';
 import MonacoCollaborativeEditor from '@/components/organisms/CodeEditor/MonacoCollaborativeEditor';
+import CodeRunner from '@/features/CodeRunner/CodeRunner';
 
 export function RepoPage() {
   const params = useParams({ strict: false });
@@ -109,7 +110,7 @@ export function RepoPage() {
           className={styles.terminalSection}
           style={{ height: `calc(100% - ${editorSectionHeight})` }}
         >
-          터미널
+          <CodeRunner repoId={repoId} />
         </div>
       </div>
     </div>
