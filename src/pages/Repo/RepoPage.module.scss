@@ -157,8 +157,8 @@
 // 코드 에디터
 .editorSection {
   display: flex;
-  flex: 0 0 70%;
   flex-direction: column;
+  flex-shrink: 0;
   box-sizing: border-box;
   min-height: 0;
   overflow: hidden;
@@ -176,7 +176,7 @@
 
 // 터미널
 .terminalSection {
-  flex-shrink: 0;
+  flex: 1;
   box-sizing: border-box;
   min-height: 0;
   overflow: hidden;
