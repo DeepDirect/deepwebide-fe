@@ -1,14 +1,34 @@
 import { create } from 'zustand';
 import type { User, CollaborationState } from '@/types/collaboration.types';
 
+interface CursorPosition {
+  line: number;
+  column: number;
+  x?: number;
+  y?: number;
+}
+
+interface UserWithCursor extends User {
+  cursor?: CursorPosition;
+  selection?: {
+    startLine: number;
+    startColumn: number;
+    endLine: number;
+    endColumn: number;
+  };
+}
+
 interface CollaborationStore extends CollaborationState {
+  users: UserWithCursor[];
+
   // 상태 관리
-  setUsers: (users: User[]) => void;
-  addUser: (user: User) => void;
+  setUsers: (users: UserWithCursor[]) => void;
+  addUser: (user: UserWithCursor) => void;
   removeUser: (userId: string) => void;
-  updateUserCursor: (userId: string, cursor: { line: number; column: number }) => void;
+  updateUserCursor: (userId: string, cursor: CursorPosition) => void;
+  updateUserSelection: (userId: string, selection: UserWithCursor['selection']) => void;
   setConnectionStatus: (isConnected: boolean) => void;
-  setCurrentUser: (user: User) => void;
+  setCurrentUser: (user: UserWithCursor) => void;
 
   // 룸 관리
   joinRoom: (roomId: string) => void;
@@ -19,10 +39,10 @@ interface CollaborationStore extends CollaborationState {
 const USER_COLORS = [
   '#FF6B6B',
   '#4ECDC4',
-  '#45B7D1',
-  '#96CEB4',
   '#FFEAA7',
   '#DDA0DD',
+  '#45B7D1',
+  '#96CEB4',
   '#98D8C8',
   '#F7DC6F',
   '#AED6F1',
@@ -53,11 +73,11 @@ export const useCollaborationStore = create<CollaborationStore>((set, get) => ({
 
     if (existingUserIndex >= 0) {
       const updatedUsers = [...state.users];
-      updatedUsers[existingUserIndex] = user;
+      updatedUsers[existingUserIndex] = { ...updatedUsers[existingUserIndex], ...user };
       set({ users: updatedUsers });
     } else {
       const colorIndex = state.users.length % USER_COLORS.length;
-      const userWithColor = { ...user, color: USER_COLORS[colorIndex] };
+      const userWithColor = { ...user, color: user.color || USER_COLORS[colorIndex] };
       set({ users: [...state.users, userWithColor] });
     }
   },
@@ -70,6 +90,14 @@ export const useCollaborationStore = create<CollaborationStore>((set, get) => ({
   updateUserCursor: (userId, cursor) => {
     const state = get();
     const updatedUsers = state.users.map(user => (user.id === userId ? { ...user, cursor } : user));
+    set({ users: updatedUsers });
+  },
+
+  updateUserSelection: (userId, selection) => {
+    const state = get();
+    const updatedUsers = state.users.map(user =>
+      user.id === userId ? { ...user, selection } : user
+    );
     set({ users: updatedUsers });
   },
 
