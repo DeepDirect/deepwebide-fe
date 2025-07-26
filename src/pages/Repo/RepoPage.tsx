@@ -84,7 +84,7 @@ export function RepoPage() {
         style={{ width: `calc(100% - ${fileSectionWidth})` }}
       >
         {/* 코드 에디터 */}
-        <div className={styles.editorSection}>
+        <div className={styles.editorSection} style={{ height: editorSectionHeight }}>
           <div className={styles.tabBarContainer}>
             <TabBar repoId={repoId} />
           </div>
