@@ -95,6 +95,7 @@
 .code-runner__project-path {
   position: relative;
   display: inline-block;
+  min-width: 100px;
   padding: 5px 35px 5px 15px;
   font-size: $font-size-xxsmall;
   font-weight: $font-weight-regular;
