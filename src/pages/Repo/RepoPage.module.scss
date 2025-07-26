@@ -57,6 +57,7 @@
 }
 
 .horizontalResizer {
+  z-index: 10; // 다른 요소들보다 위에 위치하도록
   width: 6px;
   cursor: col-resize;
 
@@ -90,78 +91,44 @@
       opacity: 1;
     }
   }
-}
 
-.verticalResizer {
-  width: 100%;
-  height: 6px;
-  cursor: row-resize;
-
-  &::before {
+  &::after {
     content: '';
     position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 20px;
-    height: 2px;
-    border-top: 1px dotted var(--resizer-handle);
-    border-bottom: 1px dotted var(--resizer-handle);
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    transform: translate(-50%, -50%);
-  }
-
-  &:hover {
-    background-color: var(--resizer-hover-bg);
-
-    &::before {
-      opacity: 1;
-    }
-  }
-
-  &:active {
-    background-color: var(--resizer-active-bg);
-
-    &::before {
-      border-color: var(--resizer-active-handle);
-      opacity: 1;
-    }
+    top: 0;
+    left: -2px;
+    width: 10px; // 실제 6px보다 넓은 호버 영역
+    height: 100%;
+    cursor: col-resize;
   }
 }
 
-// 에디터 + 터미널 그룹 (동적 너비)
+// 에디터 + 터미널 그룹 (동적 너비, 최소 너비 460px)
 .editorGroup {
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0; // 크기 조절 시 축소되지 않도록
-  box-sizing: border-box;
-  min-width: 0;
-  height: 100%;
-  overflow: hidden;
-
-  // 수직 리사이징 중일 때 스타일
-  &.verticalResizing {
-    cursor: row-resize;
-    user-select: none;
-
-    * {
-      pointer-events: none;
-    }
-
-    .verticalResizer {
-      background-color: var(--resizer-active-bg);
-    }
-  }
-}
-
-// 코드 에디터
-.editorSection {
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
   box-sizing: border-box;
-  min-height: 0;
+  min-width: 460px;
+  height: 100%;
   overflow: hidden;
+}
+
+// 코드 에디터 (터미널 높이를 제외한 나머지 공간)
+.editorSection {
+  display: flex;
+  flex: 1; // 터미널을 제외한 나머지 공간 차지
+  flex-direction: column;
+  box-sizing: border-box;
+  min-height: 0;
+  border-bottom: 1px solid #e9ecef;
+  overflow: hidden;
+  background-color: $white-1;
+
+  // 세로 공간이 부족할 때 에디터가 전체 높이를 차지
+  @media screen and (height <= 600px) {
+    border-bottom: none;
+  }
 }
 
 .tabBarContainer {
@@ -174,13 +141,16 @@
   flex: 1;
 }
 
-// 터미널
 .terminalSection {
-  flex: 1;
+  flex: 0 0 273px; // 고정 높이 200px
   box-sizing: border-box;
-  min-height: 0;
   overflow: hidden;
   background-color: #343a40;
+
+  // 세로 공간이 부족할 때 터미널 숨김
+  @media screen and (height <= 600px) {
+    display: none;
+  }
 }
 
 @media screen and (width <= 769px) {
@@ -194,17 +164,15 @@
 
   .editorGroup {
     width: 100% !important;
+    min-width: unset;
   }
 
   .editorSection {
-    height: calc(100% - 150px) !important; // 터미널 높이 고정
-  }
-
-  .verticalResizer {
-    display: none;
+    flex: 1;
+    border-bottom: 1px solid #e9ecef;
   }
 
   .terminalSection {
-    height: 150px !important; // 모바일에서 터미널 높이 고정
+    flex: 0 0 273px;
   }
 }
