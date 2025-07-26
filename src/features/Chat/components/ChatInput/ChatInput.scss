@@ -27,9 +27,20 @@
   }
 }
 
+.chat-input__character-counter {
+  padding: 3px 20px;
+  font-size: $font-size-xxxsmall;
+  text-align: right;
+  color: $gray-6;
+
+  .dark & {
+    color: $gray-7;
+  }
+}
+
 .chat-input__input {
   flex: 1;
-  padding: 20px;
+  padding: 20px 20px 0;
   border: none;
   font-size: $font-size-xxsmall;
   font-weight: $font-weight-bold;
@@ -53,6 +64,10 @@
       color: $white-2;
     }
   }
+}
+
+.chat-input__input::-webkit-scrollbar {
+  display: none;
 }
 
 .chat-input__footer {
