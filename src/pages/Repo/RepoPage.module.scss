@@ -6,30 +6,155 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
+
+  // 수평 리사이징 중일 때 전체 컨테이너 스타일
+  &.horizontalResizing {
+    cursor: col-resize;
+    user-select: none;
+
+    * {
+      pointer-events: none; // 리사이징 중 다른 요소들의 이벤트 방지
+    }
+
+    .horizontalResizer {
+      background-color: var(--resizer-active-bg);
+    }
+  }
 }
 
-// 파일 구조 섹션 (항상 전체 너비의 25%)
 .fileSection {
-  flex: 0 0 25%;
+  position: relative;
+  flex-shrink: 0; // NOTE: 크기 조절 시 축소되지 않도록
   box-sizing: border-box;
   min-width: 0;
-  border-right: 1px solid #e9ecef;
+  border-right: 1px solid var(--resizer-border);
   overflow: hidden;
-  background-color: #f8f9fa;
+  background-color: var(--file-section-bg);
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 1px;
+    height: 100%;
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      var(--resizer-shadow) 20%,
+      var(--resizer-shadow) 80%,
+      transparent 100%
+    );
+    pointer-events: none;
+  }
 }
 
-// 에디터 + 터미널 그룹 (항상 전체 너비의 75%)
+.resizer {
+  position: relative;
+  flex-shrink: 0;
+  background-color: var(--resizer-bg);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.horizontalResizer {
+  width: 6px;
+  cursor: col-resize;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 2px;
+    height: 20px;
+    border-right: 1px dotted var(--resizer-handle);
+    border-left: 1px dotted var(--resizer-handle);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    transform: translate(-50%, -50%);
+  }
+
+  &:hover {
+    background-color: var(--resizer-hover-bg);
+
+    &::before {
+      opacity: 1;
+    }
+  }
+
+  &:active {
+    background-color: var(--resizer-active-bg);
+
+    &::before {
+      border-color: var(--resizer-active-handle);
+      opacity: 1;
+    }
+  }
+}
+
+.verticalResizer {
+  width: 100%;
+  height: 6px;
+  cursor: row-resize;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 2px;
+    border-top: 1px dotted var(--resizer-handle);
+    border-bottom: 1px dotted var(--resizer-handle);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    transform: translate(-50%, -50%);
+  }
+
+  &:hover {
+    background-color: var(--resizer-hover-bg);
+
+    &::before {
+      opacity: 1;
+    }
+  }
+
+  &:active {
+    background-color: var(--resizer-active-bg);
+
+    &::before {
+      border-color: var(--resizer-active-handle);
+      opacity: 1;
+    }
+  }
+}
+
+// 에디터 + 터미널 그룹 (동적 너비)
 .editorGroup {
   display: flex;
-  flex: 0 0 75%;
   flex-direction: column;
+  flex-shrink: 0; // 크기 조절 시 축소되지 않도록
   box-sizing: border-box;
   min-width: 0;
-  height: 100%; // 전체 높이 사용
+  height: 100%;
   overflow: hidden;
+
+  // 수직 리사이징 중일 때 스타일
+  &.verticalResizing {
+    cursor: row-resize;
+    user-select: none;
+
+    * {
+      pointer-events: none;
+    }
+
+    .verticalResizer {
+      background-color: var(--resizer-active-bg);
+    }
+  }
 }
 
-// 코드 에디터 (항상 그룹 높이의 70%)
+// 코드 에디터
 .editorSection {
   display: flex;
   flex: 0 0 70%;
@@ -49,9 +174,9 @@
   flex: 1;
 }
 
-// 터미널 (항상 그룹 높이의 30%)
+// 터미널
 .terminalSection {
-  flex: 0 0 30%;
+  flex-shrink: 0;
   box-sizing: border-box;
   min-height: 0;
   overflow: hidden;
@@ -63,16 +188,23 @@
     display: none;
   }
 
+  .horizontalResizer {
+    display: none;
+  }
+
   .editorGroup {
-    flex: 1;
-    width: 100%;
+    width: 100% !important;
   }
 
   .editorSection {
-    flex: 1;
+    height: calc(100% - 150px) !important; // 터미널 높이 고정
+  }
+
+  .verticalResizer {
+    display: none;
   }
 
   .terminalSection {
-    flex: 0 0 150px;
+    height: 150px !important; // 모바일에서 터미널 높이 고정
   }
 }

@@ -1,6 +1,7 @@
 import { useParams, useSearch } from '@tanstack/react-router';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useTabStore } from '@/stores/tabStore';
+import { useResizer } from '@/hooks/useResizer';
 import styles from './RepoPage.module.scss';
 import TabBar from '@/components/organisms/TabBar/TabBar';
 import MonacoCollaborativeEditor from '@/components/organisms/CodeEditor/MonacoCollaborativeEditor';
@@ -12,6 +13,33 @@ export function RepoPage() {
   const filePath = search.file;
 
   const { openTabs, activateTab } = useTabStore();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const editorGroupRef = useRef<HTMLDivElement>(null);
+
+  // NOTE: 파일 섹션과 에디터 그룹 간의 수평 리사이저
+  const {
+    width: fileSectionWidth,
+    isResizing: isHorizontalResizing,
+    startResize: startHorizontalResize,
+  } = useResizer({
+    initialWidth: '300px',
+    minWidth: '200px',
+    maxWidth: '50%',
+    containerRef,
+  });
+
+  // NOTE: 에디터와 터미널 간의 수직 리사이저
+  const {
+    width: editorSectionHeight,
+    isResizing: isVerticalResizing,
+    startResize: startVerticalResize,
+  } = useResizer({
+    initialWidth: '70%',
+    minWidth: '30%',
+    maxWidth: '85%',
+    containerRef: editorGroupRef,
+    direction: 'vertical',
+  });
 
   useEffect(() => {
     if (filePath && repoId) {
@@ -34,12 +62,27 @@ export function RepoPage() {
   }, [filePath, repoId, openTabs, activateTab]);
 
   return (
-    <div className={styles.repoPage}>
+    <div
+      ref={containerRef}
+      className={`${styles.repoPage} ${isHorizontalResizing ? styles.horizontalResizing : ''}`}
+    >
       {/* 파일 구조 섹션 */}
-      <div className={styles.fileSection}></div>
+      <div className={styles.fileSection} style={{ width: fileSectionWidth }}>
+        {/* 파일 트리 내용 */}
+      </div>
+
+      {/* 수평 리사이저 */}
+      <div
+        className={`${styles.resizer} ${styles.horizontalResizer}`}
+        onMouseDown={startHorizontalResize}
+      />
 
       {/* 에디터 + 터미널 그룹 */}
-      <div className={styles.editorGroup}>
+      <div
+        ref={editorGroupRef}
+        className={`${styles.editorGroup} ${isVerticalResizing ? styles.verticalResizing : ''}`}
+        style={{ width: `calc(100% - ${fileSectionWidth})` }}
+      >
         {/* 코드 에디터 */}
         <div className={styles.editorSection}>
           <div className={styles.tabBarContainer}>
@@ -55,8 +98,19 @@ export function RepoPage() {
           </div>
         </div>
 
+        {/* 수직 리사이저 */}
+        <div
+          className={`${styles.resizer} ${styles.verticalResizer}`}
+          onMouseDown={startVerticalResize}
+        />
+
         {/* 터미널 */}
-        <div className={styles.terminalSection}></div>
+        <div
+          className={styles.terminalSection}
+          style={{ height: `calc(100% - ${editorSectionHeight})` }}
+        >
+          터미널
+        </div>
       </div>
     </div>
   );
