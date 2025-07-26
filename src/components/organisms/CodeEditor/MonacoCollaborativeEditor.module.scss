@@ -14,7 +14,6 @@
   position: relative;
   flex: 1;
   height: 100%;
-  padding-top: 1rem;
   overflow: hidden;
 
   :global {
@@ -114,6 +113,33 @@
   font-weight: $font-weight-medium;
   color: $orange !important;
   background: $white-1;
+}
+
+.collaborationStatus {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  border-bottom: 1px solid $gray-8;
+  font-size: $font-size-xxsmall;
+  font-weight: $font-weight-medium;
+  color: $gray-5;
+  background: $white-1;
+
+  span:first-child {
+    color: $blue-1;
+  }
+
+  span:not(:first-child) {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 6px;
+    border: 1px solid $gray-8;
+    border-radius: 12px;
+    font-size: 11px;
+    background: $white-2;
+  }
 }
 
 // 반응형 디자인

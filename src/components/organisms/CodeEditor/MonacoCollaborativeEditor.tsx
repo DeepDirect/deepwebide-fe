@@ -1,10 +1,12 @@
 import React, { useRef, useEffect } from 'react';
 import { Editor } from '@monaco-editor/react';
 import type { OnMount } from '@monaco-editor/react';
-import { useCollaboration } from '@/hooks/useCollaboration';
+import { useYjsCollaboration } from '@/hooks/useYjsCollaboration';
 import { useEditorStore } from '@/stores/editorStore';
 import { useTabStore } from '@/stores/tabStore';
+import { useCollaborationStore } from '@/stores/collaborationStore';
 import { getLanguageFromFile } from '@/utils/fileExtensions';
+import CursorOverlay from './CursorOverlay';
 import styles from './MonacoCollaborativeEditor.module.scss';
 
 interface MonacoCollaborativeEditorProps {
@@ -14,143 +16,183 @@ interface MonacoCollaborativeEditorProps {
   userName?: string;
 }
 
+// 타입 정의
+interface MonacoEditorInstance {
+  getScrolledVisiblePosition(position: { lineNumber: number; column: number }): {
+    left: number;
+    top: number;
+  } | null;
+  getOption(optionId: number): unknown;
+  onDidScrollChange(callback: () => void): { dispose(): void } | null;
+  onDidLayoutChange(callback: () => void): { dispose(): void } | null;
+  getScrollTop(): number;
+  getScrollLeft(): number;
+  getDomNode(): HTMLElement;
+  getModel(): TextModel | null;
+  addCommand(keybinding: number, handler: () => void): void;
+  getAction(actionId: string): MonacoAction | null;
+  setSelection(range: MonacoRange): void;
+  focus(): void;
+}
+
+interface EditorInstance {
+  getModel(): TextModel | null;
+  onDidChangeCursorPosition(callback: (event: CursorChangeEvent) => void): unknown;
+  onDidChangeCursorSelection(callback: (event: SelectionChangeEvent) => void): unknown;
+  addCommand(keybinding: number, handler: () => void): void;
+  getAction(actionId: string): MonacoAction | null;
+  setSelection(range: MonacoRange): void;
+  focus(): void;
+  getDomNode(): HTMLElement;
+}
+
+interface TextModel {
+  uri: unknown;
+  getValue(): string;
+  setValue(value: string): void;
+  getFullModelRange(): MonacoRange;
+}
+
+interface MonacoRange {
+  startLineNumber: number;
+  startColumn: number;
+  endLineNumber: number;
+  endColumn: number;
+}
+
+interface MonacoAction {
+  run(): void;
+}
+
+interface CursorChangeEvent {
+  position: {
+    lineNumber: number;
+    column: number;
+  };
+}
+
+interface SelectionChangeEvent {
+  selection: {
+    startLineNumber: number;
+    startColumn: number;
+    endLineNumber: number;
+    endColumn: number;
+  };
+}
+
+interface MonacoGlobal {
+  editor: {
+    setModelMarkers: (model: unknown, owner: string, markers: unknown[]) => void;
+  };
+  languages: {
+    typescript: {
+      typescriptDefaults: {
+        setDiagnosticsOptions: (options: Record<string, boolean>) => void;
+      };
+      javascriptDefaults: {
+        setDiagnosticsOptions: (options: Record<string, boolean>) => void;
+      };
+    };
+    css: {
+      cssDefaults: {
+        setOptions: (options: { validate: boolean }) => void;
+      };
+    };
+    json: {
+      jsonDefaults: {
+        setDiagnosticsOptions: (options: { validate: boolean }) => void;
+      };
+    };
+  };
+  KeyMod: Record<string, number>;
+  KeyCode: Record<string, number>;
+}
+
 const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
   repoId,
   enableCollaboration = true,
   userId = `user-${Date.now()}`,
   userName = 'Anonymous',
 }) => {
-  const editorRef = useRef<unknown>(null);
+  const editorRef = useRef<EditorInstance | null>(null);
+  const monacoEditorRef = useRef<MonacoEditorInstance | null>(null);
+  const editorContainerRef = useRef<HTMLDivElement | null>(null);
 
   const { updateContent, saveContent } = useEditorStore();
   const { openTabs } = useTabStore();
+  const { users } = useCollaborationStore();
 
   const activeTab = openTabs.find(tab => tab.isActive);
   const language = activeTab ? getLanguageFromFile(activeTab.name) : 'plaintext';
   const roomId = activeTab && enableCollaboration ? `${repoId}-${activeTab.path}` : '';
 
-  // 탭 전환 시마다 언어별 진단 기능 설정
-  useEffect(() => {
-    interface MonacoGlobal {
-      editor: {
-        setModelMarkers: (model: unknown, owner: string, markers: unknown[]) => void;
-      };
-      languages: {
-        typescript: {
-          typescriptDefaults: {
-            setDiagnosticsOptions: (options: {
-              noSemanticValidation: boolean;
-              noSyntaxValidation: boolean;
-              noSuggestionDiagnostics: boolean;
-            }) => void;
-          };
-          javascriptDefaults: {
-            setDiagnosticsOptions: (options: {
-              noSemanticValidation: boolean;
-              noSyntaxValidation: boolean;
-              noSuggestionDiagnostics: boolean;
-            }) => void;
-          };
-        };
-        css: {
-          cssDefaults: {
-            setOptions: (options: { validate: boolean }) => void;
-          };
-        };
-        json: {
-          jsonDefaults: {
-            setDiagnosticsOptions: (options: { validate: boolean }) => void;
-          };
-        };
-      };
-    }
-
-    const monacoGlobal = (window as typeof window & { monaco?: MonacoGlobal }).monaco;
-
-    if (monacoGlobal) {
-      if (language === 'markdown') {
-        // Markdown 파일에서만 진단 기능 비활성화
-        monacoGlobal.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
-          noSemanticValidation: true,
-          noSyntaxValidation: true,
-          noSuggestionDiagnostics: true,
-        });
-
-        monacoGlobal.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
-          noSemanticValidation: true,
-          noSyntaxValidation: true,
-          noSuggestionDiagnostics: true,
-        });
-
-        monacoGlobal.languages.css.cssDefaults.setOptions({
-          validate: false,
-        });
-
-        monacoGlobal.languages.json.jsonDefaults.setDiagnosticsOptions({
-          validate: false,
-        });
-
-        // Markdown에서 기존 마커들 제거
-        if (editorRef.current) {
-          const editor = editorRef.current as {
-            getModel(): { uri: unknown } | null;
-          };
-
-          const clearAllMarkers = () => {
-            const model = editor.getModel();
-            if (model) {
-              monacoGlobal.editor.setModelMarkers(model, 'typescript', []);
-              monacoGlobal.editor.setModelMarkers(model, 'javascript', []);
-              monacoGlobal.editor.setModelMarkers(model, 'css', []);
-              monacoGlobal.editor.setModelMarkers(model, 'json', []);
-            }
-          };
-
-          clearAllMarkers();
-          const interval = setInterval(clearAllMarkers, 100);
-
-          return () => {
-            clearInterval(interval);
-          };
-        }
-      } else {
-        // 다른 파일 타입에서는 진단 기능 활성화
-        monacoGlobal.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
-          noSemanticValidation: false,
-          noSyntaxValidation: false,
-          noSuggestionDiagnostics: false,
-        });
-
-        monacoGlobal.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
-          noSemanticValidation: false,
-          noSyntaxValidation: false,
-          noSuggestionDiagnostics: false,
-        });
-
-        monacoGlobal.languages.css.cssDefaults.setOptions({
-          validate: true,
-        });
-
-        monacoGlobal.languages.json.jsonDefaults.setDiagnosticsOptions({
-          validate: true,
-        });
-      }
-    }
-  }, [language, activeTab?.path]);
-
-  // 삭제 예정인 레거시 useEffect 제거
-
-  useCollaboration({
+  const { isConnected, isLoading } = useYjsCollaboration({
     roomId,
     editor: editorRef.current,
     userId,
     userName,
-    enabled: enableCollaboration && !!activeTab,
+    enabled: enableCollaboration && Boolean(activeTab),
   });
 
-  // 에디터 마운트 시 설정
+  // 언어별 진단 설정
+  useEffect(() => {
+    const monacoGlobal = (window as typeof window & { monaco?: MonacoGlobal }).monaco;
+
+    if (monacoGlobal) {
+      const disableDiagnostics = language === 'markdown';
+
+      monacoGlobal.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
+        noSemanticValidation: disableDiagnostics,
+        noSyntaxValidation: disableDiagnostics,
+        noSuggestionDiagnostics: disableDiagnostics,
+      });
+
+      monacoGlobal.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+        noSemanticValidation: disableDiagnostics,
+        noSyntaxValidation: disableDiagnostics,
+        noSuggestionDiagnostics: disableDiagnostics,
+      });
+
+      monacoGlobal.languages.css.cssDefaults.setOptions({
+        validate: !disableDiagnostics,
+      });
+
+      monacoGlobal.languages.json.jsonDefaults.setDiagnosticsOptions({
+        validate: !disableDiagnostics,
+      });
+
+      if (disableDiagnostics && editorRef.current) {
+        const editor = editorRef.current as { getModel(): { uri: unknown } | null };
+
+        const clearAllMarkers = () => {
+          const model = editor.getModel();
+          if (model) {
+            const owners = ['typescript', 'javascript', 'css', 'json'];
+            owners.forEach(owner => {
+              monacoGlobal.editor.setModelMarkers(model, owner, []);
+            });
+          }
+        };
+
+        clearAllMarkers();
+        const interval = setInterval(clearAllMarkers, 100);
+
+        return () => {
+          clearInterval(interval);
+        };
+      }
+    }
+  }, [language, activeTab?.path]);
+
   const handleEditorDidMount: OnMount = (editor, monaco) => {
-    editorRef.current = editor;
+    editorRef.current = editor as unknown as EditorInstance;
+    monacoEditorRef.current = editor as unknown as MonacoEditorInstance;
+
+    // 에디터 컨테이너 참조 저장
+    const editorElement = editor.getDomNode();
+    if (editorElement?.parentElement) {
+      editorContainerRef.current = editorElement.parentElement as HTMLDivElement;
+    }
 
     // 키보드 단축키 설정
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
@@ -158,7 +200,6 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
       console.log('파일 저장됨');
     });
 
-    // 포맷팅 단축키 (Alt + Shift + F)
     editor.addCommand(monaco.KeyMod.Alt | monaco.KeyMod.Shift | monaco.KeyCode.KeyF, () => {
       const formatAction = editor.getAction('editor.action.formatDocument');
       if (formatAction) {
@@ -166,7 +207,6 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
       }
     });
 
-    // 전체 선택 단축키 (Ctrl/Cmd + A)
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyA, () => {
       const model = editor.getModel();
       if (model) {
@@ -177,7 +217,7 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
 
     editor.focus();
 
-    // Markdown 파일인 경우에만 진단 기능 비활성화
+    // Markdown 진단 설정
     if (language === 'markdown') {
       monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
         noSemanticValidation: true,
@@ -201,14 +241,12 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
     }
   };
 
-  // 에디터 내용 변경 핸들러
   const handleEditorChange = (value: string | undefined) => {
     if (value !== undefined && !enableCollaboration) {
       updateContent(value);
     }
   };
 
-  // 활성 탭이 없을 때 플레이스홀더 표시
   if (!activeTab) {
     return (
       <div className={styles.editorPlaceholder}>
@@ -217,7 +255,9 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
           <h3>파일을 선택해주세요</h3>
           <p>파일을 선택하면 에디터가 시작됩니다.</p>
           {enableCollaboration && (
-            <p className={styles.collaborationNote}>🤝 협업 모드가 활성화되어 있습니다</p>
+            <p className={styles.collaborationNote}>
+              🤝 협업 모드 {isConnected ? '연결됨' : isLoading ? '연결 중...' : '연결 끊김'}
+            </p>
           )}
         </div>
       </div>
@@ -226,11 +266,18 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
 
   return (
     <div className={styles.collaborativeEditor}>
-      <div className={styles.editorContainer}>
+      {/* 협업 상태 표시 */}
+      {enableCollaboration && isConnected && (
+        <div className={styles.collaborationStatus}>
+          <span>이 파일에 위치하고 있는 사람 : ({users.length + 1}명)</span>
+        </div>
+      )}
+
+      <div className={styles.editorContainer} ref={editorContainerRef}>
         <Editor
           height="100%"
           language={language}
-          value={activeTab.content}
+          value={enableCollaboration ? undefined : activeTab.content}
           theme="vs"
           onChange={handleEditorChange}
           onMount={handleEditorDidMount}
@@ -241,64 +288,36 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
             </div>
           }
           options={{
-            // 기본 설정 - 코드 에디터에 적합한 모노스페이스 폰트 유지
             fontSize: 14,
             fontFamily: 'Monaco, Menlo, "Ubuntu Mono", "Consolas", monospace',
-
-            // 레이아웃
             wordWrap: 'on',
             automaticLayout: true,
             scrollBeyondLastLine: false,
-
-            // 라인 설정
             lineNumbers: 'on',
             renderLineHighlight: 'all',
-
-            // 미니맵
-            minimap: {
-              enabled: true,
-              side: 'right',
-            },
-
-            // 들여쓰기 및 공백
+            minimap: { enabled: true, side: 'right' },
             tabSize: 2,
             insertSpaces: true,
             detectIndentation: true,
             renderWhitespace: 'selection',
-
-            // 괄호 매칭
             bracketPairColorization: { enabled: true },
-
-            // 커서 및 선택
             cursorStyle: 'line',
             cursorWidth: 2,
             selectOnLineNumbers: true,
             selectionHighlight: true,
             occurrencesHighlight: 'singleFile',
-
-            // 스크롤
             smoothScrolling: true,
-
-            // Markdown에서는 자동완성 및 진단 기능 비활성화
             quickSuggestions: language !== 'markdown',
             suggestOnTriggerCharacters: language !== 'markdown',
             acceptSuggestionOnEnter: language !== 'markdown' ? 'on' : 'off',
-
-            // 코드 접기
             folding: true,
             showFoldingControls: 'always',
-
-            // 기타 기능
             links: true,
             colorDecorators: true,
             contextmenu: true,
             readOnly: false,
-
-            // IntelliSense (Markdown에서는 비활성화)
             hover: { enabled: language !== 'markdown' },
             parameterHints: { enabled: language !== 'markdown' },
-
-            // 스크롤바
             scrollbar: {
               vertical: 'visible',
               horizontal: 'visible',
@@ -307,6 +326,14 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
             },
           }}
         />
+
+        {/* 커서 오버레이 */}
+        {enableCollaboration && isConnected && (
+          <CursorOverlay
+            editorContainer={editorContainerRef.current}
+            monacoEditor={monacoEditorRef.current}
+          />
+        )}
       </div>
     </div>
   );
