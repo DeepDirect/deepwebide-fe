@@ -15,7 +15,6 @@ export function RepoPage() {
 
   const { openTabs, activateTab } = useTabStore();
   const containerRef = useRef<HTMLDivElement>(null);
-  const editorGroupRef = useRef<HTMLDivElement>(null);
 
   // NOTE: 파일 섹션과 에디터 그룹 간의 수평 리사이저
   const {
@@ -25,21 +24,8 @@ export function RepoPage() {
   } = useResizer({
     initialWidth: '300px',
     minWidth: '200px',
-    maxWidth: '50%',
+    maxWidth: '500px',
     containerRef,
-  });
-
-  // NOTE: 에디터와 터미널 간의 수직 리사이저
-  const {
-    width: editorSectionHeight,
-    isResizing: isVerticalResizing,
-    startResize: startVerticalResize,
-  } = useResizer({
-    initialWidth: '70%',
-    minWidth: '30%',
-    maxWidth: '85%',
-    containerRef: editorGroupRef,
-    direction: 'vertical',
   });
 
   useEffect(() => {
@@ -80,12 +66,11 @@ export function RepoPage() {
 
       {/* 에디터 + 터미널 그룹 */}
       <div
-        ref={editorGroupRef}
-        className={`${styles.editorGroup} ${isVerticalResizing ? styles.verticalResizing : ''}`}
-        style={{ width: `calc(100% - ${fileSectionWidth})` }}
+        className={styles.editorGroup}
+        style={{ width: `calc(100% - ${fileSectionWidth} - 6px)` }}
       >
         {/* 코드 에디터 */}
-        <div className={styles.editorSection} style={{ height: editorSectionHeight }}>
+        <div className={styles.editorSection}>
           <div className={styles.tabBarContainer}>
             <TabBar repoId={repoId} />
           </div>
@@ -99,17 +84,8 @@ export function RepoPage() {
           </div>
         </div>
 
-        {/* 수직 리사이저 */}
-        <div
-          className={`${styles.resizer} ${styles.verticalResizer}`}
-          onMouseDown={startVerticalResize}
-        />
-
         {/* 터미널 */}
-        <div
-          className={styles.terminalSection}
-          style={{ height: `calc(100% - ${editorSectionHeight})` }}
-        >
+        <div className={styles.terminalSection}>
           <CodeRunner repoId={repoId} />
         </div>
       </div>
