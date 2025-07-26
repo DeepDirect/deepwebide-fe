@@ -1,0 +1,4 @@
+export type RepositoryQueryURL =
+  | '/api/repositories/shared'
+  | '/api/repositories/shared/me'
+  | '/api/repositories/mine';
