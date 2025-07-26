@@ -15,7 +15,7 @@ import MeatballIcon from '@/assets/icons/meatball.svg?react';
 
 import MainPageType from '@/constants/enums/MainPageType.enum';
 
-import type { RepositoryItem } from '@/types/Repository';
+import type { RepositoryItem } from '@/types/repositoryItem.types';
 
 type RepositoryProps = {
   info: RepositoryItem;

@@ -3,7 +3,7 @@ import InfoSection from '@/components/organisms/Settings/InfoSection/InfoSection
 import MemberSection from '@/components/organisms/Settings/MemberSection/MemberSection';
 import ShareSection from '@/components/organisms/Settings/ShareSection/ShareSection';
 import DeleteSection from '@/components/organisms/Settings/DeleteSection/DeleteSection';
-import type { MemberItem } from '@/types/MemberItem';
+import type { MemberItem } from '@/types/memberItem.types';
 import SettingsIcon from '@/assets/icons/settings.svg?react';
 import InfoIcon from '@/assets/icons/info.svg?react';
 import MemberIcon from '@/assets/icons/member.svg?react';

@@ -1,8 +1,12 @@
 import { RouterProvider } from '@tanstack/react-router';
-import { router } from './router/router';
+import { createAppRouter } from './router/router';
+import { useAuthStore } from '@/stores/authStore';
 
-function App() {
+const App = () => {
+  const auth = useAuthStore();
+  const router = createAppRouter(auth);
+
   return <RouterProvider router={router} />;
-}
+};
 
 export default App;
