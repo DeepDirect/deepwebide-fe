@@ -36,7 +36,7 @@ const PrivateRepoPage = () => {
     page: null, // 1부터 시작
     current: 1, // 현재 페이지
     size: 7, // 아이템 개수
-    total: null,
+    total: null, // 총 페이지 수
   });
   const [repositories, setRepositories] = useState<RepositoryItem[] | null>(null);
   const [isLiked, setIsLiked] = useState(false);
@@ -55,8 +55,7 @@ const PrivateRepoPage = () => {
       setRepositories(data.repositories);
       setPagination(prev => ({
         ...prev,
-        total: data.totalElements,
-        current: data.currentPage + 1,
+        total: data.totalPages,
       }));
     }
   }, [isSuccess, data]);
