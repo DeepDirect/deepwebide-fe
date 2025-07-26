@@ -4,6 +4,7 @@ import { useNavigate } from '@tanstack/react-router';
 import FileIcon from '@/assets/icons/file.svg?react';
 
 import useGetRepository from '@/hooks/useGetRepository';
+import useCreateRepository from '@/hooks/useCreateRepository';
 
 import Button from '@/components/atoms/Button/Button';
 import Toggle from '@/components/atoms/Toggle/Toggle';
@@ -14,10 +15,12 @@ import CreateRepoModal from '@/features/Modals/CreateRepoModal/CreateRepoModal';
 
 import MainPageType from '@/constants/enums/MainPageType.enum';
 
+import type { CreateRepoURL } from '@/types/apiEndpoints.types';
 import type { RepositoryItem } from '@/schemas/main.schema';
-import type { RepositoryQueryURL } from '@/types/main.types';
+import type { RepositoryQueryURL } from '@/types/apiEndpoints.types';
 
 import styles from './PrivateRepoPage.module.scss';
+import type RepositoryType from '@/constants/enums/RepositoryType.enum';
 
 type page = {
   maxVisiblePages: number; // 5
@@ -27,7 +30,8 @@ type page = {
   total: number | null;
 };
 
-const url: RepositoryQueryURL = '/api/repositories/mine';
+const getRepoURL: RepositoryQueryURL = '/api/repositories/mine';
+const postRepoURL: CreateRepoURL = '/api/repositories';
 
 const PrivateRepoPage = () => {
   const navigate = useNavigate();
@@ -40,14 +44,13 @@ const PrivateRepoPage = () => {
   });
   const [repositories, setRepositories] = useState<RepositoryItem[] | null>(null);
   const [isLiked, setIsLiked] = useState(false);
-  // NOTE: 레포 생성 모달 열림 여부
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-
-  const { data, isSuccess, isError, error, refetch } = useGetRepository(url, {
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false); // NOTE: 레포 생성 모달 열림 여부
+  const { data, isSuccess, isError, error, refetch } = useGetRepository(getRepoURL, {
     page: (pagination.page ?? 1) - 1,
     size: pagination.current ?? 7,
     liked: isLiked,
   });
+  const createMutation = useCreateRepository(postRepoURL);
 
   // 성공
   useEffect(() => {
@@ -94,10 +97,21 @@ const PrivateRepoPage = () => {
   };
 
   // 레포지토리 생성 확인
-  const handleCreateRepoConfirm = (data: { name: string; projectType: string }) => {
-    console.log('새 레포지토리 생성:', data);
-    // TODO: API 호출하여 레포지토리 생성 기능 API 연결 필요
+  const handleCreateRepoConfirm = (data: {
+    repositoryName: string;
+    repositoryType: RepositoryType;
+  }) => {
     setIsCreateModalOpen(false);
+
+    createMutation.mutate(data, {
+      onSuccess: data => {
+        console.log(data);
+        refetch();
+      },
+      onError: error => {
+        console.error('생성 실패!', error);
+      },
+    });
   };
 
   // 레포지토리 생성 취소
