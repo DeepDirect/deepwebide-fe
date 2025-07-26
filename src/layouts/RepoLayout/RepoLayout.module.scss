@@ -4,21 +4,69 @@
   display: grid;
   grid-template:
     'header header' 56px
-    'sidebar content' calc(100vh - 56px) / auto 1fr;
+    'sidebar content' calc(100vh - 56px) / 44px 1fr;
   width: 100vw;
   height: 100vh;
   overflow: hidden;
   background-color: $white-1;
 }
 
+.RepoLayoutDark {
+  background-color: $gray-1;
+}
+
+// 파일 구조창이 있을 때 - 더 빨리 전체화면
 .RepoLayoutWithChat {
   grid-template:
     'header header header' 56px
-    'sidebar content chat' calc(100vh - 56px) / auto 1fr 452px;
+    'sidebar content chat' calc(100vh - 56px) / 44px 1fr 452px;
+
+  :global(.content-area) {
+    min-width: 460px;
+  }
+
+  @media (width <= 1400px) {
+    grid-template:
+      'header header' 56px
+      'sidebar chat' calc(100vh - 56px) / 44px 1fr;
+
+    :global(.content-area) {
+      display: none;
+    }
+
+    .chatContainer {
+      box-sizing: border-box;
+      width: 100%;
+      max-width: 100%;
+    }
+  }
 }
 
-.RepoLayoutDark {
-  background-color: $gray-1;
+// 파일 구조창이 없을 때 - 더 늦게 전체화면
+.RepoLayoutWithChatNoFileSection {
+  grid-template:
+    'header header header' 56px
+    'sidebar content chat' calc(100vh - 56px) / 44px 1fr 452px;
+
+  :global(.content-area) {
+    min-width: 460px;
+  }
+
+  @media (width <= 1000px) {
+    grid-template:
+      'header header' 56px
+      'sidebar chat' calc(100vh - 56px) / 44px 1fr;
+
+    :global(.content-area) {
+      display: none;
+    }
+
+    .chatContainer {
+      box-sizing: border-box;
+      width: 100%;
+      max-width: 100%;
+    }
+  }
 }
 
 :global(header) {
@@ -30,6 +78,7 @@
 :global(.sidebar) {
   z-index: 50;
   grid-area: sidebar;
+  width: 44px;
 }
 
 :global(.content-area) {
@@ -41,6 +90,7 @@
 
 .chatContainer {
   grid-area: chat;
+  width: 452px;
   height: calc(100vh - 56px);
   overflow: hidden;
 }
