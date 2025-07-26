@@ -3,7 +3,7 @@ import { useState } from 'react';
 import styles from './RepoLayout.module.scss';
 import clsx from 'clsx';
 
-import Header from '@/components/organisms/Header/Header';
+import RepoHeader from '@/components/organisms/Header/RepoHeader/RepoHeader';
 import { Sidebar } from '@/components/organisms/Sidebar/RepoSidebar/RepoSidebar';
 import { useThemeStore } from '@/stores/themeStore';
 import { useMockRepoInitializer } from '@/hooks/useMockRepoInitializer';
@@ -26,7 +26,7 @@ export function RepoLayout() {
         [styles.RepoLayoutWithChat]: isChatOpen,
       })}
     >
-      <Header variant="repo" onChatButtonClick={handleChatToggle} />
+      <RepoHeader onChatButtonClick={handleChatToggle} />
       <Sidebar />
       <main className="content-area">
         <Outlet />

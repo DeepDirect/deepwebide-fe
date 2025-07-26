@@ -10,9 +10,16 @@
   gap: 0.5rem;
   border: none;
   font-weight: $font-weight-medium;
-  color: var(--header-username);
   background: none;
   cursor: pointer;
+
+  &.lightModeOnly {
+    color: $gray-5;
+  }
+
+  &.darkModeSupport {
+    color: var(--header-username);
+  }
 }
 
 .avatar {

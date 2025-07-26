@@ -1,24 +1,32 @@
 @use '@/styles/variables' as *;
 
-.container {
-  position: relative;
-  display: flex;
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  display: grid;
   align-items: center;
-  justify-content: flex-end;
+  grid-template-columns: auto 1fr auto;
   box-sizing: border-box;
   width: 100%;
   height: 56px;
   padding: 0 1rem;
+  background-color: var(--header-bg);
+  box-shadow: $shadow-under;
+}
+
+.left {
+  display: flex;
+  justify-self: start;
 }
 
 .center {
-  position: absolute;
-  left: 50%;
   display: flex;
   align-items: center;
+  justify-self: center;
   gap: 1rem;
   white-space: nowrap;
-  transform: translateX(-50%);
 }
 
 .pathArea {
@@ -52,14 +60,9 @@
   cursor: pointer;
 }
 
-.rightArea {
+.right {
   display: flex;
   align-items: center;
+  justify-self: end;
   gap: 1rem;
-}
-
-.toggleButton {
-  border: none;
-  background: none;
-  cursor: pointer;
 }
