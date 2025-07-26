@@ -8,7 +8,7 @@ import RepositoryType from '@/constants/enums/RepositoryType.enum';
 export interface CreateRepoModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onConfirm: (data: { name: string; projectType: string }) => void;
+  onConfirm: (data: { repositoryName: string; repositoryType: RepositoryType }) => void;
   onCancel?: () => void;
 }
 
@@ -34,8 +34,8 @@ const CreateRepoModal: React.FC<CreateRepoModalProps> = ({
     }
 
     onConfirm({
-      name: repoName.trim(),
-      projectType,
+      repositoryName: repoName.trim(),
+      repositoryType: projectType,
     });
   };
 
