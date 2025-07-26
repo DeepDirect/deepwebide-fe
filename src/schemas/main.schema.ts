@@ -12,7 +12,7 @@ export const RepositoryItemSchema = z.object({
   isShared: z.boolean(),
 });
 
-export const RepositoryRequestSchema = z.object({
+export const RepositoryResponseSchema = z.object({
   currentPage: z.number(),
   pageSize: z.number(),
   totalPages: z.number(),
@@ -20,12 +20,12 @@ export const RepositoryRequestSchema = z.object({
   repositories: z.array(RepositoryItemSchema),
 });
 
-export const RepositoryResponseSchema = z.object({
+export const RepositoryRequestSchema = z.object({
   page: z.number(),
   size: z.number(),
   liked: z.boolean(),
 });
 
-export type RepositoryItem = z.infer<typeof RepositoryItemSchema>;
 export type RepositoryRequest = z.infer<typeof RepositoryRequestSchema>;
+export type RepositoryItem = z.infer<typeof RepositoryItemSchema>;
 export type RepositoryResponse = z.infer<typeof RepositoryResponseSchema>;
