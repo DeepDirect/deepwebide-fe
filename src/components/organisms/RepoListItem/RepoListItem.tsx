@@ -16,6 +16,7 @@ import ChangeRepoNameModal from '@/features/Modals/ChangeRepoNameModal/ChangeRep
 import PrivateRepoMeatballModal from '@/features/Modals/PrivateRepoMeatballModal/PrivateRepoMeatballModal';
 import SharedByMeRepoMeatballModal from '@/features/Modals/SharedByMeRepoMeatballModal/SharedByMeRepoMeatballModal';
 import SharedWithMeRepoMeatballModal from '@/features/Modals/SharedWithMeRepoMeatballModal/SharedWithMeRepoMeatballModal';
+import DeleteRepoAlertDialog from '@/features/AlertDialog/common/DeleteRepoAlertDialog';
 
 import type { RepositoryItem } from '@/schemas/main.schema';
 
@@ -45,7 +46,8 @@ const RepoListItem: React.FC<RepositoryProps> = ({
   const [modalPosition, setModalPosition] = useState<positionType>({});
   const meatballRef = useRef<HTMLButtonElement>(null);
   const [isModlasOpen, setIsModalsOpen] = useState({
-    ChangeRepoName: false,
+    changeRepoName: false,
+    deleteRepoAlert: false,
   });
   const {
     mutate: renameRepository,
@@ -96,7 +98,10 @@ const RepoListItem: React.FC<RepositoryProps> = ({
   };
 
   const openChangeRepoName = () => {
-    setIsModalsOpen(prev => ({ ...prev, ChangeRepoName: !isModlasOpen.ChangeRepoName }));
+    setIsModalsOpen(prev => ({ ...prev, changeRepoName: !isModlasOpen.changeRepoName }));
+  };
+  const openDeleteRepoAlert = () => {
+    setIsModalsOpen(prev => ({ ...prev, deleteRepoAlert: !isModlasOpen.deleteRepoAlert }));
   };
 
   const handleConfirmChangeRepoName = (newName: string) => {
@@ -170,7 +175,7 @@ const RepoListItem: React.FC<RepositoryProps> = ({
                   onOpenChange={setIsModalOpen}
                   position={modalPosition}
                   onRename={() => openChangeRepoName()}
-                  onDelete={() => handleDeleteRepo()}
+                  onDelete={() => openDeleteRepoAlert()}
                 />
               );
             case MainPageType.SHARED_BY_ME:
@@ -202,10 +207,15 @@ const RepoListItem: React.FC<RepositoryProps> = ({
         })()}
 
       <ChangeRepoNameModal
-        open={isModlasOpen.ChangeRepoName}
+        open={isModlasOpen.changeRepoName}
         onOpenChange={openChangeRepoName}
         currentName={info.repositoryName}
         onConfirm={handleConfirmChangeRepoName}
+      />
+      <DeleteRepoAlertDialog
+        open={isModlasOpen.deleteRepoAlert}
+        onOpenChange={openDeleteRepoAlert}
+        onConfirm={handleDeleteRepo}
       />
     </div>
   );
