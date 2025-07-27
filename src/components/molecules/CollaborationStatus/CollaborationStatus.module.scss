@@ -1,0 +1,44 @@
+@use '@/styles/variables' as *;
+
+.collaborationStatus {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  border-bottom: 1px solid $gray-8;
+  font-size: $font-size-xxsmall;
+  font-weight: $font-weight-medium;
+  color: $gray-5;
+  background: $white-1;
+
+  span:first-child {
+    color: $blue-1;
+  }
+
+  span:not(:first-child) {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 6px;
+    border: 1px solid $gray-8;
+    border-radius: 12px;
+    font-size: 11px;
+    background: $white-2;
+  }
+}
+
+// 다크모드 지원
+:global(.dark) .collaborationStatus {
+  color: $gray-7;
+  background: $gray-2;
+  border-bottom-color: $gray-4;
+
+  span:first-child {
+    color: $blue-3;
+  }
+
+  span:not(:first-child) {
+    border-color: $gray-4;
+    background: $gray-3;
+  }
+}
