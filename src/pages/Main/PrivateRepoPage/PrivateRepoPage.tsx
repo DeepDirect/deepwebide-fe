@@ -18,24 +18,17 @@ import MainPageType from '@/constants/enums/MainPageType.enum';
 import type { CreateRepoURL } from '@/types/apiEndpoints.types';
 import type { RepositoryItem } from '@/schemas/main.schema';
 import type { RepositoryQueryURL } from '@/types/apiEndpoints.types';
+import type { Page } from '@/types/page.types';
 
 import styles from './PrivateRepoPage.module.scss';
 import type RepositoryType from '@/constants/enums/RepositoryType.enum';
-
-type page = {
-  maxVisiblePages: number; // 5
-  page: number | null;
-  current: number | null;
-  size: number; // 7
-  total: number | null;
-};
 
 const getRepoURL: RepositoryQueryURL = '/api/repositories/mine';
 const postRepoURL: CreateRepoURL = '/api/repositories';
 
 const PrivateRepoPage = () => {
   const navigate = useNavigate();
-  const [pagination, setPagination] = useState<page>({
+  const [pagination, setPagination] = useState<Page>({
     maxVisiblePages: 5,
     page: null, // 1부터 시작
     current: 1, // 현재 페이지
