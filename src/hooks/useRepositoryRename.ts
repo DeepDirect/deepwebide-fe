@@ -2,10 +2,10 @@ import { useMutation, useQueryClient, type UseMutationOptions } from '@tanstack/
 import type { AxiosError } from 'axios';
 import { apiClient } from '@/api/client';
 import type { RepositoryRenameRequest, RepositoryRenameResponse } from '@/schemas/repo.schema';
-import type { RepositoryRenameURL } from '@/types/apiEndpoints.types';
+import type { RepositoryURL } from '@/types/apiEndpoints.types';
 
 export const useRepositoryRename = (
-  url: RepositoryRenameURL,
+  url: RepositoryURL,
   options?: Omit<
     UseMutationOptions<RepositoryRenameResponse, AxiosError, RepositoryRenameRequest>,
     'mutationFn'

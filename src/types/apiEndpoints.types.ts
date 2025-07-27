@@ -5,4 +5,4 @@ export type RepositoryQueryURL =
 
 export type CreateRepoURL = '/api/repositories';
 
-export type RepositoryRenameURL = `/api/repositories/${number}`;
+export type RepositoryURL = `/api/repositories/${number}`;
