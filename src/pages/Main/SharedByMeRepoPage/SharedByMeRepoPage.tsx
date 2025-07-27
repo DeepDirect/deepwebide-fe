@@ -86,7 +86,7 @@ const SharedByMeRepoPage = () => {
           <RepoListItem
             key={repo.repositoryId}
             info={repo}
-            pageType={MainPageType.PRIVATE_REPO}
+            pageType={MainPageType.SHARED_BY_ME}
             handleFavoriteClick={handleFavoriteClick}
             handleRepoClick={handleRepoClick}
           />
