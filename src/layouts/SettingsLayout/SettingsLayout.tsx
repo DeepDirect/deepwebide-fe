@@ -3,7 +3,7 @@ import styles from './SettingsLayout.module.scss';
 import { Outlet } from '@tanstack/react-router';
 
 import { Sidebar } from '@/components/organisms/Sidebar/RepoSidebar/RepoSidebar';
-import Header from '@/components/organisms/Header/Header';
+import AuthHeader from '@/components/organisms/Header/AuthHeader/AuthHeader';
 
 const SettingsLayout = () => {
   // const location = useLocation();
@@ -12,7 +12,7 @@ const SettingsLayout = () => {
   return (
     <div className={styles.settingsLayout}>
       <header className={styles.header}>
-        <Header variant="auth" />
+        <AuthHeader />
       </header>
 
       <aside className={styles.sidebar}>
