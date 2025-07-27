@@ -10,7 +10,9 @@
   background-color: $white-1;
 
   @include mobile {
-    padding: 3rem 1rem 1rem calc(1rem + 44px);
+    min-width: 520px;
+    margin-left: 44px;
+    padding: 3rem 1rem;
   }
 
   .topWrapper {

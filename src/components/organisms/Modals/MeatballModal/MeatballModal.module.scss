@@ -4,7 +4,7 @@
   position: fixed;
   top: 0;
   left: 0;
-  z-index: $modal-overlay-z-index;
+  z-index: 7;
   width: 100vw;
   height: 100vh;
   background: transparent;
@@ -12,7 +12,7 @@
 
 .content {
   position: absolute;
-  z-index: $modal-z-index;
+  z-index: 8;
   width: max-content;
   max-width: 480px;
   min-width: 200px;
