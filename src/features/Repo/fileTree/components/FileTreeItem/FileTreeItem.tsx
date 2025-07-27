@@ -47,25 +47,27 @@ const FileTreeItem: React.FC<FileTreeItemProps> = ({
       aria-expanded={node.type === 'folder' ? isExpanded : undefined}
       style={{ paddingLeft: `${8 + node.level * 16}px` }}
     >
-      {/* 폴더인 경우 화살표 표시 */}
-      {node.type === 'folder' && (
-        <div
-          className={clsx(styles.arrow, {
-            [styles.expanded]: isExpanded,
-          })}
-        >
-          <svg width="8" height="8" viewBox="0 0 16 16" className={styles.arrowIcon}>
-            <path
-              d="M6 4l4 4-4 4"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-      )}
+      {/* 화살표 영역 - 항상 동일한 크기 유지 */}
+      <div className={styles.arrowArea}>
+        {node.type === 'folder' && (
+          <div
+            className={clsx(styles.arrow, {
+              [styles.expanded]: isExpanded,
+            })}
+          >
+            <svg width="8" height="8" viewBox="0 0 16 16" className={styles.arrowIcon}>
+              <path
+                d="M6 4l4 4-4 4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
+        )}
+      </div>
 
       {/* 아이콘 */}
       <div className={styles.iconWrapper}>
