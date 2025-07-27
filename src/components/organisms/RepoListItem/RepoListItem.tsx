@@ -1,7 +1,7 @@
 import 'dayjs/locale/ko';
 
-import { useRef, useState } from 'react';
 import dayjs from 'dayjs';
+import { useRef, useState } from 'react';
 
 import FillHeartIcon from '@/assets/icons/fill-heart.svg?react';
 import HeartIcon from '@/assets/icons/heart.svg?react';
@@ -11,12 +11,14 @@ import MainPageType from '@/constants/enums/MainPageType.enum';
 
 import useDeleteRepository from '@/hooks/useDeleteRepository';
 import useRepositoryRename from '@/hooks/useRepositoryRename';
+import useShareRepositoryStatus from '@/hooks/useShareRepositoryStatus';
 
+import DeleteRepoAlertDialog from '@/features/AlertDialog/common/DeleteRepoAlertDialog';
+import ShareMyRepoAlertDialog from '@/features/AlertDialog/RepoOwner/ShareMyRepoAlertDialog';
 import ChangeRepoNameModal from '@/features/Modals/ChangeRepoNameModal/ChangeRepoNameModal';
 import PrivateRepoMeatballModal from '@/features/Modals/PrivateRepoMeatballModal/PrivateRepoMeatballModal';
 import SharedByMeRepoMeatballModal from '@/features/Modals/SharedByMeRepoMeatballModal/SharedByMeRepoMeatballModal';
 import SharedWithMeRepoMeatballModal from '@/features/Modals/SharedWithMeRepoMeatballModal/SharedWithMeRepoMeatballModal';
-import DeleteRepoAlertDialog from '@/features/AlertDialog/common/DeleteRepoAlertDialog';
 
 import type { RepositoryItem } from '@/schemas/main.schema';
 
@@ -48,12 +50,23 @@ const RepoListItem: React.FC<RepositoryProps> = ({
   const [isModlasOpen, setIsModalsOpen] = useState({
     changeRepoName: false,
     deleteRepoAlert: false,
+    shareMyRepoAlertDialog: false,
   });
   const {
     mutate: renameRepository,
     // isLoading: isRenaming,
   } = useRepositoryRename(`/api/repositories/${info.repositoryId}`);
-
+  const {
+    mutate: shareRepositoryStatus,
+    // isLoading: isRenaming,
+  } = useShareRepositoryStatus(`/api/repositories/${info.repositoryId}`, {
+    onSuccess: res => {
+      console.log('공유 상태 변경 완료:', res);
+    },
+    onError: err => {
+      console.error('공유 상태 변경 실패:', err);
+    },
+  });
   const deleteRepositoryMutation = useDeleteRepository(`/api/repositories/${info.repositoryId}`, {
     onSuccess: () => {
       console.log('삭제 성공');
@@ -103,6 +116,12 @@ const RepoListItem: React.FC<RepositoryProps> = ({
   const openDeleteRepoAlert = () => {
     setIsModalsOpen(prev => ({ ...prev, deleteRepoAlert: !isModlasOpen.deleteRepoAlert }));
   };
+  const openShareMyRepoAlertDialog = () => {
+    setIsModalsOpen(prev => ({
+      ...prev,
+      shareMyRepoAlertDialog: !isModlasOpen.shareMyRepoAlertDialog,
+    }));
+  };
 
   const handleConfirmChangeRepoName = (newName: string) => {
     renameRepository(
@@ -117,9 +136,11 @@ const RepoListItem: React.FC<RepositoryProps> = ({
       }
     );
   };
-
-  const handleDeleteRepo = () => {
+  const handleConfirmDeleteRepo = () => {
     deleteRepositoryMutation.mutate();
+  };
+  const handleConfirmShare = () => {
+    shareRepositoryStatus();
   };
 
   return (
@@ -174,6 +195,7 @@ const RepoListItem: React.FC<RepositoryProps> = ({
                   open={isModalOpen}
                   onOpenChange={setIsModalOpen}
                   position={modalPosition}
+                  onShare={() => openShareMyRepoAlertDialog()}
                   onRename={() => openChangeRepoName()}
                   onDelete={() => openDeleteRepoAlert()}
                 />
@@ -215,7 +237,12 @@ const RepoListItem: React.FC<RepositoryProps> = ({
       <DeleteRepoAlertDialog
         open={isModlasOpen.deleteRepoAlert}
         onOpenChange={openDeleteRepoAlert}
-        onConfirm={handleDeleteRepo}
+        onConfirm={handleConfirmDeleteRepo}
+      />
+      <ShareMyRepoAlertDialog
+        open={isModlasOpen.shareMyRepoAlertDialog}
+        onOpenChange={openShareMyRepoAlertDialog}
+        onConfirm={handleConfirmShare}
       />
     </div>
   );
