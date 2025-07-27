@@ -9,6 +9,7 @@ import MeatballIcon from '@/assets/icons/meatball.svg?react';
 
 import MainPageType from '@/constants/enums/MainPageType.enum';
 
+import useDeleteRepository from '@/hooks/useDeleteRepository';
 import useRepositoryRename from '@/hooks/useRepositoryRename';
 
 import ChangeRepoNameModal from '@/features/Modals/ChangeRepoNameModal/ChangeRepoNameModal';
@@ -50,6 +51,15 @@ const RepoListItem: React.FC<RepositoryProps> = ({
     mutate: renameRepository,
     // isLoading: isRenaming,
   } = useRepositoryRename(`/api/repositories/${info.repositoryId}`);
+
+  const deleteRepositoryMutation = useDeleteRepository(`/api/repositories/${info.repositoryId}`, {
+    onSuccess: () => {
+      console.log('삭제 성공');
+    },
+    onError: error => {
+      console.error('삭제 실패', error);
+    },
+  });
 
   const handleMeatballClick = () => {
     if (meatballRef.current) {
@@ -93,14 +103,18 @@ const RepoListItem: React.FC<RepositoryProps> = ({
     renameRepository(
       { repositoryName: newName },
       {
-        onSuccess: data => {
-          console.log(data);
+        onSuccess: () => {
+          console.log('레포 삭제 성공');
         },
         onError: error => {
           console.error(error);
         },
       }
     );
+  };
+
+  const handleDeleteRepo = () => {
+    deleteRepositoryMutation.mutate();
   };
 
   return (
@@ -156,7 +170,7 @@ const RepoListItem: React.FC<RepositoryProps> = ({
                   onOpenChange={setIsModalOpen}
                   position={modalPosition}
                   onRename={() => openChangeRepoName()}
-                  onDelete={() => console.log('삭제')}
+                  onDelete={() => handleDeleteRepo()}
                 />
               );
             case MainPageType.SHARED_BY_ME:

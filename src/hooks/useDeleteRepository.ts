@@ -4,7 +4,7 @@ import type { AxiosError } from 'axios';
 import { apiClient } from '@/api/client';
 import type { RepositoryURL } from '@/types/apiEndpoints.types';
 
-export const useDeleteRepository = (
+const useDeleteRepository = (
   url: RepositoryURL,
   options?: Omit<UseMutationOptions<void, AxiosError, number>, 'mutationFn'>
 ) => {
@@ -15,3 +15,5 @@ export const useDeleteRepository = (
     ...options,
   });
 };
+
+export default useDeleteRepository;
