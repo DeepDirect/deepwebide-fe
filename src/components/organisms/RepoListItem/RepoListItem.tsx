@@ -67,7 +67,10 @@ const RepoListItem: React.FC<RepositoryProps> = ({
       console.error('공유 상태 변경 실패:', err);
     },
   });
-  const deleteRepositoryMutation = useDeleteRepository(`/api/repositories/${info.repositoryId}`, {
+  const {
+    mutate: deleteRepository,
+    // isLoading: isDeleting
+  } = useDeleteRepository(`/api/repositories/${info.repositoryId}`, {
     onSuccess: () => {
       console.log('삭제 성공');
     },
@@ -137,7 +140,7 @@ const RepoListItem: React.FC<RepositoryProps> = ({
     );
   };
   const handleConfirmDeleteRepo = () => {
-    deleteRepositoryMutation.mutate();
+    deleteRepository();
   };
   const handleConfirmShare = () => {
     shareRepositoryStatus();
