@@ -1,15 +1,16 @@
 // 메인 컴포넌트
-export { default as FileTree } from './FileTree.tsx';
+export { default } from './FileTree';
+export { default as FileTree } from './FileTree';
 
 // 개별 컴포넌트
-export { default as FileTreeItem } from './components/FileTreeItem/FileTreeItem.tsx';
+export { default as FileTreeItem } from './components/FileTreeItem/FileTreeItem';
 
 // 훅들
-export { useFileTree } from './hooks/useFileTree.ts';
-export { useFileTreeActions } from './hooks/useFileTreeActions.ts';
+export { useFileTree } from './hooks/useFileTree';
+export { useFileTreeActions } from './hooks/useFileTreeActions';
 
 // 유틸리티
-export * from './utils.ts';
+export * from './utils';
 
 // 타입들
-export type * from './types.ts';
+export type * from './types';
