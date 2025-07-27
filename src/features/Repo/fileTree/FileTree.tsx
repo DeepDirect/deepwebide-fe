@@ -1,8 +1,11 @@
 import React from 'react';
 import clsx from 'clsx';
 import FileTreeItem from './components/FileTreeItem/FileTreeItem';
+import FileTreeContextMenu from './components/FileTreeContextMenu/FileTreeContextMenu';
+import CreateFileModal from './components/CreateFileModal/CreateFileModal';
 import { useFileTree } from './hooks/useFileTree';
 import { useFileTreeActions } from './hooks/useFileTreeActions';
+import { useFileTreeOperations } from './hooks/useFileTreeOperations';
 import styles from './FileTree.module.scss';
 import type { ApiFileTreeResponse, FileTreeNode } from './types';
 
@@ -34,6 +37,33 @@ const FileTree: React.FC<FileTreeProps> = ({
     setSelectedFile,
   });
 
+  const {
+    // 모달 상태
+    createModalOpen,
+    createModalType,
+    createModalParent,
+    editingNode,
+
+    // 모달 제어
+    openCreateModal,
+    closeCreateModal,
+    startEditing,
+    stopEditing,
+
+    // CRUD 작업
+    createItem,
+    renameItem,
+    deleteItem,
+
+    // 클립보드 작업
+    canPaste,
+    copyNode,
+    cutNode,
+    pasteNode,
+  } = useFileTreeOperations({
+    repoId,
+  });
+
   /**
    * 트리 노드들을 재귀적으로 렌더링
    */
@@ -41,6 +71,7 @@ const FileTree: React.FC<FileTreeProps> = ({
     return nodes.map(node => {
       const isExpanded = expandedFolders.has(node.id);
       const isSelected = selectedFile === node.path;
+      const isEditing = editingNode?.id === node.id;
 
       return (
         <React.Fragment key={node.id}>
@@ -50,6 +81,19 @@ const FileTree: React.FC<FileTreeProps> = ({
             isSelected={isSelected}
             onFileClick={handleFileClick}
             onFolderToggle={handleFolderToggle}
+            // 컨텍스트 메뉴 관련
+            onNewFile={parent => openCreateModal('file', parent)}
+            onNewFolder={parent => openCreateModal('folder', parent)}
+            onRename={startEditing}
+            onDelete={deleteItem}
+            onCopy={copyNode}
+            onCut={cutNode}
+            onPaste={pasteNode}
+            canPaste={canPaste}
+            // 인라인 편집 관련
+            isEditing={isEditing}
+            onEditSave={renameItem}
+            onEditCancel={stopEditing}
           />
 
           {/* 폴더가 확장되어 있고 자식이 있으면 재귀 렌더링 */}
@@ -80,6 +124,9 @@ const FileTree: React.FC<FileTreeProps> = ({
         <div className={styles.error}>
           <div className={styles.errorIcon}>⚠️</div>
           <span className={styles.errorText}>{error}</span>
+          <button className={styles.retryButton} onClick={() => window.location.reload()}>
+            다시 시도
+          </button>
         </div>
       </div>
     );
@@ -88,19 +135,46 @@ const FileTree: React.FC<FileTreeProps> = ({
   // 데이터가 없는 경우
   if (!apiData?.data || apiData.status !== 200 || treeData.length === 0) {
     return (
-      <div className={clsx(styles.fileTree, className)}>
-        <div className={styles.empty}>
-          <div className={styles.emptyIcon}>📁</div>
-          <span className={styles.emptyText}>파일이 없습니다</span>
+      <FileTreeContextMenu
+        onNewFile={() => openCreateModal('file')}
+        onNewFolder={() => openCreateModal('folder')}
+        onPaste={() => pasteNode()}
+        canPaste={canPaste}
+      >
+        <div className={clsx(styles.fileTree, className)}>
+          <div className={styles.empty}>
+            <div className={styles.emptyIcon}>📁</div>
+            <span className={styles.emptyText}>파일이 없습니다</span>
+            <span className={styles.emptyHint}>우클릭으로 파일을 생성하세요</span>
+          </div>
         </div>
-      </div>
+      </FileTreeContextMenu>
     );
   }
 
   return (
-    <div className={clsx(styles.fileTree, className)}>
-      <div className={styles.treeContainer}>{renderTreeNodes(treeData)}</div>
-    </div>
+    <>
+      <FileTreeContextMenu
+        onNewFile={() => openCreateModal('file')}
+        onNewFolder={() => openCreateModal('folder')}
+        onPaste={() => pasteNode()}
+        canPaste={canPaste}
+      >
+        <div className={clsx(styles.fileTree, className)}>
+          <div className={styles.treeContainer}>{renderTreeNodes(treeData)}</div>
+        </div>
+      </FileTreeContextMenu>
+
+      {/* 파일/폴더 생성 모달 */}
+      <CreateFileModal
+        open={createModalOpen}
+        onOpenChange={closeCreateModal}
+        type={createModalType}
+        parentNode={createModalParent}
+        onConfirm={createItem}
+        onCancel={closeCreateModal}
+      />
+    </>
   );
 };
 
