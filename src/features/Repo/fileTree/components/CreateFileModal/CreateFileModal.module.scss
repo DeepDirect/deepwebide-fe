@@ -1,0 +1,102 @@
+@use '@/styles/variables' as *;
+
+.createFileModal {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.parentPath {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-radius: 6px;
+  background-color: var(--create-modal-path-bg);
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  font-family: $font-family-inter;
+  font-size: $font-size-xsmall;
+  font-weight: $font-weight-medium;
+  color: var(--create-modal-text);
+}
+
+.path {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-family: $font-family-inter;
+  font-family: 'Courier New', monospace;
+  font-size: $font-size-xxsmall;
+  font-weight: $font-weight-regular;
+  color: var(--create-modal-path-text);
+  background-color: var(--create-modal-path-code-bg);
+}
+
+.errorInput {
+  :global(.input) {
+    border-color: var(--create-modal-error) !important;
+
+    &:focus {
+      border-color: var(--create-modal-error) !important;
+      box-shadow: 0 0 0 2px rgb(220 38 38 / 20%) !important;
+    }
+  }
+}
+
+.errorMessage {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+  font-size: $font-size-xxsmall;
+  font-weight: $font-weight-medium;
+  color: var(--create-modal-error);
+
+  &::before {
+    content: '⚠️';
+    font-size: 12px;
+  }
+}
+
+.warningMessage {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+  font-size: $font-size-xxsmall;
+  font-weight: $font-weight-regular;
+  color: var(--create-modal-warning);
+
+  &::before {
+    content: '💡';
+    font-size: 12px;
+  }
+}
+
+// 다크모드/라이트모드 색상 변수
+:root {
+  // 라이트모드
+  --create-modal-text: #{$gray-1};
+  --create-modal-path-bg: #{$gray-10};
+  --create-modal-path-text: #{$gray-3};
+  --create-modal-path-code-bg: #{$white-2};
+  --create-modal-error: #{$red};
+  --create-modal-warning: #{$orange};
+}
+
+:global(.dark) {
+  // 다크모드
+  --create-modal-text: #{$gray-7};
+  --create-modal-path-bg: #{$gray-4};
+  --create-modal-path-text: #{$gray-6};
+  --create-modal-path-code-bg: #{$gray-3};
+  --create-modal-error: #{$red};
+  --create-modal-warning: #{$orange};
+}
