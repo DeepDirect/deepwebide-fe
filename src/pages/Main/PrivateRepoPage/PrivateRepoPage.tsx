@@ -46,8 +46,8 @@ const PrivateRepoPage = () => {
   const [isLiked, setIsLiked] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false); // NOTE: 레포 생성 모달 열림 여부
   const { data, isSuccess, isError, error, refetch } = useGetRepository(getRepoURL, {
-    page: (pagination.page ?? 1) - 1,
-    size: pagination.current ?? 7,
+    page: (pagination.page || 1) - 1,
+    size: pagination.current || 7,
     liked: isLiked,
   });
   const createMutation = useCreateRepository(postRepoURL);
@@ -146,9 +146,9 @@ const PrivateRepoPage = () => {
 
       <div className={styles.paginationWrapper}>
         <Pagination
-          maxVisiblePages={pagination.total ?? 0}
-          totalPages={pagination.total ?? 1}
-          currentPage={pagination.current ?? 1}
+          maxVisiblePages={pagination.total || 1}
+          totalPages={pagination.total || 1}
+          currentPage={pagination.current || 1}
           handlePageChange={handlePageChange}
         />
       </div>
