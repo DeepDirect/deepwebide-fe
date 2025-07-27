@@ -13,5 +13,20 @@ export const CreateRepoResponseSchema = z.object({
   createdAt: z.string(),
 });
 
+export const RepositoryRenameRequestSchema = z.object({
+  repositoryName: z.string(),
+});
+
+export const RepositoryRenameResponseSchema = z.object({
+  repositoryId: z.number(),
+  repositoryName: z.string(),
+  ownerId: z.number(),
+  ownerName: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
 export type CreateRepoRequest = z.infer<typeof CreateRepoRequestSchema>;
 export type CreateRepoResponse = z.infer<typeof CreateRepoResponseSchema>;
+export type RepositoryRenameRequest = z.infer<typeof RepositoryRenameRequestSchema>;
+export type RepositoryRenameResponse = z.infer<typeof RepositoryRenameResponseSchema>;
