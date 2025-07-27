@@ -1,0 +1,142 @@
+@use '@/styles/variables' as *;
+
+.fileTreeItem {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; // 왼쪽 정렬 고정
+  gap: 4px;
+  box-sizing: border-box;
+  min-height: 24px;
+  padding: 2px 8px 2px 0;
+  border-radius: 4px;
+  font-family: $font-family-inter;
+  font-size: $font-size-xxsmall;
+  font-weight: $font-weight-regular;
+  line-height: 1.2;
+  color: var(--filetree-text);
+  transition: all 0.15s ease;
+  cursor: pointer;
+  user-select: none;
+
+  &:hover {
+    color: var(--filetree-text-hover);
+    background-color: var(--filetree-item-hover);
+  }
+
+  &:focus {
+    outline: none;
+    color: var(--filetree-text-hover);
+    background-color: var(--filetree-item-focus);
+  }
+
+  &.selected {
+    color: var(--filetree-text-selected);
+    background-color: var(--filetree-item-selected);
+
+    &:hover {
+      background-color: var(--filetree-item-selected-hover);
+    }
+  }
+
+  // 파일과 폴더에 따른 미세한 스타일 차이
+  &.folder {
+    font-weight: $font-weight-medium;
+  }
+
+  &.file {
+    font-weight: $font-weight-regular;
+  }
+}
+
+.arrow {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-left: -2px;
+  opacity: 0.7;
+  transition: transform 0.15s ease;
+
+  &.expanded {
+    transform: rotate(90deg);
+  }
+}
+
+.arrowIcon {
+  width: 8px;
+  height: 8px;
+  color: var(--filetree-arrow);
+  transition: color 0.15s ease;
+
+  .fileTreeItem:hover & {
+    color: var(--filetree-arrow-hover);
+  }
+}
+
+.iconWrapper {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+}
+
+.icon {
+  width: 16px;
+  height: 16px;
+  opacity: 0.8;
+  transition: opacity 0.15s ease;
+  object-fit: contain;
+
+  .fileTreeItem:hover & {
+    opacity: 1;
+  }
+
+  .fileTreeItem.selected & {
+    opacity: 1;
+  }
+
+  // 다크모드에서 아이콘을 밝게 만들기
+  :global(.dark) & {
+    filter: brightness(0) invert(1) brightness(0.8);
+  }
+}
+
+.name {
+  flex: 0 1 auto; // flex-grow: 0, flex-shrink: 1, flex-basis: auto
+  min-width: 0;
+  margin-left: 0; // 아이콘과의 간격은 부모의 gap으로 처리
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// 다크모드/라이트모드 색상 변수
+:root {
+  // 라이트모드
+  --filetree-text: #{$gray-1};
+  --filetree-text-hover: #{$black-1};
+  --filetree-text-selected: #{$white-2};
+  --filetree-item-hover: #{$gray-10};
+  --filetree-item-focus: #{$gray-9};
+  --filetree-item-selected: #{$blue-3};
+  --filetree-item-selected-hover: #{$blue-3};
+  --filetree-arrow: #{$gray-5};
+  --filetree-arrow-hover: #{$gray-1};
+}
+
+:global(.dark) {
+  // 다크모드
+  --filetree-text: #{$gray-7};
+  --filetree-text-hover: #{$white-2};
+  --filetree-text-selected: #{$white-2};
+  --filetree-item-hover: #{$gray-4};
+  --filetree-item-focus: #{$gray-3};
+  --filetree-item-selected: #{$blue-3};
+  --filetree-item-selected-hover: #{$blue-3};
+  --filetree-arrow: #{$gray-6};
+  --filetree-arrow-hover: #{$white-2};
+}
