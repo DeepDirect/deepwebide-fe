@@ -40,6 +40,16 @@ const CreateFileModal: React.FC<CreateFileModalProps> = ({
       return '파일명에는 < > : " / \\ | ? * 문자를 사용할 수 없습니다.';
     }
 
+    // 시작과 끝의 공백, 점 제거
+    const trimmedName = name.trim();
+    if (trimmedName.startsWith('.') && trimmedName.length === 1) {
+      return '파일명은 단순히 "."일 수 없습니다.';
+    }
+
+    if (trimmedName === '..' || trimmedName === '...') {
+      return '파일명으로 ".." 또는 "..."을 사용할 수 없습니다.';
+    }
+
     // Windows 예약어 검사
     const reservedNames = [
       'CON',
@@ -65,26 +75,30 @@ const CreateFileModal: React.FC<CreateFileModalProps> = ({
       'LPT8',
       'LPT9',
     ];
-    if (reservedNames.includes(name.toUpperCase().split('.')[0])) {
+
+    const nameWithoutExt = trimmedName.split('.')[0].toUpperCase();
+    if (reservedNames.includes(nameWithoutExt)) {
       return '이 이름은 시스템에서 예약된 이름입니다.';
     }
 
-    // 파일의 경우 확장자 권장
-    if (isFile && !name.includes('.')) {
-      return ''; // 경고는 하지 않지만 확장자가 없다는 것을 알 수 있음
+    // 파일명 길이 검사
+    if (trimmedName.length > 255) {
+      return '파일명이 너무 깁니다. (최대 255자)';
     }
 
     return '';
   };
 
   const handleConfirm = () => {
-    const validationError = validateFileName(fileName);
+    const trimmedName = fileName.trim();
+    const validationError = validateFileName(trimmedName);
+
     if (validationError) {
       setError(validationError);
       return;
     }
 
-    onConfirm(fileName.trim(), parentNode?.path);
+    onConfirm(trimmedName, parentNode?.path);
     handleClose();
   };
 
@@ -102,7 +116,7 @@ const CreateFileModal: React.FC<CreateFileModalProps> = ({
     setFileName(value);
 
     // 입력할 때마다 실시간 검증
-    if (error && value) {
+    if (error && value.trim()) {
       const validationError = validateFileName(value);
       if (!validationError) {
         setError('');
@@ -114,12 +128,19 @@ const CreateFileModal: React.FC<CreateFileModalProps> = ({
     if (e.key === 'Enter') {
       e.preventDefault();
       handleConfirm();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      handleClose();
     }
   };
 
   // 모달이 열릴 때 입력 필드에 포커스
   useEffect(() => {
     if (open) {
+      // 상태 초기화
+      setFileName('');
+      setError('');
+
       const timer = setTimeout(() => {
         const input = document.querySelector(
           'input[placeholder*="입력하세요"]'
@@ -134,11 +155,12 @@ const CreateFileModal: React.FC<CreateFileModalProps> = ({
   }, [open]);
 
   const isConfirmDisabled = !fileName.trim() || !!error;
+  const showExtensionWarning = isFile && fileName.trim() && !fileName.includes('.') && !error;
 
   return (
     <BaseModal
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={handleClose}
       title={title}
       confirmText="생성"
       cancelText="취소"
@@ -163,9 +185,13 @@ const CreateFileModal: React.FC<CreateFileModalProps> = ({
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
             className={error ? styles.errorInput : ''}
+            autoComplete="off"
+            spellCheck="false"
           />
+
           {error && <div className={styles.errorMessage}>{error}</div>}
-          {!error && isFile && !fileName.includes('.') && fileName.length > 0 && (
+
+          {showExtensionWarning && (
             <div className={styles.warningMessage}>
               확장자를 포함하는 것을 권장합니다 (예: .js, .ts, .md)
             </div>
