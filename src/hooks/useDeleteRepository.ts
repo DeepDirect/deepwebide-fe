@@ -6,9 +6,9 @@ import type { RepositoryURL } from '@/types/apiEndpoints.types';
 
 const useDeleteRepository = (
   url: RepositoryURL,
-  options?: Omit<UseMutationOptions<void, AxiosError, number>, 'mutationFn'>
+  options?: Omit<UseMutationOptions<void, AxiosError, void>, 'mutationFn'>
 ) => {
-  return useMutation<void, AxiosError, number>({
+  return useMutation<void, AxiosError, void>({
     mutationFn: async () => {
       await apiClient.delete(`${url}`);
     },
