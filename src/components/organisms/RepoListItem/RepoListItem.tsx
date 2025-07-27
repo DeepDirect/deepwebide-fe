@@ -145,6 +145,14 @@ const RepoListItem: React.FC<RepositoryProps> = ({
   const handleConfirmShare = () => {
     shareRepositoryStatus();
   };
+  const handleShareLinkCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(info.shareLink);
+      alert('링크가 복사되었습니다!');
+    } catch (err) {
+      console.error('링크 복사 실패:', err);
+    }
+  };
 
   return (
     <div className={styles.repositoryWrapper}>
@@ -212,7 +220,7 @@ const RepoListItem: React.FC<RepositoryProps> = ({
                   shareLink={info.shareLink ?? ''}
                   entryCode={''} // TODO: entryCode는 API 연동 후 추가
                   onRename={() => openChangeRepoName()}
-                  onShareLinkCopy={() => console.log('링크 복사됨')}
+                  onShareLinkCopy={() => handleShareLinkCopy()}
                   onEntryCodeCopy={() => console.log('코드 복사됨')}
                   onCancelShare={() => console.log('공유 취소')}
                 />
@@ -224,7 +232,7 @@ const RepoListItem: React.FC<RepositoryProps> = ({
                   onOpenChange={setIsModalOpen}
                   position={modalPosition}
                   shareLink={info.shareLink ?? ''}
-                  onShareLinkCopy={() => console.log('링크 복사됨')}
+                  onShareLinkCopy={() => handleShareLinkCopy()}
                   onLeaveRepository={() => console.log('레포 떠남')}
                 />
               );
