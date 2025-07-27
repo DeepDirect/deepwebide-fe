@@ -26,6 +26,9 @@ const useCreateRepository = (
 
       options?.onSuccess?.(data, variables, context);
     },
+    onError: (error, variables, context) => {
+      options?.onError?.(error, variables, context);
+    },
     ...options,
   });
 };
