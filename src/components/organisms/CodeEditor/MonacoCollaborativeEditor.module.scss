@@ -21,10 +21,10 @@
       &.vertical .slider,
       &.horizontal .slider {
         border-radius: 6px !important;
-        background-color: $gray-6 !important;
+        background-color: var(--monaco-scrollbar-thumb) !important;
 
         &:hover {
-          background-color: $gray-5 !important;
+          background-color: var(--monaco-scrollbar-thumb-hover) !important;
         }
       }
     }
