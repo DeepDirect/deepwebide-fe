@@ -5,6 +5,7 @@ import { useYjsCollaboration } from '@/hooks/useYjsCollaboration';
 import { useEditorStore } from '@/stores/editorStore';
 import { useTabStore } from '@/stores/tabStore';
 import { useCollaborationStore } from '@/stores/collaborationStore';
+import { useThemeStore } from '@/stores/themeStore';
 import { getLanguageFromFile } from '@/utils/fileExtensions';
 import CursorOverlay from './CursorOverlay';
 import styles from './MonacoCollaborativeEditor.module.scss';
@@ -121,10 +122,13 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
   const { updateContent, saveContent } = useEditorStore();
   const { openTabs } = useTabStore();
   const { users } = useCollaborationStore();
+  const { isDarkMode } = useThemeStore();
 
   const activeTab = openTabs.find(tab => tab.isActive);
   const language = activeTab ? getLanguageFromFile(activeTab.name) : 'plaintext';
   const roomId = activeTab && enableCollaboration ? `${repoId}-${activeTab.path}` : '';
+
+  const editorTheme = isDarkMode ? 'vs-dark' : 'vs';
 
   const { isConnected, isLoading } = useYjsCollaboration({
     roomId,
@@ -278,7 +282,7 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
           height="100%"
           language={language}
           value={enableCollaboration ? undefined : activeTab.content}
-          theme="vs"
+          theme={editorTheme}
           onChange={handleEditorChange}
           onMount={handleEditorDidMount}
           loading={
