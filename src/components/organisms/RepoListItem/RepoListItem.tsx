@@ -3,19 +3,22 @@ import 'dayjs/locale/ko';
 import { useRef, useState } from 'react';
 import dayjs from 'dayjs';
 
-import styles from './RepoListItem.module.scss';
-
-import PrivateRepoMeatballModal from '@/features/Modals/PrivateRepoMeatballModal/PrivateRepoMeatballModal';
-import SharedByMeRepoMeatballModal from '@/features/Modals/SharedByMeRepoMeatballModal/SharedByMeRepoMeatballModal';
-import SharedWithMeRepoMeatballModal from '@/features/Modals/SharedWithMeRepoMeatballModal/SharedWithMeRepoMeatballModal';
-
 import FillHeartIcon from '@/assets/icons/fill-heart.svg?react';
 import HeartIcon from '@/assets/icons/heart.svg?react';
 import MeatballIcon from '@/assets/icons/meatball.svg?react';
 
 import MainPageType from '@/constants/enums/MainPageType.enum';
 
+import useRepositoryRename from '@/hooks/useRepositoryRename';
+
+import ChangeRepoNameModal from '@/features/Modals/ChangeRepoNameModal/ChangeRepoNameModal';
+import PrivateRepoMeatballModal from '@/features/Modals/PrivateRepoMeatballModal/PrivateRepoMeatballModal';
+import SharedByMeRepoMeatballModal from '@/features/Modals/SharedByMeRepoMeatballModal/SharedByMeRepoMeatballModal';
+import SharedWithMeRepoMeatballModal from '@/features/Modals/SharedWithMeRepoMeatballModal/SharedWithMeRepoMeatballModal';
+
 import type { RepositoryItem } from '@/schemas/main.schema';
+
+import styles from './RepoListItem.module.scss';
 
 type RepositoryProps = {
   info: RepositoryItem;
@@ -40,6 +43,13 @@ const RepoListItem: React.FC<RepositoryProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalPosition, setModalPosition] = useState<positionType>({});
   const meatballRef = useRef<HTMLButtonElement>(null);
+  const [isModlasOpen, setIsModalsOpen] = useState({
+    ChangeRepoName: false,
+  });
+  const {
+    mutate: renameRepository,
+    // isLoading: isRenaming,
+  } = useRepositoryRename(`/api/repositories/${info.repositoryId}`);
 
   const handleMeatballClick = () => {
     if (meatballRef.current) {
@@ -73,6 +83,24 @@ const RepoListItem: React.FC<RepositoryProps> = ({
       setModalPosition(setPotion);
     }
     setIsModalOpen(prev => !prev);
+  };
+
+  const openChangeRepoName = () => {
+    setIsModalsOpen(prev => ({ ...prev, ChangeRepoName: !isModlasOpen.ChangeRepoName }));
+  };
+
+  const handleConfirmChangeRepoName = (newName: string) => {
+    renameRepository(
+      { repositoryName: newName },
+      {
+        onSuccess: data => {
+          console.log(data);
+        },
+        onError: error => {
+          console.error(error);
+        },
+      }
+    );
   };
 
   return (
@@ -127,7 +155,7 @@ const RepoListItem: React.FC<RepositoryProps> = ({
                   open={isModalOpen}
                   onOpenChange={setIsModalOpen}
                   position={modalPosition}
-                  onRename={() => console.log('이름 변경')}
+                  onRename={() => openChangeRepoName()}
                   onDelete={() => console.log('삭제')}
                 />
               );
@@ -139,7 +167,7 @@ const RepoListItem: React.FC<RepositoryProps> = ({
                   position={modalPosition}
                   shareLink={info.shareLink ?? ''}
                   entryCode={''} // TODO: entryCode는 API 연동 후 추가
-                  onRename={() => console.log('이름 변경')}
+                  onRename={() => openChangeRepoName()}
                   onShareLinkCopy={() => console.log('링크 복사됨')}
                   onEntryCodeCopy={() => console.log('코드 복사됨')}
                   onCancelShare={() => console.log('공유 취소')}
@@ -158,6 +186,13 @@ const RepoListItem: React.FC<RepositoryProps> = ({
               );
           }
         })()}
+
+      <ChangeRepoNameModal
+        open={isModlasOpen.ChangeRepoName}
+        onOpenChange={openChangeRepoName}
+        currentName={info.repositoryName}
+        onConfirm={handleConfirmChangeRepoName}
+      />
     </div>
   );
 };
