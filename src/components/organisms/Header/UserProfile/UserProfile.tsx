@@ -3,6 +3,7 @@ import styles from './UserProfile.module.scss';
 import ProfileDropdown from '@/components/molecules/Modals/ProfileDropdown/ProfileDropdown';
 import MessageTextIcon from '@/assets/icons/message-text.svg?react';
 import moodHappyIcon from '@/assets/icons/mood-happy.svg';
+import { useAuthStore } from '@/stores/authStore';
 
 interface UserProfileProps {
   variant?: 'lightModeOnly' | 'darkModeSupport';
@@ -16,12 +17,17 @@ const UserProfile = ({
   onChatButtonClick,
 }: UserProfileProps) => {
   const navigate = useNavigate();
+  const { signout } = useAuthStore();
 
-  const handleLogout = () => {
-    // TODO: 로그아웃 처리 로직 구현
-    console.log('로그아웃 처리');
-    // signout(); // authStore 사용 시 주석 해제
-    navigate({ to: '/sign-in' });
+  const handleLogout = async () => {
+    try {
+      await signout();
+      navigate({ to: '/sign-in' });
+    } catch (error) {
+      // 에러 처리 로직 필요
+      console.error('로그아웃 처리 중 오류:', error);
+      navigate({ to: '/sign-in' });
+    }
   };
 
   return (
