@@ -67,6 +67,12 @@ button {
   --tab-scrollbar-thumb: #{variables.$gray-6};
   --tab-scrollbar-thumb-hover: #{variables.$gray-5};
   --tab-close-btn-bg: rgb(0 0 0 / 10%);
+
+  // light mode - monaco-editor
+  --editor-bg: #{variables.$white-2};
+  --editor-header: #{variables.$black-1};
+  --editor-text: #{variables.$gray-5};
+  --editor-point-color: #{variables.$orange};
   --monaco-scrollbar-thumb: #{variables.$gray-6};
   --monaco-scrollbar-thumb-hover: #{variables.$gray-5};
 }
@@ -103,6 +109,12 @@ button {
   --tab-scrollbar-thumb: #{variables.$gray-5};
   --tab-scrollbar-thumb-hover: #{variables.$gray-6};
   --tab-close-btn-bg: rgb(255 255 255 / 10%);
+
+  // dark mode mode - monaco-editor
+  --editor-bg: #{variables.$black-2};
+  --editor-header: #{variables.$white-2};
+  --editor-text: #{variables.$gray-7};
+  --editor-point-color: #{variables.$blue-3};
   --monaco-scrollbar-thumb: #{variables.$gray-5};
   --monaco-scrollbar-thumb-hover: #{variables.$gray-6};
 }
