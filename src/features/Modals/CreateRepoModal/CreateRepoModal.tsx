@@ -3,18 +3,19 @@ import BaseModal from '@/components/organisms/Modals/BaseModal/BaseModal';
 import Input from '@/components/atoms/Input/Input';
 import Select from '@/components/atoms/Select/Select';
 import styles from './CreateRepoModal.module.scss';
+import RepositoryType from '@/constants/enums/RepositoryType.enum';
 
 export interface CreateRepoModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onConfirm: (data: { name: string; projectType: string }) => void;
+  onConfirm: (data: { repositoryName: string; repositoryType: RepositoryType }) => void;
   onCancel?: () => void;
 }
 
 const PROJECT_TYPES = [
-  { value: 'Spring Boot', label: 'Spring Boot' },
-  { value: 'React', label: 'React' },
-  { value: 'FastAPI', label: 'FastAPI' },
+  { value: RepositoryType.SPRING_BOOT, label: 'Spring Boot' },
+  { value: RepositoryType.REACT, label: 'React' },
+  { value: RepositoryType.FAST_API, label: 'FastAPI' },
 ];
 
 const CreateRepoModal: React.FC<CreateRepoModalProps> = ({
@@ -24,7 +25,7 @@ const CreateRepoModal: React.FC<CreateRepoModalProps> = ({
   onCancel,
 }) => {
   const [repoName, setRepoName] = useState('');
-  const [projectType, setProjectType] = useState('Spring Boot');
+  const [projectType, setProjectType] = useState<RepositoryType>(RepositoryType.SPRING_BOOT);
 
   const handleConfirm = () => {
     // 레포지토리 이름이 비어있으면 아무것도 하지 않음
@@ -33,14 +34,14 @@ const CreateRepoModal: React.FC<CreateRepoModalProps> = ({
     }
 
     onConfirm({
-      name: repoName.trim(),
-      projectType,
+      repositoryName: repoName.trim(),
+      repositoryType: projectType,
     });
   };
 
   const handleCancel = () => {
     setRepoName('');
-    setProjectType('Spring Boot');
+    setProjectType(RepositoryType.SPRING_BOOT);
     if (onCancel) {
       onCancel();
     }
@@ -49,7 +50,7 @@ const CreateRepoModal: React.FC<CreateRepoModalProps> = ({
   const handleOpenChange = (open: boolean) => {
     if (!open) {
       setRepoName('');
-      setProjectType('Spring Boot');
+      setProjectType(RepositoryType.SPRING_BOOT);
     }
     onOpenChange(open);
   };
@@ -86,7 +87,7 @@ const CreateRepoModal: React.FC<CreateRepoModalProps> = ({
           <Select
             options={PROJECT_TYPES}
             value={projectType}
-            onValueChange={setProjectType}
+            onValueChange={value => setProjectType(value as RepositoryType)}
             className={styles.projectSelect}
           />
         </div>

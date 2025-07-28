@@ -1,13 +1,7 @@
 import 'dayjs/locale/ko';
 
-import { useRef, useState } from 'react';
 import dayjs from 'dayjs';
-
-import styles from './RepoListItem.module.scss';
-
-import PrivateRepoMeatballModal from '@/features/Modals/PrivateRepoMeatballModal/PrivateRepoMeatballModal';
-import SharedByMeRepoMeatballModal from '@/features/Modals/SharedByMeRepoMeatballModal/SharedByMeRepoMeatballModal';
-import SharedWithMeRepoMeatballModal from '@/features/Modals/SharedWithMeRepoMeatballModal/SharedWithMeRepoMeatballModal';
+import { useEffect, useRef, useState } from 'react';
 
 import FillHeartIcon from '@/assets/icons/fill-heart.svg?react';
 import HeartIcon from '@/assets/icons/heart.svg?react';
@@ -15,7 +9,24 @@ import MeatballIcon from '@/assets/icons/meatball.svg?react';
 
 import MainPageType from '@/constants/enums/MainPageType.enum';
 
-import type { RepositoryItem } from '@/types/repositoryItem.types';
+import useDeleteRepository from '@/hooks/useDeleteRepository';
+import useGetRepositoryEntrycode from '@/hooks/useGetRepositoryEntrycode';
+import useRepositoryExit from '@/hooks/useRepositoryExit';
+import useRepositoryRename from '@/hooks/useRepositoryRename';
+import useShareRepositoryStatus from '@/hooks/useShareRepositoryStatus';
+
+import CancelMyRepoShareAlertDialog from '@/features/AlertDialog/RepoOwner/CancelMyRepoShareAlertDialog';
+import DeleteRepoAlertDialog from '@/features/AlertDialog/common/DeleteRepoAlertDialog';
+import LeaveSharedRepoAlertDialog from '@/features/AlertDialog/RepoMember/LeaveSharedRepoAlertDialog';
+import ShareMyRepoAlertDialog from '@/features/AlertDialog/RepoOwner/ShareMyRepoAlertDialog';
+import ChangeRepoNameModal from '@/features/Modals/ChangeRepoNameModal/ChangeRepoNameModal';
+import PrivateRepoMeatballModal from '@/features/Modals/PrivateRepoMeatballModal/PrivateRepoMeatballModal';
+import SharedByMeRepoMeatballModal from '@/features/Modals/SharedByMeRepoMeatballModal/SharedByMeRepoMeatballModal';
+import SharedWithMeRepoMeatballModal from '@/features/Modals/SharedWithMeRepoMeatballModal/SharedWithMeRepoMeatballModal';
+
+import type { RepositoryItem } from '@/schemas/main.schema';
+
+import styles from './RepoListItem.module.scss';
 
 type RepositoryProps = {
   info: RepositoryItem;
@@ -31,6 +42,18 @@ type positionType = {
   left?: number;
 };
 
+const textCopy = async (text: string, successMessage: string, failMessage: string) => {
+  // TODO: return 값 boolean으로 변경 후 토스트 메시지 출력 되도록 변경해야 함.
+  try {
+    await navigator.clipboard.writeText(text);
+    alert(successMessage);
+    // return true;
+  } catch {
+    alert(failMessage);
+    // return false;
+  }
+};
+
 const RepoListItem: React.FC<RepositoryProps> = ({
   info,
   handleFavoriteClick,
@@ -40,6 +63,64 @@ const RepoListItem: React.FC<RepositoryProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalPosition, setModalPosition] = useState<positionType>({});
   const meatballRef = useRef<HTMLButtonElement>(null);
+  const [isModlasOpen, setIsModalsOpen] = useState({
+    pageModal: false,
+    changeRepoName: false,
+    deleteRepoAlert: false,
+    shareMyRepoAlertDialog: false,
+    cancelMyRepoShareAlert: false,
+    leaveSharedRepoAlertDialog: false,
+  });
+  const {
+    mutate: renameRepository,
+    // isLoading: isRenaming,
+  } = useRepositoryRename(`/api/repositories/${info.repositoryId}`);
+  const {
+    mutate: shareRepositoryStatus,
+    // isLoading: isRenaming,
+  } = useShareRepositoryStatus(`/api/repositories/${info.repositoryId}`, {
+    onSuccess: res => {
+      // TODO: 토스트 추가
+      console.log('공유 상태 변경 완료:', res);
+    },
+    onError: err => {
+      console.error('공유 상태 변경 실패:', err);
+    },
+  });
+  const {
+    mutate: deleteRepository,
+    // isLoading: isDeleting
+  } = useDeleteRepository(`/api/repositories/${info.repositoryId}`, {
+    onSuccess: () => {
+      // TODO: 토스트 추가
+      console.log('삭제 성공');
+    },
+    onError: error => {
+      console.error('삭제 실패', error);
+    },
+  });
+  const {
+    mutate: repositoryExit,
+    // isLoading: isExiting
+  } = useRepositoryExit(`/api/repositories/${info.repositoryId}/exit`, {
+    onSuccess: () => {
+      console.log('나가기 성공');
+    },
+    onError: error => {
+      console.error('나가기 실패', error);
+    },
+  });
+  const {
+    data: entryCodeRes,
+    isError: isEntryCodeError,
+    error: entryCodeError,
+  } = useGetRepositoryEntrycode(`/api/repositories/${info.repositoryId}/entrycode`);
+
+  useEffect(() => {
+    if (isEntryCodeError) {
+      console.error(entryCodeError); // TODO: 에러 처리 변경 필요
+    }
+  }, [isEntryCodeError, entryCodeError]);
 
   const handleMeatballClick = () => {
     if (meatballRef.current) {
@@ -73,6 +154,63 @@ const RepoListItem: React.FC<RepositoryProps> = ({
       setModalPosition(setPotion);
     }
     setIsModalOpen(prev => !prev);
+  };
+
+  const openChangeRepoName = () => {
+    setIsModalsOpen(prev => ({ ...prev, changeRepoName: !isModlasOpen.changeRepoName }));
+  };
+  const openDeleteRepoAlert = () => {
+    setIsModalsOpen(prev => ({ ...prev, deleteRepoAlert: !isModlasOpen.deleteRepoAlert }));
+  };
+  const openShareMyRepoAlertDialog = () => {
+    setIsModalsOpen(prev => ({
+      ...prev,
+      shareMyRepoAlertDialog: !isModlasOpen.shareMyRepoAlertDialog,
+    }));
+  };
+  const openCancelMyRepoShareAlertDialog = () => {
+    setIsModalsOpen(prev => ({
+      ...prev,
+      cancelMyRepoShareAlert: !isModlasOpen.cancelMyRepoShareAlert,
+    }));
+  };
+  const openLeaveSharedRepoAlertDialog = () => {
+    setIsModalsOpen(prev => ({
+      ...prev,
+      leaveSharedRepoAlertDialog: !isModlasOpen.leaveSharedRepoAlertDialog,
+    }));
+  };
+  const handleConfirmChangeRepoName = (newName: string) => {
+    // TODO: 토스트 추가
+    renameRepository(
+      { repositoryName: newName },
+      {
+        onSuccess: () => {
+          console.log('레포 삭제 성공');
+        },
+        onError: error => {
+          console.error(error);
+        },
+      }
+    );
+  };
+  const handleShareLinkCopy = () => {
+    // TODO: 토스트 추가
+    const successMessage = '공유 링크가 복사되었습니다!';
+    const failMessage = '공유 링크 복사에 실패했습니다.';
+    textCopy(info.shareLink, successMessage, failMessage);
+  };
+  const handleEntrycodeCopy = () => {
+    // TODO: 토스트 추가
+    if (!entryCodeRes?.entryCode) {
+      alert('입장코드 복사에 실패했습니다.');
+      return;
+    }
+
+    const successMessage = '입장코드가 복사되었습니다!';
+    const failMessage = '입장코드 복사에 실패했습니다.';
+
+    textCopy(entryCodeRes.entryCode, successMessage, failMessage);
   };
 
   return (
@@ -127,8 +265,9 @@ const RepoListItem: React.FC<RepositoryProps> = ({
                   open={isModalOpen}
                   onOpenChange={setIsModalOpen}
                   position={modalPosition}
-                  onRename={() => console.log('이름 변경')}
-                  onDelete={() => console.log('삭제')}
+                  onShare={() => openShareMyRepoAlertDialog()}
+                  onRename={() => openChangeRepoName()}
+                  onDelete={() => openDeleteRepoAlert()}
                 />
               );
             case MainPageType.SHARED_BY_ME:
@@ -137,12 +276,12 @@ const RepoListItem: React.FC<RepositoryProps> = ({
                   open={isModalOpen}
                   onOpenChange={setIsModalOpen}
                   position={modalPosition}
-                  shareLink={info.shareLink ?? ''}
-                  entryCode={''} // TODO: entryCode는 API 연동 후 추가
-                  onRename={() => console.log('이름 변경')}
-                  onShareLinkCopy={() => console.log('링크 복사됨')}
-                  onEntryCodeCopy={() => console.log('코드 복사됨')}
-                  onCancelShare={() => console.log('공유 취소')}
+                  shareLink={info.shareLink}
+                  entryCode={entryCodeRes?.entryCode}
+                  onRename={() => openChangeRepoName()}
+                  onShareLinkCopy={() => handleShareLinkCopy()}
+                  onEntryCodeCopy={() => handleEntrycodeCopy()}
+                  onCancelShare={() => openCancelMyRepoShareAlertDialog()}
                 />
               );
             case MainPageType.SHARED_WITH_ME:
@@ -151,13 +290,40 @@ const RepoListItem: React.FC<RepositoryProps> = ({
                   open={isModalOpen}
                   onOpenChange={setIsModalOpen}
                   position={modalPosition}
-                  shareLink={info.shareLink ?? ''}
-                  onShareLinkCopy={() => console.log('링크 복사됨')}
-                  onLeaveRepository={() => console.log('레포 떠남')}
+                  shareLink={info.shareLink}
+                  onShareLinkCopy={() => handleShareLinkCopy()}
+                  onLeaveRepository={() => openLeaveSharedRepoAlertDialog()}
                 />
               );
           }
         })()}
+
+      <ChangeRepoNameModal
+        open={isModlasOpen.changeRepoName}
+        onOpenChange={openChangeRepoName}
+        currentName={info.repositoryName}
+        onConfirm={handleConfirmChangeRepoName}
+      />
+      <DeleteRepoAlertDialog
+        open={isModlasOpen.deleteRepoAlert}
+        onOpenChange={openDeleteRepoAlert}
+        onConfirm={deleteRepository}
+      />
+      <ShareMyRepoAlertDialog
+        open={isModlasOpen.shareMyRepoAlertDialog}
+        onOpenChange={openShareMyRepoAlertDialog}
+        onConfirm={shareRepositoryStatus}
+      />
+      <CancelMyRepoShareAlertDialog
+        open={isModlasOpen.cancelMyRepoShareAlert}
+        onOpenChange={openCancelMyRepoShareAlertDialog}
+        onConfirm={shareRepositoryStatus}
+      />
+      <LeaveSharedRepoAlertDialog
+        open={isModlasOpen.leaveSharedRepoAlertDialog}
+        onOpenChange={openLeaveSharedRepoAlertDialog}
+        onConfirm={repositoryExit}
+      />
     </div>
   );
 };
