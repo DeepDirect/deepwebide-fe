@@ -39,12 +39,15 @@ type positionType = {
   left?: number;
 };
 
-const textCopy = async (text: string): Promise<boolean> => {
+const textCopy = async (text: string, successMessage: string, failMessage: string) => {
+  // TODO: return 값 boolean으로 변경 후 토스트 메시지 출력 되도록 변경해야 함.
   try {
     await navigator.clipboard.writeText(text);
-    return true;
+    alert(successMessage);
+    // return true;
   } catch {
-    return false;
+    alert(failMessage);
+    // return false;
   }
 };
 
@@ -169,29 +172,23 @@ const RepoListItem: React.FC<RepositoryProps> = ({
   const handleConfirmShare = () => {
     shareRepositoryStatus();
   };
-  const handleShareLinkCopy = async () => {
+  const handleShareLinkCopy = () => {
     // TODO: 토스트 추가
-    const isSuccess = await textCopy(info.shareLink);
-    if (isSuccess) {
-      alert('공유 링크가 복사되었습니다!');
-    } else {
-      alert('공유 링크 복사에 실패했습니다.');
-    }
+    const successMessage = '공유 링크가 복사되었습니다!';
+    const failMessage = '공유 링크 복사에 실패했습니다.';
+    textCopy(info.shareLink, successMessage, failMessage);
   };
-  const handleEntrycodeCopy = async () => {
+  const handleEntrycodeCopy = () => {
     // TODO: 토스트 추가
     if (!entryCodeRes?.entryCode) {
       alert('입장코드 복사에 실패했습니다.');
       return;
     }
 
-    const isSuccess = await textCopy(entryCodeRes.entryCode);
+    const successMessage = '입장코드가 복사되었습니다!';
+    const failMessage = '입장코드 복사에 실패했습니다.';
 
-    if (isSuccess) {
-      alert('입장코드가 복사되었습니다!');
-    } else {
-      alert('입장코드 복사에 실패했습니다.');
-    }
+    textCopy(entryCodeRes.entryCode, successMessage, failMessage);
   };
 
   return (
@@ -257,9 +254,8 @@ const RepoListItem: React.FC<RepositoryProps> = ({
                   open={isModalOpen}
                   onOpenChange={setIsModalOpen}
                   position={modalPosition}
-                  shareLink={info.shareLink ?? ''}
-                  // entryCode={entryCodeRes?.entryCode}
-                  entryCode={'대충테스트'}
+                  shareLink={info.shareLink}
+                  entryCode={entryCodeRes?.entryCode}
                   onRename={() => openChangeRepoName()}
                   onShareLinkCopy={() => handleShareLinkCopy()}
                   onEntryCodeCopy={() => handleEntrycodeCopy()}
@@ -272,7 +268,7 @@ const RepoListItem: React.FC<RepositoryProps> = ({
                   open={isModalOpen}
                   onOpenChange={setIsModalOpen}
                   position={modalPosition}
-                  shareLink={info.shareLink ?? ''}
+                  shareLink={info.shareLink}
                   onShareLinkCopy={() => handleShareLinkCopy()}
                   onLeaveRepository={() => console.log('레포 떠남')}
                 />
