@@ -53,6 +53,22 @@ button {
   --resizer-active-handle: #{variables.$white-2};
   --resizer-shadow: rgb(0 0 0 / 8%);
   --file-section-bg: #{variables.$white-1};
+
+  // light mode - tab bar
+  --tab-bar-bg: #{variables.$gray-9};
+  --tab-border: #{variables.$gray-8};
+  --tab-bg: #{variables.$gray-10};
+  --tab-bg-hover: #{variables.$gray-8};
+  --tab-bg-active: #{variables.$white-2};
+  --tab-text: #{variables.$gray-5};
+  --tab-text-hover: #{variables.$gray-2};
+  --tab-text-active: #{variables.$black-1};
+  --tab-active-line: #{variables.$orange};
+  --tab-scrollbar-thumb: #{variables.$gray-6};
+  --tab-scrollbar-thumb-hover: #{variables.$gray-5};
+  --tab-close-btn-bg: rgb(0 0 0 / 10%);
+  --monaco-scrollbar-thumb: #{variables.$gray-6};
+  --monaco-scrollbar-thumb-hover: #{variables.$gray-5};
 }
 
 .dark {
@@ -73,4 +89,20 @@ button {
   --resizer-active-handle: #{variables.$gray-1};
   --resizer-shadow: rgb(255 255 255 / 5%);
   --file-section-bg: #{variables.$gray-2};
+
+  // dark mode - tab bar
+  --tab-bar-bg: #{variables.$gray-3};
+  --tab-border: #{variables.$gray-4};
+  --tab-bg: #{variables.$gray-2};
+  --tab-bg-hover: #{variables.$gray-5};
+  --tab-bg-active: #{variables.$black-2};
+  --tab-text: #{variables.$gray-7};
+  --tab-text-hover: #{variables.$white-1};
+  --tab-text-active: #{variables.$white-2};
+  --tab-active-line: #{variables.$blue-3};
+  --tab-scrollbar-thumb: #{variables.$gray-5};
+  --tab-scrollbar-thumb-hover: #{variables.$gray-6};
+  --tab-close-btn-bg: rgb(255 255 255 / 10%);
+  --monaco-scrollbar-thumb: #{variables.$gray-5};
+  --monaco-scrollbar-thumb-hover: #{variables.$gray-6};
 }

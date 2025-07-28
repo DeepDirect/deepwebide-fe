@@ -49,7 +49,7 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
     onContentChange: updateContent,
     enableCollaboration,
   });
-
+  
   // Yjs 협업 훅
   const { isConnected, isLoading } = useYjsCollaboration({
     roomId,
