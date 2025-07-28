@@ -27,17 +27,18 @@ export default function SignInForm() {
   const email = watch('email');
   const password = watch('password');
 
-  const onSubmit = (data: SignInFormValues) => {
-    // TODO: 로그인 API 호출
-    console.log('로그인 시도:', data);
-
-    signin();
-    navigate({ to: '/main' });
+  const onSubmit = async (data: SignInFormValues) => {
+    try {
+      await signin(data);
+      navigate({ to: '/main' });
+    } catch (error) {
+      console.error('로그인 실패:', error);
+    }
   };
 
   useEffect(() => {
     if (isLoggedIn) navigate({ to: '/main' });
-  }, [isLoggedIn]);
+  }, [isLoggedIn, navigate]);
 
   const isButtonDisabled = isSubmitting || !email || !password;
 
