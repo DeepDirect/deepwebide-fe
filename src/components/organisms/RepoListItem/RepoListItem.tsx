@@ -11,10 +11,13 @@ import MainPageType from '@/constants/enums/MainPageType.enum';
 
 import useDeleteRepository from '@/hooks/useDeleteRepository';
 import useGetRepositoryEntrycode from '@/hooks/useGetRepositoryEntrycode';
+import useRepositoryExit from '@/hooks/useRepositoryExit';
 import useRepositoryRename from '@/hooks/useRepositoryRename';
 import useShareRepositoryStatus from '@/hooks/useShareRepositoryStatus';
 
+import CancelMyRepoShareAlertDialog from '@/features/AlertDialog/RepoOwner/CancelMyRepoShareAlertDialog';
 import DeleteRepoAlertDialog from '@/features/AlertDialog/common/DeleteRepoAlertDialog';
+import LeaveSharedRepoAlertDialog from '@/features/AlertDialog/RepoMember/LeaveSharedRepoAlertDialog';
 import ShareMyRepoAlertDialog from '@/features/AlertDialog/RepoOwner/ShareMyRepoAlertDialog';
 import ChangeRepoNameModal from '@/features/Modals/ChangeRepoNameModal/ChangeRepoNameModal';
 import PrivateRepoMeatballModal from '@/features/Modals/PrivateRepoMeatballModal/PrivateRepoMeatballModal';
@@ -61,9 +64,12 @@ const RepoListItem: React.FC<RepositoryProps> = ({
   const [modalPosition, setModalPosition] = useState<positionType>({});
   const meatballRef = useRef<HTMLButtonElement>(null);
   const [isModlasOpen, setIsModalsOpen] = useState({
+    pageModal: false,
     changeRepoName: false,
     deleteRepoAlert: false,
     shareMyRepoAlertDialog: false,
+    cancelMyRepoShareAlert: false,
+    leaveSharedRepoAlertDialog: false,
   });
   const {
     mutate: renameRepository,
@@ -91,6 +97,17 @@ const RepoListItem: React.FC<RepositoryProps> = ({
     },
     onError: error => {
       console.error('삭제 실패', error);
+    },
+  });
+  const {
+    mutate: repositoryExit,
+    // isLoading: isExiting
+  } = useRepositoryExit(`/api/repositories/${info.repositoryId}/exit`, {
+    onSuccess: () => {
+      console.log('나가기 성공');
+    },
+    onError: error => {
+      console.error('나가기 실패', error);
     },
   });
   const {
@@ -151,7 +168,18 @@ const RepoListItem: React.FC<RepositoryProps> = ({
       shareMyRepoAlertDialog: !isModlasOpen.shareMyRepoAlertDialog,
     }));
   };
-
+  const openCancelMyRepoShareAlertDialog = () => {
+    setIsModalsOpen(prev => ({
+      ...prev,
+      cancelMyRepoShareAlert: !isModlasOpen.cancelMyRepoShareAlert,
+    }));
+  };
+  const openLeaveSharedRepoAlertDialog = () => {
+    setIsModalsOpen(prev => ({
+      ...prev,
+      leaveSharedRepoAlertDialog: !isModlasOpen.leaveSharedRepoAlertDialog,
+    }));
+  };
   const handleConfirmChangeRepoName = (newName: string) => {
     // TODO: 토스트 추가
     renameRepository(
@@ -165,12 +193,6 @@ const RepoListItem: React.FC<RepositoryProps> = ({
         },
       }
     );
-  };
-  const handleConfirmDeleteRepo = () => {
-    deleteRepository();
-  };
-  const handleConfirmShare = () => {
-    shareRepositoryStatus();
   };
   const handleShareLinkCopy = () => {
     // TODO: 토스트 추가
@@ -259,7 +281,7 @@ const RepoListItem: React.FC<RepositoryProps> = ({
                   onRename={() => openChangeRepoName()}
                   onShareLinkCopy={() => handleShareLinkCopy()}
                   onEntryCodeCopy={() => handleEntrycodeCopy()}
-                  onCancelShare={() => console.log('공유 취소')}
+                  onCancelShare={() => openCancelMyRepoShareAlertDialog()}
                 />
               );
             case MainPageType.SHARED_WITH_ME:
@@ -270,7 +292,7 @@ const RepoListItem: React.FC<RepositoryProps> = ({
                   position={modalPosition}
                   shareLink={info.shareLink}
                   onShareLinkCopy={() => handleShareLinkCopy()}
-                  onLeaveRepository={() => console.log('레포 떠남')}
+                  onLeaveRepository={() => openLeaveSharedRepoAlertDialog()}
                 />
               );
           }
@@ -285,12 +307,22 @@ const RepoListItem: React.FC<RepositoryProps> = ({
       <DeleteRepoAlertDialog
         open={isModlasOpen.deleteRepoAlert}
         onOpenChange={openDeleteRepoAlert}
-        onConfirm={handleConfirmDeleteRepo}
+        onConfirm={deleteRepository}
       />
       <ShareMyRepoAlertDialog
         open={isModlasOpen.shareMyRepoAlertDialog}
         onOpenChange={openShareMyRepoAlertDialog}
-        onConfirm={handleConfirmShare}
+        onConfirm={shareRepositoryStatus}
+      />
+      <CancelMyRepoShareAlertDialog
+        open={isModlasOpen.cancelMyRepoShareAlert}
+        onOpenChange={openCancelMyRepoShareAlertDialog}
+        onConfirm={shareRepositoryStatus}
+      />
+      <LeaveSharedRepoAlertDialog
+        open={isModlasOpen.leaveSharedRepoAlertDialog}
+        onOpenChange={openLeaveSharedRepoAlertDialog}
+        onConfirm={repositoryExit}
       />
     </div>
   );
