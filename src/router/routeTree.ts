@@ -11,6 +11,7 @@ import { PrivateRepoPageRoute } from './routes/main/private-repo';
 import { SharedByMeRepoRoute } from './routes/main/shared-by-me-repo';
 import { SharedWithMeRepoRoute } from './routes/main/shared-with-me-repo';
 import { repoLayoutRoute, repoPageRoute } from './routes/$repoId';
+import { invitationLinkRoute } from './routes/invitation';
 import { signUpLayoutRoute, signUpFormRoute } from './routes/auth/sign-up';
 import { signUpCompleteRoute } from './routes/auth/sign-up/complete';
 import {
@@ -36,6 +37,7 @@ export const routeTree = rootRoute.addChildren([
     SharedWithMeRepoRoute,
   ]),
   repoLayoutRoute.addChildren([repoPageRoute]),
+  invitationLinkRoute,
   settingsLayoutRoute.addChildren([
     settingsIndexRoute,
     privateSettingsRoute,
