@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import type { User, CollaborationState } from '@/types/collaboration.types';
 
+// 기본 타입 정의
 interface CursorPosition {
   line: number;
   column: number;
@@ -8,27 +8,44 @@ interface CursorPosition {
   y?: number;
 }
 
-interface UserWithCursor extends User {
-  cursor?: CursorPosition;
-  selection?: {
-    startLine: number;
-    startColumn: number;
-    endLine: number;
-    endColumn: number;
-  };
+interface SelectionRange {
+  startLine: number;
+  startColumn: number;
+  endLine: number;
+  endColumn: number;
 }
 
-interface CollaborationStore extends CollaborationState {
-  users: UserWithCursor[];
+interface User {
+  id: string;
+  name: string;
+  color: string;
+}
 
-  // 상태 관리
+interface UserWithCursor extends User {
+  cursor?: CursorPosition;
+  selection?: SelectionRange;
+}
+
+// Store 상태 인터페이스
+interface CollaborationStore {
+  // 상태
+  users: UserWithCursor[];
+  isConnected: boolean;
+  roomId: string;
+  currentUser: UserWithCursor;
+
+  // 사용자 관리
   setUsers: (users: UserWithCursor[]) => void;
   addUser: (user: UserWithCursor) => void;
   removeUser: (userId: string) => void;
-  updateUserCursor: (userId: string, cursor: CursorPosition) => void;
-  updateUserSelection: (userId: string, selection: UserWithCursor['selection']) => void;
-  setConnectionStatus: (isConnected: boolean) => void;
   setCurrentUser: (user: UserWithCursor) => void;
+
+  // 커서 및 선택 영역 관리
+  updateUserCursor: (userId: string, cursor: CursorPosition) => void;
+  updateUserSelection: (userId: string, selection: SelectionRange) => void;
+
+  // 연결 상태 관리
+  setConnectionStatus: (isConnected: boolean) => void;
 
   // 룸 관리
   joinRoom: (roomId: string) => void;
@@ -37,25 +54,26 @@ interface CollaborationStore extends CollaborationState {
 
 // 사용자 색상 팔레트
 const USER_COLORS = [
-  '#FF6B6B',
-  '#4ECDC4',
-  '#FFEAA7',
-  '#DDA0DD',
-  '#45B7D1',
-  '#96CEB4',
-  '#98D8C8',
-  '#F7DC6F',
-  '#AED6F1',
-  '#A9DFBF',
-  '#F9E79F',
-  '#F8C471',
-  '#BB8FCE',
-  '#85C1E9',
-  '#82E0AA',
-  '#F7DC6F',
-];
+  '#FF6B6B', // Red
+  '#4ECDC4', // Teal
+  '#45B7D1', // Blue
+  '#96CEB4', // Green
+  '#FFEAA7', // Yellow
+  '#DDA0DD', // Plum
+  '#98D8C8', // Mint
+  '#F7DC6F', // Light Yellow
+  '#AED6F1', // Light Blue
+  '#A9DFBF', // Light Green
+  '#F8C471', // Orange
+  '#BB8FCE', // Purple
+  '#85C1E9', // Sky Blue
+  '#82E0AA', // Lime Green
+  '#F9E79F', // Cream
+] as const;
 
+// Store 생성
 export const useCollaborationStore = create<CollaborationStore>((set, get) => ({
+  // 초기 상태
   users: [],
   isConnected: false,
   roomId: '',
@@ -65,6 +83,7 @@ export const useCollaborationStore = create<CollaborationStore>((set, get) => ({
     color: USER_COLORS[0],
   },
 
+  // 사용자 관리 액션
   setUsers: users => set({ users }),
 
   addUser: user => {
@@ -72,12 +91,20 @@ export const useCollaborationStore = create<CollaborationStore>((set, get) => ({
     const existingUserIndex = state.users.findIndex(u => u.id === user.id);
 
     if (existingUserIndex >= 0) {
+      // 기존 사용자 업데이트
       const updatedUsers = [...state.users];
-      updatedUsers[existingUserIndex] = { ...updatedUsers[existingUserIndex], ...user };
+      updatedUsers[existingUserIndex] = {
+        ...updatedUsers[existingUserIndex],
+        ...user,
+      };
       set({ users: updatedUsers });
     } else {
+      // 새 사용자 추가 (색상 자동 할당)
       const colorIndex = state.users.length % USER_COLORS.length;
-      const userWithColor = { ...user, color: user.color || USER_COLORS[colorIndex] };
+      const userWithColor = {
+        ...user,
+        color: user.color || USER_COLORS[colorIndex],
+      };
       set({ users: [...state.users, userWithColor] });
     }
   },
@@ -87,6 +114,9 @@ export const useCollaborationStore = create<CollaborationStore>((set, get) => ({
     set({ users: state.users.filter(u => u.id !== userId) });
   },
 
+  setCurrentUser: user => set({ currentUser: user }),
+
+  // 커서 및 선택 영역 관리
   updateUserCursor: (userId, cursor) => {
     const state = get();
     const updatedUsers = state.users.map(user => (user.id === userId ? { ...user, cursor } : user));
@@ -101,10 +131,10 @@ export const useCollaborationStore = create<CollaborationStore>((set, get) => ({
     set({ users: updatedUsers });
   },
 
+  // 연결 상태 관리
   setConnectionStatus: isConnected => set({ isConnected }),
 
-  setCurrentUser: user => set({ currentUser: user }),
-
+  // 룸 관리
   joinRoom: roomId => set({ roomId }),
 
   leaveRoom: () =>
