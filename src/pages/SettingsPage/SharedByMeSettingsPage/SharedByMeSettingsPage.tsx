@@ -40,6 +40,13 @@ const SharedByMeSettingsPage = () => {
     },
   ];
 
+  const scrollToSection = (id: string) => {
+    const section = document.getElementById(id);
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className={styles.sharedByMeSettingsPage}>
       <div className={styles.titleWrapper}>
@@ -49,19 +56,35 @@ const SharedByMeSettingsPage = () => {
 
       <div className={styles.sectionsWrapper}>
         <div className={styles.sectionLabel}>
-          <div className={styles.label}>
+          <div
+            className={styles.label}
+            role="button"
+            onClick={() => scrollToSection('infoSection')}
+          >
             <InfoIcon className={styles.icon} />
             <span>INFO</span>
           </div>
-          <div className={styles.label}>
+          <div
+            className={styles.label}
+            role="button"
+            onClick={() => scrollToSection('memberSection')}
+          >
             <MemberIcon className={styles.icon} />
             <span>MEMBER</span>
           </div>
-          <div className={styles.label}>
+          <div
+            className={styles.label}
+            role="button"
+            onClick={() => scrollToSection('shareSection')}
+          >
             <ShareIcon className={styles.icon} />
             <span>SHARE</span>
           </div>
-          <div className={`${styles.label} ${styles.redColor}`}>
+          <div
+            className={`${styles.label} ${styles.redColor}`}
+            role="button"
+            onClick={() => scrollToSection('deleteSection')}
+          >
             <DeleteIcon className={styles.icon} />
             <span>DELETE</span>
           </div>
