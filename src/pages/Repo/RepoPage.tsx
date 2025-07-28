@@ -1,6 +1,7 @@
 import { useParams, useSearch } from '@tanstack/react-router';
 import { useEffect, useRef } from 'react';
 import { useTabStore } from '@/stores/tabStore';
+import { useFileSectionStore } from '@/stores/fileSectionStore';
 import { useResizer } from '@/hooks/useResizer';
 import styles from './RepoPage.module.scss';
 import TabBar from '@/components/organisms/TabBar/TabBar';
@@ -14,6 +15,7 @@ export function RepoPage() {
   const filePath = search.file;
 
   const { openTabs, activateTab } = useTabStore();
+  const { isVisible: isFileSectionVisible } = useFileSectionStore();
   const containerRef = useRef<HTMLDivElement>(null);
 
   // NOTE: 파일 섹션과 에디터 그룹 간의 수평 리사이저
@@ -51,23 +53,31 @@ export function RepoPage() {
   return (
     <div
       ref={containerRef}
-      className={`${styles.repoPage} ${isHorizontalResizing ? styles.horizontalResizing : ''}`}
+      className={`${styles.repoPage} ${isHorizontalResizing ? styles.horizontalResizing : ''} ${
+        !isFileSectionVisible ? styles.hideFileSection : ''
+      }`}
     >
-      {/* 파일 구조 섹션 */}
-      <div className={styles.fileSection} style={{ width: fileSectionWidth }}>
-        {/* 파일 트리 내용 */}
-      </div>
+      {/* 파일 구조 섹션 - 조건부 렌더링 */}
+      {isFileSectionVisible && (
+        <>
+          <div className={styles.fileSection} style={{ width: fileSectionWidth }}>
+            {/* 파일 트리 내용 */}
+          </div>
 
-      {/* 수평 리사이저 */}
-      <div
-        className={`${styles.resizer} ${styles.horizontalResizer}`}
-        onMouseDown={startHorizontalResize}
-      />
+          {/* 수평 리사이저 */}
+          <div
+            className={`${styles.resizer} ${styles.horizontalResizer}`}
+            onMouseDown={startHorizontalResize}
+          />
+        </>
+      )}
 
       {/* 에디터 + 터미널 그룹 */}
       <div
         className={styles.editorGroup}
-        style={{ width: `calc(100% - ${fileSectionWidth} - 6px)` }}
+        style={{
+          width: isFileSectionVisible ? `calc(100% - ${fileSectionWidth} - 6px)` : '100%',
+        }}
       >
         {/* 코드 에디터 */}
         <div className={styles.editorSection}>

@@ -11,13 +11,12 @@
 
 // 링크 스타일링
 a {
-  font-weight: 500;
-  text-decoration: inherit;
-  color: #646cff;
-
-  &:hover {
-    color: #535bf2;
-  }
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  outline: none;
+  text-decoration: none;
+  color: inherit;
 }
 
 // 바디 스타일링
@@ -54,6 +53,28 @@ button {
   --resizer-active-handle: #{variables.$white-2};
   --resizer-shadow: rgb(0 0 0 / 8%);
   --file-section-bg: #{variables.$white-1};
+
+  // light mode - tab bar
+  --tab-bar-bg: #{variables.$gray-9};
+  --tab-border: #{variables.$gray-8};
+  --tab-bg: #{variables.$gray-10};
+  --tab-bg-hover: #{variables.$gray-8};
+  --tab-bg-active: #{variables.$white-2};
+  --tab-text: #{variables.$gray-5};
+  --tab-text-hover: #{variables.$gray-2};
+  --tab-text-active: #{variables.$black-1};
+  --tab-active-line: #{variables.$orange};
+  --tab-scrollbar-thumb: #{variables.$gray-6};
+  --tab-scrollbar-thumb-hover: #{variables.$gray-5};
+  --tab-close-btn-bg: rgb(0 0 0 / 10%);
+
+  // light mode - monaco-editor
+  --editor-bg: #{variables.$white-2};
+  --editor-header: #{variables.$black-1};
+  --editor-text: #{variables.$gray-5};
+  --editor-point-color: #{variables.$orange};
+  --monaco-scrollbar-thumb: #{variables.$gray-6};
+  --monaco-scrollbar-thumb-hover: #{variables.$gray-5};
 }
 
 .dark {
@@ -67,11 +88,33 @@ button {
 
   // dark mode - resizer & file section
   --resizer-bg: transparent;
-  --resizer-hover-bg: #{variables.$gray-7};
+  --resizer-hover-bg: #60a5fa;
   --resizer-active-bg: #{variables.$blue-3};
   --resizer-border: #{variables.$gray-4};
   --resizer-handle: #{variables.$gray-6};
   --resizer-active-handle: #{variables.$gray-1};
   --resizer-shadow: rgb(255 255 255 / 5%);
   --file-section-bg: #{variables.$gray-2};
+
+  // dark mode - tab bar
+  --tab-bar-bg: #{variables.$gray-3};
+  --tab-border: #{variables.$gray-4};
+  --tab-bg: #{variables.$gray-2};
+  --tab-bg-hover: #{variables.$gray-5};
+  --tab-bg-active: #{variables.$black-2};
+  --tab-text: #{variables.$gray-7};
+  --tab-text-hover: #{variables.$white-1};
+  --tab-text-active: #{variables.$white-2};
+  --tab-active-line: #{variables.$blue-3};
+  --tab-scrollbar-thumb: #{variables.$gray-5};
+  --tab-scrollbar-thumb-hover: #{variables.$gray-6};
+  --tab-close-btn-bg: rgb(255 255 255 / 10%);
+
+  // dark mode mode - monaco-editor
+  --editor-bg: #{variables.$black-2};
+  --editor-header: #{variables.$white-2};
+  --editor-text: #{variables.$gray-7};
+  --editor-point-color: #{variables.$blue-3};
+  --monaco-scrollbar-thumb: #{variables.$gray-5};
+  --monaco-scrollbar-thumb-hover: #{variables.$gray-6};
 }

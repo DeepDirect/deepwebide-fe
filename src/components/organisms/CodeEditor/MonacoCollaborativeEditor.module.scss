@@ -6,7 +6,7 @@
   height: 100%;
   overflow: hidden;
   font-family: Monaco, Menlo, 'Ubuntu Mono', monospace;
-  background: $white-2;
+  background: var(--editor-bg);
 }
 
 // 에디터 컨테이너
@@ -21,10 +21,10 @@
       &.vertical .slider,
       &.horizontal .slider {
         border-radius: 6px !important;
-        background-color: $gray-6 !important;
+        background-color: var(--monaco-scrollbar-thumb) !important;
 
         &:hover {
-          background-color: $gray-5 !important;
+          background-color: var(--monaco-scrollbar-thumb-hover) !important;
         }
       }
     }
@@ -39,13 +39,13 @@
   justify-content: center;
   gap: 16px;
   height: 100%;
-  color: $black-1;
-  background: $white-2;
+  color: var(--editor-header);
+  background: var(--editor-bg);
 
   span {
     font-size: $font-size-xsmall;
     font-weight: $font-weight-medium;
-    color: $gray-5;
+    color: var(--editor-header);
   }
 }
 
@@ -76,7 +76,7 @@
   height: 100%;
   padding: 40px;
   color: $black-1;
-  background: $white-2;
+  background: var(--editor-bg);
 }
 
 .placeholderContent {
@@ -94,25 +94,25 @@
   margin: 0 0 12px;
   font-size: $font-size-small;
   font-weight: $font-weight-semi-bold;
-  color: $black-1;
+  color: var(--editor-header);
 }
 
 .placeholderContent p {
   margin: 0 0 8px;
   font-size: $font-size-xsmall;
   line-height: $default-line-height;
-  color: $gray-5;
+  color: var(--editor-text);
 }
 
 .collaborationNote {
   margin-top: 16px !important;
   padding: 8px 12px;
-  border: 1px solid $blue-3;
+  border: 1px solid var(--editor-point-color);
   border-radius: 4px;
   font-size: $font-size-xxsmall !important;
   font-weight: $font-weight-medium;
-  color: $orange !important;
-  background: $white-1;
+  color: var(--editor-point-color) !important;
+  background: var(--editor-bg);
 }
 
 .collaborationStatus {

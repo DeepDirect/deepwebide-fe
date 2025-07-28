@@ -4,10 +4,9 @@
   display: flex;
   height: 40px;
   padding: 0;
-  border-bottom: 1px solid $gray-8;
   overflow-x: auto;
   white-space: nowrap;
-  background-color: $gray-9;
+  background-color: var(--tab-bar-bg);
 
   // 스크롤바 스타일링
   &::-webkit-scrollbar {
@@ -15,16 +14,16 @@
   }
 
   &::-webkit-scrollbar-track {
-    background: $gray-9;
+    background: var(--tab-bar-bg);
   }
 
   &::-webkit-scrollbar-thumb {
     border-radius: 3px;
-    background: $gray-6;
+    background: var(--tab-scrollbar-thumb);
   }
 
   &::-webkit-scrollbar-thumb:hover {
-    background: $gray-5;
+    background: var(--tab-scrollbar-thumb-hover);
   }
 }
 
@@ -37,18 +36,18 @@
   max-width: 200px;
   min-width: 120px;
   padding: 0 16px;
-  border-right: 1px solid $gray-8;
+  border-right: 1px solid var(--tab-border);
   font-size: $font-size-xxsmall;
   font-weight: $font-weight-medium;
-  color: $gray-5;
-  background-color: $gray-10;
+  color: var(--tab-text);
+  background-color: var(--tab-bg);
   transition: all 0.2s ease;
   cursor: pointer;
   user-select: none;
 
   &:hover {
-    color: $gray-2;
-    background-color: $gray-8;
+    color: var(--tab-text-hover);
+    background-color: var(--tab-bg-hover);
   }
 
   &:first-child {
@@ -57,13 +56,13 @@
 }
 
 .active {
-  border-bottom: 2px solid $orange;
-  color: $black-1;
-  background-color: $white-2;
+  border-bottom: 2px solid var(--tab-active-line);
+  color: var(--tab-text-active);
+  background-color: var(--tab-bg-active);
 
   &:hover {
-    color: $black-1;
-    background-color: $white-2;
+    color: var(--tab-text-active);
+    background-color: var(--tab-bg-active);
   }
 }
 
@@ -86,6 +85,10 @@
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   image-rendering: crisp-edges;
+
+  :global(.dark) & {
+    filter: brightness(0) invert(1);
+  }
 }
 
 .tabName {
@@ -110,13 +113,17 @@
   cursor: pointer;
 
   &:hover {
-    background: rgb(0 0 0 / 10%);
+    background: var(--tab-close-btn-bg);
     opacity: 1;
   }
 
   img {
     width: 10px;
     height: 10px;
+
+    :global(.dark) & {
+      filter: brightness(0) invert(1);
+    }
   }
 }
 

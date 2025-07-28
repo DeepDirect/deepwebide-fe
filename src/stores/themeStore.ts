@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 
 type ThemeState = {
   isDarkMode: boolean;
+  isInitialized: boolean;
   toggleTheme: () => void;
   initializeTheme: () => void;
 };
@@ -13,31 +14,45 @@ const getSystemDarkMode = (): boolean => {
   return window.matchMedia('(prefers-color-scheme: dark)').matches;
 };
 
+// DOM에 테마 클래스 적용
+const applyThemeToDOM = (isDarkMode: boolean) => {
+  if (typeof document !== 'undefined') {
+    document.documentElement.classList.toggle('dark', isDarkMode);
+  }
+};
+
 export const useThemeStore = create<ThemeState>()(
   persist(
     (set, get) => ({
       isDarkMode: false, // 기본값 (persist에서 초기화됨)
+      isInitialized: false,
 
       toggleTheme: () =>
         set(state => {
           const next = !state.isDarkMode;
-          document.documentElement.classList.toggle('dark', next);
+          applyThemeToDOM(next);
           return { isDarkMode: next };
         }),
 
       initializeTheme: () => {
         const { isDarkMode } = get();
-        document.documentElement.classList.toggle('dark', isDarkMode);
+        applyThemeToDOM(isDarkMode);
+        set({ isInitialized: true });
       },
     }),
     {
       name: 'theme-storage',
       version: 1,
 
-      // 스토리지에서 값을 가져온 후 DOM에 적용
+      // 스토리지에서 값을 가져온 후 즉시 DOM에 적용
       onRehydrateStorage: () => state => {
         if (state) {
-          document.documentElement.classList.toggle('dark', state.isDarkMode);
+          // 복원된 즉시 DOM에 적용
+          applyThemeToDOM(state.isDarkMode);
+          // 초기화 완료 마킹
+          setTimeout(() => {
+            state.initializeTheme();
+          }, 0);
         }
       },
 
@@ -50,12 +65,16 @@ export const useThemeStore = create<ThemeState>()(
           'isDarkMode' in persistedState &&
           typeof persistedState.isDarkMode === 'boolean'
         ) {
-          return { ...currentState, isDarkMode: persistedState.isDarkMode };
+          const isDarkMode = persistedState.isDarkMode;
+          // 즉시 DOM에 적용
+          applyThemeToDOM(isDarkMode);
+          return { ...currentState, isDarkMode, isInitialized: false };
         }
 
         // 로컬스토리지에 값이 없거나 유효하지 않으면 시스템 테마를 초기값으로 사용
         const systemDarkMode = getSystemDarkMode();
-        return { ...currentState, isDarkMode: systemDarkMode };
+        applyThemeToDOM(systemDarkMode);
+        return { ...currentState, isDarkMode: systemDarkMode, isInitialized: false };
       },
     }
   )
