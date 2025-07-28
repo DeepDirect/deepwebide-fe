@@ -3,12 +3,14 @@ import { useCollaborationStore } from '@/stores/collaborationStore';
 import type { MonacoEditorInstance } from '@/types/monaco.types';
 import styles from './CursorOverlay.module.scss';
 
+// 컴포넌트 Props 타입
 interface CursorOverlayProps {
   editorContainer: HTMLElement | null;
   monacoEditor?: MonacoEditorInstance | null;
   className?: string;
 }
 
+// 커서 위치 타입
 interface CursorPosition {
   x: number;
   y: number;
@@ -16,6 +18,17 @@ interface CursorPosition {
   userName: string;
   userColor: string;
 }
+
+// Monaco Editor 메서드 타입 정의
+type GetScrolledVisiblePositionMethod = (position: {
+  lineNumber: number;
+  column: number;
+}) => { left: number; top: number } | null;
+
+type GetOptionMethod = (optionId: number) => unknown;
+
+type OnDidScrollChangeMethod = (callback: () => void) => { dispose(): void } | null;
+type OnDidLayoutChangeMethod = (callback: () => void) => { dispose(): void } | null;
 
 const CursorOverlay: React.FC<CursorOverlayProps> = ({
   editorContainer,
@@ -29,22 +42,22 @@ const CursorOverlay: React.FC<CursorOverlayProps> = ({
   const calculateCursorPosition = useCallback(
     (
       user: (typeof users)[0],
-      editorContainer: HTMLElement,
-      monacoEditor: MonacoEditorInstance
+      container: HTMLElement,
+      editor: MonacoEditorInstance
     ): CursorPosition | null => {
       if (!user.cursor?.line || !user.cursor?.column) return null;
 
       try {
-        // Monaco Editor의 메서드들을 타입 확장으로 접근
-        const editorWithMethods = monacoEditor as MonacoEditorInstance & {
-          getScrolledVisiblePosition?: (position: { lineNumber: number; column: number }) => {
-            left: number;
-            top: number;
-          } | null;
-          getOption?: (optionId: number) => unknown;
-        };
+        // Monaco Editor 메서드들을 안전하게 접근
+        const editorAsAny = editor as unknown as Record<string, unknown>;
+        const getScrolledVisiblePosition = editorAsAny.getScrolledVisiblePosition as
+          | GetScrolledVisiblePositionMethod
+          | undefined;
 
-        const position = editorWithMethods.getScrolledVisiblePosition?.({
+        const getOption = editorAsAny.getOption as GetOptionMethod | undefined;
+
+        // Monaco Editor의 내장 메서드 사용 시도
+        const position = getScrolledVisiblePosition?.({
           lineNumber: user.cursor.line,
           column: user.cursor.column,
         });
@@ -60,16 +73,16 @@ const CursorOverlay: React.FC<CursorOverlayProps> = ({
         }
 
         // 수동 계산 폴백
-        const lineElement = editorContainer.querySelector(
+        const lineElement = container.querySelector(
           `.view-line[data-line-number="${user.cursor.line}"], .view-line:nth-child(${user.cursor.line})`
         ) as HTMLElement;
 
         if (lineElement) {
-          const containerRect = editorContainer.getBoundingClientRect();
+          const containerRect = container.getBoundingClientRect();
           const lineRect = lineElement.getBoundingClientRect();
 
-          // 문자 너비 계산
-          const fontSize = (editorWithMethods.getOption?.(40) as number) || 14;
+          // 문자 너비 계산 (폰트 크기 기반)
+          const fontSize = (getOption?.(40) as number) || 14;
           const charWidth = fontSize * 0.6;
 
           const x = lineRect.left - containerRect.left + (user.cursor.column - 1) * charWidth;
@@ -94,7 +107,7 @@ const CursorOverlay: React.FC<CursorOverlayProps> = ({
     []
   );
 
-  // 커서 위치 업데이트
+  // 커서 위치 업데이트 함수
   const updateCursors = useCallback(() => {
     if (!editorContainer || !monacoEditor) return;
 
@@ -110,26 +123,28 @@ const CursorOverlay: React.FC<CursorOverlayProps> = ({
     setCursors(newCursors);
   }, [users, editorContainer, monacoEditor, calculateCursorPosition]);
 
+  // 이벤트 리스너 및 업데이트 설정
   useEffect(() => {
     if (!editorContainer || !monacoEditor) return;
 
     // 초기 업데이트
     updateCursors();
 
+    // Monaco Editor 이벤트 리스너를 안전하게 접근
+    const editorAsAny = monacoEditor as unknown as Record<string, unknown>;
+    const onDidScrollChange = editorAsAny.onDidScrollChange as OnDidScrollChangeMethod | undefined;
+    const onDidLayoutChange = editorAsAny.onDidLayoutChange as OnDidLayoutChangeMethod | undefined;
+
     const disposables: Array<{ dispose(): void }> = [];
 
-    // Monaco Editor 이벤트 리스너
-    const editorWithEvents = monacoEditor as MonacoEditorInstance & {
-      onDidScrollChange?: (callback: () => void) => { dispose(): void } | null;
-      onDidLayoutChange?: (callback: () => void) => { dispose(): void } | null;
-    };
-
-    const scrollDisposable = editorWithEvents.onDidScrollChange?.(updateCursors);
+    // Monaco Editor 스크롤 이벤트
+    const scrollDisposable = onDidScrollChange?.(updateCursors);
     if (scrollDisposable) {
       disposables.push(scrollDisposable);
     }
 
-    const layoutDisposable = editorWithEvents.onDidLayoutChange?.(updateCursors);
+    // Monaco Editor 레이아웃 변경 이벤트
+    const layoutDisposable = onDidLayoutChange?.(updateCursors);
     if (layoutDisposable) {
       disposables.push(layoutDisposable);
     }
@@ -140,9 +155,10 @@ const CursorOverlay: React.FC<CursorOverlayProps> = ({
     };
     window.addEventListener('resize', handleResize);
 
-    // 주기적 업데이트
+    // 주기적 업데이트 (1초마다)
     const intervalId = setInterval(updateCursors, 1000);
 
+    // 정리 함수
     return () => {
       disposables.forEach(disposable => disposable.dispose());
       window.removeEventListener('resize', handleResize);
@@ -150,6 +166,7 @@ const CursorOverlay: React.FC<CursorOverlayProps> = ({
     };
   }, [updateCursors, editorContainer, monacoEditor]);
 
+  // 커서가 없으면 렌더링하지 않음
   if (!editorContainer || cursors.length === 0) {
     return null;
   }
