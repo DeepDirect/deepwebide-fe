@@ -2,7 +2,7 @@
 @use '@/styles/mixins' as *;
 
 .infoSection {
-  font-family: $font-family-silkscreen;
+  font-family: $font-family-inter;
   color: $black-1;
   user-select: none;
 
@@ -24,8 +24,9 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: $font-size-xxsmall;
+    gap: 12px;
     height: 92px;
+    font-family: $font-family-silkscreen;
 
     .sectionTitle {
       font-size: $font-size-xlarge;
@@ -51,6 +52,7 @@
   }
 
   .label {
+    font-family: $font-family-silkscreen;
     font-size: $font-size-small;
     text-align: left;
     white-space: nowrap;
