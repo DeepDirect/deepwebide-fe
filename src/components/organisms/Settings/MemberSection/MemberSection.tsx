@@ -26,7 +26,7 @@ const MemberSection = ({ members }: memberSectionProps) => {
   }, [members]);
 
   return (
-    <section className={styles.infoSection}>
+    <section className={styles.infoSection} id="memberSection">
       <div className={styles.sectionTitleWrapper}>
         <MemberIcon className={styles.nameIcon} />
         <h2 className={styles.sectionTitle}>MEMBER</h2>

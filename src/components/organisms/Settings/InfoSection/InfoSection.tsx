@@ -15,7 +15,7 @@ type infoSectionProps = {
 
 const InfoSection = ({ name, createdAt, updatedAt }: infoSectionProps) => {
   return (
-    <section className={styles.infoSection}>
+    <section className={styles.infoSection} id="infoSection">
       <div className={styles.sectionTitleWrapper}>
         <InfoIcon className={styles.nameIcon} />
         <h2 className={styles.sectionTitle}>INFO</h2>

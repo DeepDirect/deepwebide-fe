@@ -3,16 +3,20 @@ import InfoSection from '@/components/organisms/Settings/InfoSection/InfoSection
 import MemberSection from '@/components/organisms/Settings/MemberSection/MemberSection';
 import ShareSection from '@/components/organisms/Settings/ShareSection/ShareSection';
 import DeleteSection from '@/components/organisms/Settings/DeleteSection/DeleteSection';
+import BackIcon from '@/assets/icons/back.svg?react';
 import type { MemberItem } from '@/types/memberItem.types';
 import SettingsIcon from '@/assets/icons/settings.svg?react';
 import InfoIcon from '@/assets/icons/info.svg?react';
 import MemberIcon from '@/assets/icons/member.svg?react';
 import ShareIcon from '@/assets/icons/share.svg?react';
 import DeleteIcon from '@/assets/icons/trash.svg?react';
+import { useRouter, useCanGoBack } from '@tanstack/react-router';
 
 type memberSectionProps = MemberItem[];
 
 const SharedByMeSettingsPage = () => {
+  const router = useRouter();
+  const canGoBack = useCanGoBack();
   const members: memberSectionProps = [
     {
       userId: 7,
@@ -40,28 +44,60 @@ const SharedByMeSettingsPage = () => {
     },
   ];
 
+  const scrollToSection = (id: string) => {
+    const section = document.getElementById(id);
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleBack = () => {
+    if (canGoBack) router.history.back();
+  };
+
   return (
     <div className={styles.sharedByMeSettingsPage}>
-      <div className={styles.titleWrapper}>
-        <SettingsIcon className={styles.titleIcon} />
-        <h2 className={styles.title}>SETTINGS</h2>
+      <div className={styles.top}>
+        <div className={styles.titleWrapper}>
+          <SettingsIcon className={styles.titleIcon} />
+          <h2 className={styles.title}>SETTINGS</h2>
+        </div>
+        <button className={styles.backButton} onClick={handleBack}>
+          <BackIcon className={styles.icon} />
+        </button>
       </div>
 
       <div className={styles.sectionsWrapper}>
         <div className={styles.sectionLabel}>
-          <div className={styles.label}>
+          <div
+            className={styles.label}
+            role="button"
+            onClick={() => scrollToSection('infoSection')}
+          >
             <InfoIcon className={styles.icon} />
             <span>INFO</span>
           </div>
-          <div className={styles.label}>
+          <div
+            className={styles.label}
+            role="button"
+            onClick={() => scrollToSection('memberSection')}
+          >
             <MemberIcon className={styles.icon} />
             <span>MEMBER</span>
           </div>
-          <div className={styles.label}>
+          <div
+            className={styles.label}
+            role="button"
+            onClick={() => scrollToSection('shareSection')}
+          >
             <ShareIcon className={styles.icon} />
             <span>SHARE</span>
           </div>
-          <div className={`${styles.label} ${styles.redColor}`}>
+          <div
+            className={`${styles.label} ${styles.redColor}`}
+            role="button"
+            onClick={() => scrollToSection('deleteSection')}
+          >
             <DeleteIcon className={styles.icon} />
             <span>DELETE</span>
           </div>

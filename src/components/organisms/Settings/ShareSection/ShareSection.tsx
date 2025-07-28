@@ -21,14 +21,14 @@ const ShareSection = ({ shareLink, onShareLinkCopy }: shareSectionProps) => {
   };
 
   return (
-    <section className={styles.shareSection}>
+    <section className={styles.shareSection} id="shareSection">
       <div className={styles.sectionTitleWrapper}>
         <ShareIcon className={styles.nameIcon} />
         <h2 className={styles.sectionTitle}>SHARE</h2>
       </div>
 
       {/* 링크 공유 */}
-      <div className={styles.itemWrapper}>
+      <div className={`${styles.itemWrapper} ${styles.shareWrapper}`}>
         <div className={styles.label}>SHARE LINK</div>
 
         <div className={styles.linkWrapper}>

@@ -2,7 +2,7 @@
 @use '@/styles/mixins' as *;
 
 .shareSection {
-  font-family: $font-family-silkscreen;
+  font-family: $font-family-inter;
   color: $black-1;
   user-select: none;
 
@@ -43,6 +43,7 @@
 
   .label {
     width: 143px;
+    font-family: $font-family-silkscreen;
   }
 
   .sectionTitleWrapper {
@@ -53,6 +54,7 @@
     height: 92px;
 
     .sectionTitle {
+      font-family: $font-family-silkscreen;
       font-size: $font-size-xlarge;
     }
   }
@@ -62,7 +64,7 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    width: 700px;
+    width: 883px;
     height: 92px;
 
     @include mobile {
@@ -70,9 +72,8 @@
       width: 100%;
     }
 
-    &.entryCodeWrapper,
-    &.unshareWrapper {
-      width: 883px;
+    &.shareWrapper {
+      width: 700px;
 
       @include mobile {
         width: 100%;
@@ -145,6 +146,7 @@
       justify-content: center;
       width: fit-content;
       padding: 12px 25px;
+      font-family: $font-family-inter;
       font-size: $font-size-small;
       white-space: nowrap;
       background: none;

@@ -3,7 +3,7 @@ import DeleteIcon from '@/assets/icons/trash.svg?react';
 
 const DeleteSection = () => {
   return (
-    <section className={styles.deleteSection}>
+    <section className={styles.deleteSection} id="deleteSection">
       <div className={styles.sectionTitleWrapper}>
         <DeleteIcon className={styles.nameIcon} />
         <h2 className={styles.sectionTitle}>DELETE</h2>
