@@ -6,6 +6,8 @@ import fileOffIcon from '@/assets/icons/file-off.svg';
 import colorsSwatchIcon from '@/assets/icons/colors-swatch.svg';
 import articleIcon from '@/assets/icons/article.svg';
 import slidersIcon from '@/assets/icons/sliders.svg';
+import folderClosedIcon from '@/assets/icons/folder-closed.svg';
+import folderOpenIcon from '@/assets/icons/folder-open.svg';
 
 export const getLanguageFromFile = (fileName: string): string => {
   const extension = fileName.split('.').pop()?.toLowerCase();
@@ -73,4 +75,11 @@ export const getFileIcon = (fileName: string): string => {
   };
 
   return iconMap[extension || ''] || fileOffIcon;
+};
+
+/**
+ * 폴더 아이콘을 반환하는 함수
+ */
+export const getFolderIcon = (isExpanded: boolean): string => {
+  return isExpanded ? folderOpenIcon : folderClosedIcon;
 };

@@ -1,0 +1,228 @@
+@use '@/styles/variables' as *;
+
+.fileTree {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: $font-family-inter;
+  background-color: var(--file-section-bg);
+  transition: background-color 0.2s ease;
+}
+
+.treeContainer {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: 8px 0;
+  overflow: hidden auto;
+  scroll-behavior: smooth;
+  scrollbar-color: var(--filetree-scrollbar) transparent;
+
+  // Firefox 스크롤바
+  scrollbar-width: thin;
+
+  // 스크롤바 스타일링
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background: var(--filetree-scrollbar);
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background: var(--filetree-scrollbar-hover);
+    }
+  }
+
+  &::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}
+
+// 로딩 상태
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  height: 120px;
+  color: var(--filetree-text);
+}
+
+.loadingSpinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--filetree-loading-bg);
+  border-top: 2px solid var(--filetree-loading);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loadingText {
+  font-size: $font-size-xxsmall;
+  font-weight: $font-weight-medium;
+  color: var(--filetree-text);
+  opacity: 0.8;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+// 에러 상태
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  height: 150px;
+  padding: 16px;
+}
+
+.errorIcon {
+  font-size: 32px;
+  opacity: 0.7;
+  animation: pulse 2s infinite;
+}
+
+.errorText {
+  max-width: 200px;
+  font-size: $font-size-xxsmall;
+  font-weight: $font-weight-medium;
+  line-height: 1.4;
+  text-align: center;
+  color: var(--filetree-error);
+}
+
+.retryButton {
+  padding: 6px 12px;
+  border: 1px solid var(--filetree-retry-border);
+  border-radius: 4px;
+  font-size: $font-size-xxxsmall;
+  font-weight: $font-weight-medium;
+  color: var(--filetree-retry-text);
+  background-color: var(--filetree-retry-bg);
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--filetree-retry-hover);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.7;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.7;
+  }
+}
+
+// 빈 상태
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 200px;
+  padding: 16px;
+  transition: all 0.2s ease;
+  cursor: context-menu;
+
+  &:hover {
+    background-color: var(--filetree-empty-hover);
+  }
+}
+
+.emptyIcon {
+  font-size: 48px;
+  opacity: 0.4;
+  transition: all 0.3s ease;
+
+  .empty:hover & {
+    opacity: 0.6;
+    transform: scale(1.05);
+  }
+}
+
+.emptyText {
+  font-size: $font-size-xsmall;
+  font-weight: $font-weight-medium;
+  text-align: center;
+  color: var(--filetree-text);
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+
+  .empty:hover & {
+    opacity: 0.9;
+  }
+}
+
+.emptyHint {
+  font-size: $font-size-xxxsmall;
+  font-weight: $font-weight-regular;
+  text-align: center;
+  color: var(--filetree-text);
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+
+  .empty:hover & {
+    opacity: 0.7;
+  }
+}
+
+// 다크모드/라이트모드 색상 변수
+:root {
+  // 라이트모드
+  --filetree-scrollbar: #{$gray-7};
+  --filetree-scrollbar-hover: #{$gray-6};
+  --filetree-loading: #{$blue-3};
+  --filetree-loading-bg: #{$gray-9};
+  --filetree-error: #{$red};
+  --filetree-retry-bg: #{$white-2};
+  --filetree-retry-border: #{$gray-7};
+  --filetree-retry-text: #{$gray-1};
+  --filetree-retry-hover: #{$gray-10};
+  --filetree-empty-hover: rgb(0 0 0 / 2%);
+}
+
+:global(.dark) {
+  // 다크모드
+  --filetree-scrollbar: #{$gray-5};
+  --filetree-scrollbar-hover: #{$gray-4};
+  --filetree-loading: #{$blue-3};
+  --filetree-loading-bg: #{$gray-4};
+  --filetree-error: #{$red};
+  --filetree-retry-bg: #{$gray-4};
+  --filetree-retry-border: #{$gray-3};
+  --filetree-retry-text: #{$white-2};
+  --filetree-retry-hover: #{$gray-3};
+  --filetree-empty-hover: rgb(255 255 255 / 3%);
+}

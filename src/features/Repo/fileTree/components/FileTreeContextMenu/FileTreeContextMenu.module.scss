@@ -1,0 +1,161 @@
+@use '@/styles/variables' as *;
+
+.content {
+  z-index: $modal-z-index;
+  max-width: 280px;
+  min-width: 180px;
+  padding: 4px;
+  border: 1px solid var(--context-menu-border);
+  border-radius: 6px;
+  background-color: var(--context-menu-bg);
+  box-shadow: var(--context-menu-shadow);
+  animation: fade-in $modal-transition-duration $modal-transition-easing;
+  will-change: transform, opacity;
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 32px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  font-family: $font-family-inter;
+  font-size: $font-size-xxsmall;
+  font-weight: $font-weight-regular;
+  white-space: nowrap;
+  color: var(--context-menu-text);
+  background: transparent;
+  transition: all 0.15s ease;
+  cursor: pointer;
+  user-select: none;
+
+  &:hover {
+    color: var(--context-menu-text-hover);
+    background-color: var(--context-menu-item-hover);
+  }
+
+  &:focus {
+    outline: none;
+    color: var(--context-menu-text-hover);
+    background-color: var(--context-menu-item-focus);
+  }
+
+  &:active {
+    background-color: var(--context-menu-item-active);
+    transform: scale(0.98);
+  }
+
+  &.danger {
+    color: var(--context-menu-danger);
+
+    &:hover {
+      color: var(--context-menu-danger-hover);
+      background-color: var(--context-menu-danger-bg);
+    }
+
+    &:focus {
+      color: var(--context-menu-danger-hover);
+      background-color: var(--context-menu-danger-bg);
+    }
+
+    &:active {
+      background-color: var(--context-menu-danger-active);
+    }
+  }
+}
+
+.icon {
+  flex-shrink: 0;
+  width: 16px;
+  font-size: 12px;
+  text-align: center;
+  opacity: 0.8;
+  transition: opacity 0.15s ease;
+
+  .item:hover & {
+    opacity: 1;
+  }
+}
+
+.shortcut {
+  margin-left: auto;
+  font-size: $font-size-xxxsmall;
+  font-weight: $font-weight-medium;
+  color: var(--context-menu-shortcut);
+  opacity: 0.7;
+  transition: opacity 0.15s ease;
+
+  .item:hover & {
+    opacity: 1;
+  }
+}
+
+.separator {
+  height: 1px;
+  margin: 4px 0;
+  background-color: var(--context-menu-separator);
+  transition: background-color 0.15s ease;
+}
+
+// 다크모드/라이트모드 색상 변수
+:root {
+  // 라이트모드
+  --context-menu-bg: #{$white-2};
+  --context-menu-border: #{$gray-8};
+  --context-menu-text: #{$gray-1};
+  --context-menu-text-hover: #{$black-1};
+  --context-menu-item-hover: #{$gray-10};
+  --context-menu-item-focus: #{$gray-9};
+  --context-menu-item-active: #{$gray-8};
+  --context-menu-shortcut: #{$gray-6};
+  --context-menu-separator: #{$gray-9};
+  --context-menu-shadow: 0 4px 6px -1px rgb(0 0 0 / 10%), 0 2px 4px -1px rgb(0 0 0 / 6%);
+
+  // 위험한 액션 (삭제 등)
+  --context-menu-danger: #{$red};
+  --context-menu-danger-bg: rgb(220 38 38 / 10%);
+  --context-menu-danger-hover: #{$white-2};
+  --context-menu-danger-active: rgb(220 38 38 / 15%);
+}
+
+:global(.dark) {
+  // 다크모드
+  --context-menu-bg: #{$gray-2};
+  --context-menu-border: #{$gray-4};
+  --context-menu-text: #{$gray-7};
+  --context-menu-text-hover: #{$white-2};
+  --context-menu-item-hover: #{$gray-4};
+  --context-menu-item-focus: #{$gray-3};
+  --context-menu-item-active: #{$gray-5};
+  --context-menu-shortcut: #{$gray-6};
+  --context-menu-separator: #{$gray-4};
+  --context-menu-shadow:
+    0 4px 6px -1px rgb(0 0 0 / 20%), 0 2px 4px -1px rgb(0 0 0 / 15%),
+    0 0 0 1px rgb(255 255 255 / 5%);
+
+  // 위험한 액션 (삭제 등)
+  --context-menu-danger: #{$red};
+  --context-menu-danger-bg: rgb(220 38 38 / 20%);
+  --context-menu-danger-hover: #{$white-2};
+  --context-menu-danger-active: rgb(220 38 38 / 25%);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

@@ -1,0 +1,228 @@
+@use '@/styles/variables' as *;
+
+.fileTreeItem {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+  box-sizing: border-box;
+  min-height: 24px;
+  padding: 2px 8px 2px 0;
+  border-radius: 4px;
+  font-family: $font-family-inter;
+  font-size: $font-size-xxsmall;
+  font-weight: $font-weight-regular;
+  line-height: 1.2;
+  color: var(--filetree-text);
+  transition: all 0.15s ease;
+  cursor: pointer;
+  user-select: none;
+
+  // 호버 효과
+  &:hover {
+    color: var(--filetree-text-hover);
+    background-color: var(--filetree-item-hover);
+  }
+
+  // 포커스 효과
+  &:focus {
+    outline: none;
+    color: var(--filetree-text-hover);
+    background-color: var(--filetree-item-focus);
+    box-shadow: inset 2px 0 0 var(--filetree-focus-indicator);
+  }
+
+  // 선택된 상태
+  &.selected {
+    color: var(--filetree-text-selected);
+    background-color: var(--filetree-item-selected);
+    box-shadow: inset 2px 0 0 var(--filetree-selected-indicator);
+
+    &:hover {
+      background-color: var(--filetree-item-selected-hover);
+    }
+
+    &:focus {
+      background-color: var(--filetree-item-selected-focus);
+      box-shadow: inset 2px 0 0 var(--filetree-selected-indicator);
+    }
+  }
+
+  // 파일과 폴더에 따른 스타일 차이
+  &.folder {
+    font-weight: $font-weight-medium;
+
+    &:hover {
+      .arrowIcon {
+        color: var(--filetree-arrow-hover);
+      }
+    }
+  }
+
+  &.file {
+    font-weight: $font-weight-regular;
+    opacity: 0.95;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  // 편집 모드일 때
+  &.editing {
+    background-color: var(--filetree-item-editing);
+
+    &:hover {
+      background-color: var(--filetree-item-editing);
+    }
+
+    &:focus {
+      background-color: var(--filetree-item-editing);
+      box-shadow: inset 2px 0 0 var(--filetree-editing-indicator);
+    }
+  }
+
+  // 액티브 상태
+  &:active:not(.editing) {
+    background-color: var(--filetree-item-active);
+    transform: scale(0.98);
+  }
+}
+
+// 화살표 영역
+.arrowArea {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-left: -2px;
+}
+
+.arrow {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+  opacity: 0.7;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: var(--filetree-arrow-bg-hover);
+    opacity: 1;
+  }
+
+  &.expanded {
+    transform: rotate(90deg);
+  }
+}
+
+.arrowIcon {
+  width: 8px;
+  height: 8px;
+  color: var(--filetree-arrow);
+  transition: color 0.15s ease;
+}
+
+// 아이콘 영역
+.iconWrapper {
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+}
+
+.icon {
+  width: 16px;
+  height: 16px;
+  opacity: 0.8;
+  transition: all 0.15s ease;
+  object-fit: contain;
+
+  .fileTreeItem:hover & {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+
+  .fileTreeItem.selected & {
+    opacity: 1;
+    filter: brightness(1.1);
+  }
+
+  // 다크모드에서 아이콘 필터링
+  :global(.dark) & {
+    filter: brightness(0) invert(1) brightness(0.8) contrast(1.2);
+
+    .fileTreeItem:hover & {
+      filter: brightness(0) invert(1) brightness(0.9) contrast(1.2);
+    }
+
+    .fileTreeItem.selected & {
+      filter: brightness(0) invert(1) brightness(1) contrast(1.3);
+    }
+  }
+}
+
+// 파일/폴더 이름
+.name {
+  flex: 0 1 auto;
+  min-width: 0;
+  margin-left: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+
+  .fileTreeItem:hover & {
+    transform: translateX(1px);
+  }
+}
+
+// 다크모드/라이트모드 색상 변수
+:root {
+  // 라이트모드
+  --filetree-text: #{$gray-1};
+  --filetree-text-hover: #{$black-1};
+  --filetree-text-selected: #{$white-2};
+  --filetree-item-hover: #{$gray-10};
+  --filetree-item-focus: #{$gray-9};
+  --filetree-item-active: #{$gray-8};
+  --filetree-item-selected: #{$blue-3};
+  --filetree-item-selected-hover: #{$blue-3};
+  --filetree-item-selected-focus: #{$blue-3};
+  --filetree-item-editing: #{$gray-9};
+  --filetree-arrow: #{$gray-5};
+  --filetree-arrow-hover: #{$gray-1};
+  --filetree-arrow-bg-hover: #{$gray-9};
+  --filetree-focus-indicator: #{$blue-3};
+  --filetree-selected-indicator: #{$orange};
+  --filetree-editing-indicator: #{$yellow};
+}
+
+:global(.dark) {
+  // 다크모드
+  --filetree-text: #{$gray-7};
+  --filetree-text-hover: #{$white-2};
+  --filetree-text-selected: #{$white-2};
+  --filetree-item-hover: #{$gray-4};
+  --filetree-item-focus: #{$gray-3};
+  --filetree-item-active: #{$gray-5};
+  --filetree-item-selected: #{$blue-3};
+  --filetree-item-selected-hover: #{$blue-3};
+  --filetree-item-selected-focus: #{$blue-3};
+  --filetree-item-editing: #{$gray-3};
+  --filetree-arrow: #{$gray-6};
+  --filetree-arrow-hover: #{$white-2};
+  --filetree-arrow-bg-hover: #{$gray-5};
+  --filetree-focus-indicator: #{$blue-3};
+  --filetree-selected-indicator: #{$orange};
+  --filetree-editing-indicator: #{$yellow};
+}
