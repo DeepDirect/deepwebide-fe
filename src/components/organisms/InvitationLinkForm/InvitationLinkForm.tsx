@@ -7,9 +7,14 @@ import './InvitationLinkForm.scss';
 interface InvitationLinkFormProps {
   onSubmit?: (code: string) => void;
   onGoHome?: () => void;
+  repositoryName?: string;
 }
 
-const InvitationLinkForm: React.FC<InvitationLinkFormProps> = ({ onSubmit, onGoHome }) => {
+const InvitationLinkForm: React.FC<InvitationLinkFormProps> = ({
+  onSubmit,
+  onGoHome,
+  repositoryName,
+}) => {
   const [invitationCode, setInvitationCode] = useState('');
 
   const handleSubmit = () => {
@@ -32,7 +37,7 @@ const InvitationLinkForm: React.FC<InvitationLinkFormProps> = ({ onSubmit, onGoH
           {/* 프로젝트 정보 표시 */}
           <div className="invitation-form__project-info">
             <div className="invitation-form__project-icon" />
-            <span className="invitation-form__project-name">project07</span>
+            <span className="invitation-form__project-name">{repositoryName}</span>
           </div>
         </div>
 
@@ -48,11 +53,7 @@ const InvitationLinkForm: React.FC<InvitationLinkFormProps> = ({ onSubmit, onGoH
           </div>
 
           {/* 제출 버튼 & 홈으로 이동 버튼 */}
-          <InvitationFormActions
-            onSubmit={handleSubmit}
-            onGoHome={onGoHome}
-            submitDisabled={!invitationCode.trim()}
-          />
+          <InvitationFormActions onSubmit={handleSubmit} onGoHome={onGoHome} />
         </div>
       </div>
     </div>

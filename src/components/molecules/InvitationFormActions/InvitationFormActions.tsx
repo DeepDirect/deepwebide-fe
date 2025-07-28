@@ -6,24 +6,19 @@ import './InvitationFormActions.scss';
 interface InvitationFormActionsProps {
   onSubmit?: () => void;
   onGoHome?: () => void;
-  submitDisabled?: boolean;
 }
 
-const InvitationFormActions: React.FC<InvitationFormActionsProps> = ({
-  onSubmit,
-  onGoHome,
-  submitDisabled = false,
-}) => {
+const InvitationFormActions: React.FC<InvitationFormActionsProps> = ({ onSubmit, onGoHome }) => {
   return (
-    <div className="invitation-form-actions">
-      <EntryCodeSubmitButton onClick={onSubmit} disabled={submitDisabled}>
-        입장하기
-      </EntryCodeSubmitButton>
+    <>
+      <div className="invitation-form-actions">
+        <EntryCodeSubmitButton onClick={onSubmit}>입장하기</EntryCodeSubmitButton>
 
-      <button type="button" className="invitation-form-actions__home-link" onClick={onGoHome}>
-        홈으로 돌아가기
-      </button>
-    </div>
+        <button type="button" className="invitation-form-actions__home-link" onClick={onGoHome}>
+          홈으로 돌아가기
+        </button>
+      </div>
+    </>
   );
 };
 
