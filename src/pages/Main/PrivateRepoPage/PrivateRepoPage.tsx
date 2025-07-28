@@ -3,8 +3,9 @@ import { useNavigate } from '@tanstack/react-router';
 
 import FileIcon from '@/assets/icons/file.svg?react';
 
-import useGetRepository from '@/hooks/useGetRepository';
 import useCreateRepository from '@/hooks/useCreateRepository';
+import useGetRepository from '@/hooks/useGetRepository';
+import useRepositoryFavorite from '@/hooks/useRepositoryFavorite';
 
 import Button from '@/components/atoms/Button/Button';
 import Toggle from '@/components/atoms/Toggle/Toggle';
@@ -14,14 +15,13 @@ import RepoListItem from '@/components/organisms/RepoListItem/RepoListItem';
 import CreateRepoModal from '@/features/Modals/CreateRepoModal/CreateRepoModal';
 
 import MainPageType from '@/constants/enums/MainPageType.enum';
+import type RepositoryType from '@/constants/enums/RepositoryType.enum';
 
-import type { CreateRepoURL } from '@/types/apiEndpoints.types';
 import type { RepositoryItem } from '@/schemas/main.schema';
-import type { RepositoryQueryURL } from '@/types/apiEndpoints.types';
+import type { CreateRepoURL, RepositoryQueryURL } from '@/types/apiEndpoints.types';
 import type { Page } from '@/types/page.types';
 
 import styles from './PrivateRepoPage.module.scss';
-import type RepositoryType from '@/constants/enums/RepositoryType.enum';
 
 const getRepoURL: RepositoryQueryURL = '/api/repositories/mine';
 const postRepoURL: CreateRepoURL = '/api/repositories';
@@ -55,6 +55,7 @@ const PrivateRepoPage = () => {
       }));
     }
   }, [isSuccess, data]);
+  const { mutate: updateFavorite } = useRepositoryFavorite();
 
   // 실패
   useEffect(() => {
@@ -71,7 +72,21 @@ const PrivateRepoPage = () => {
 
   // 레포 좋아요
   const handleFavoriteClick = (id: number) => {
-    console.log(`Favorite clicked for repository ID: ${id}`);
+    // TODO: 토스트 추가
+    updateFavorite(id, {
+      onSuccess: data => {
+        setRepositories(
+          prev =>
+            prev?.map(repo =>
+              repo.repositoryId === id ? { ...repo, isFavorite: data.isFavorite } : repo
+            ) ?? null
+        );
+        console.log('즐겨찾기 성공:', data.isFavorite);
+      },
+      onError: error => {
+        console.error('즐겨찾기 실패:', error.message);
+      },
+    });
   };
 
   // 좋아요 필터

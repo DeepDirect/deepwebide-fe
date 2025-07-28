@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 
 import useGetRepository from '@/hooks/useGetRepository';
+import useRepositoryFavorite from '@/hooks/useRepositoryFavorite';
 
 import Toggle from '@/components/atoms/Toggle/Toggle';
 import Pagination from '@/components/molecules/Pagination/Pagination';
@@ -38,6 +39,7 @@ const SharedByMeRepoPage = () => {
     size: pagination.current || 7,
     liked: isLiked,
   });
+  const { mutate: updateFavorite } = useRepositoryFavorite();
 
   // 성공
   useEffect(() => {
@@ -58,7 +60,21 @@ const SharedByMeRepoPage = () => {
 
   // 레포 좋아요
   const handleFavoriteClick = (id: number) => {
-    console.log(`Favorite clicked for repository ID: ${id}`);
+    // TODO: 토스트 추가
+    updateFavorite(id, {
+      onSuccess: data => {
+        setRepositories(
+          prev =>
+            prev?.map(repo =>
+              repo.repositoryId === id ? { ...repo, isFavorite: data.isFavorite } : repo
+            ) ?? null
+        );
+        console.log('즐겨찾기 성공:', data.isFavorite);
+      },
+      onError: error => {
+        console.error('즐겨찾기 실패:', error.message);
+      },
+    });
   };
 
   // 좋아요 필터
