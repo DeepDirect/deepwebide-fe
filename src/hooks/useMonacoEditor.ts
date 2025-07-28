@@ -2,6 +2,7 @@ import { useRef, useEffect, useCallback } from 'react';
 import type { OnMount } from '@monaco-editor/react';
 import type { MonacoEditorInstance, MonacoModel, MonacoAction } from '@/types/monaco.types';
 import { getMonacoGlobal, disableLanguageDiagnostics } from '@/utils/monacoUtils';
+import { useThemeStore } from '@/stores/themeStore';
 
 interface UseMonacoEditorProps {
   language: string;
@@ -27,6 +28,7 @@ export const useMonacoEditor = ({
   const editorRef = useRef<MonacoEditorInstance | null>(null);
   const monacoEditorRef = useRef<MonacoEditorInstance | null>(null);
   const editorContainerRef = useRef<HTMLDivElement | null>(null);
+  const { isDarkMode } = useThemeStore();
 
   // 언어별 진단 설정
   useEffect(() => {
@@ -57,11 +59,43 @@ export const useMonacoEditor = ({
     }
   }, [language]);
 
+  // 테마 변경 감지 및 적용
+  useEffect(() => {
+    const monaco = getMonacoGlobal();
+    if (!monaco || !editorRef.current) return;
+
+    const newTheme = isDarkMode ? 'vs-dark' : 'vs';
+
+    try {
+      // Monaco Editor의 테마를 즉시 변경
+      monaco.editor.setTheme(newTheme);
+
+      // 에디터 인스턴스가 있다면 레이아웃 업데이트
+      if (editorRef.current) {
+        const editorWithMethods = editorRef.current as MonacoEditorInstance & {
+          updateOptions?: (options: { theme: string }) => void;
+        };
+
+        editorWithMethods.updateOptions?.({ theme: newTheme });
+      }
+    } catch (error) {
+      console.warn('Monaco 테마 적용 실패:', error);
+    }
+  }, [isDarkMode]);
+
   // 에디터 마운트 핸들러
   const handleEditorDidMount: OnMount = useCallback(
     (editor, monaco) => {
       editorRef.current = editor;
       monacoEditorRef.current = editor;
+
+      // 초기 테마 설정 - 스토어의 현재 상태를 즉시 반영
+      const currentTheme = isDarkMode ? 'vs-dark' : 'vs';
+      try {
+        monaco.editor.setTheme(currentTheme);
+      } catch (error) {
+        console.warn('초기 Monaco 테마 설정 실패:', error);
+      }
 
       // 에디터 컨테이너 참조 저장
       const editorElement = editor.getDomNode();
@@ -115,7 +149,7 @@ export const useMonacoEditor = ({
       // 포커스
       editor.focus();
     },
-    [language, onSave]
+    [language, onSave, isDarkMode]
   );
 
   // 에디터 내용 변경 핸들러

@@ -127,7 +127,7 @@
   box-sizing: border-box;
   min-height: 200px;
   overflow: hidden;
-  background-color: $white-1;
+  background-color: var(--editor-bg);
 
   @media screen and (height <= 600px) {
     min-height: 150px;
