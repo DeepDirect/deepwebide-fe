@@ -50,6 +50,11 @@ export const RepositoryEntrycodeResponseSchema = z.object({
   isShared: z.boolean(),
 });
 
+export const RepositoryFavoriteResponseSchema = z.object({
+  message: z.string(),
+  isFavorite: z.boolean(),
+});
+
 export type CreateRepoRequest = z.infer<typeof CreateRepoRequestSchema>;
 export type CreateRepoResponse = z.infer<typeof CreateRepoResponseSchema>;
 export type RepositoryRenameRequest = z.infer<typeof RepositoryRenameRequestSchema>;
@@ -58,3 +63,4 @@ export type UpdateRepositoryShareStatusResponse = z.infer<
   typeof UpdateRepositoryShareStatusResponseSchema
 >;
 export type RepositoryEntrycodeResponse = z.infer<typeof RepositoryEntrycodeResponseSchema>;
+export type RepositoryFavoriteResponse = z.infer<typeof RepositoryFavoriteResponseSchema>;
