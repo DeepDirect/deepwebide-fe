@@ -2,12 +2,17 @@ import styles from './PrivateSettingsPage.module.scss';
 import InfoSection from '@/components/organisms/Settings/InfoSection/InfoSection';
 import ShareSection from '@/components/organisms/Settings/ShareSection/ShareSection';
 import DeleteSection from '@/components/organisms/Settings/DeleteSection/DeleteSection';
+import BackIcon from '@/assets/icons/back.svg?react';
 import SettingsIcon from '@/assets/icons/settings.svg?react';
 import InfoIcon from '@/assets/icons/info.svg?react';
 import ShareIcon from '@/assets/icons/share.svg?react';
 import DeleteIcon from '@/assets/icons/trash.svg?react';
+import { useRouter, useCanGoBack } from '@tanstack/react-router';
 
 const PrivateSettingsPage = () => {
+  const router = useRouter();
+  const canGoBack = useCanGoBack();
+
   const scrollToSection = (id: string) => {
     const section = document.getElementById(id);
     if (section) {
@@ -15,11 +20,20 @@ const PrivateSettingsPage = () => {
     }
   };
 
+  const handleBack = () => {
+    if (canGoBack) router.history.back();
+  };
+
   return (
     <div className={styles.privateSettingsPage}>
-      <div className={styles.titleWrapper}>
-        <SettingsIcon className={styles.titleIcon} />
-        <h2 className={styles.title}>SETTINGS</h2>
+      <div className={styles.top}>
+        <div className={styles.titleWrapper}>
+          <SettingsIcon className={styles.titleIcon} />
+          <h2 className={styles.title}>SETTINGS</h2>
+        </div>
+        <button className={styles.backButton} onClick={handleBack}>
+          <BackIcon className={styles.icon} />
+        </button>
       </div>
 
       <div className={styles.sectionsWrapper}>
