@@ -1,7 +1,7 @@
 import 'dayjs/locale/ko';
 
 import dayjs from 'dayjs';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import FillHeartIcon from '@/assets/icons/fill-heart.svg?react';
 import HeartIcon from '@/assets/icons/heart.svg?react';
@@ -10,6 +10,7 @@ import MeatballIcon from '@/assets/icons/meatball.svg?react';
 import MainPageType from '@/constants/enums/MainPageType.enum';
 
 import useDeleteRepository from '@/hooks/useDeleteRepository';
+import useGetRepositoryEntrycode from '@/hooks/useGetRepositoryEntrycode';
 import useRepositoryRename from '@/hooks/useRepositoryRename';
 import useShareRepositoryStatus from '@/hooks/useShareRepositoryStatus';
 
@@ -38,6 +39,15 @@ type positionType = {
   left?: number;
 };
 
+const textCopy = async (text: string): Promise<boolean> => {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 const RepoListItem: React.FC<RepositoryProps> = ({
   info,
   handleFavoriteClick,
@@ -61,6 +71,7 @@ const RepoListItem: React.FC<RepositoryProps> = ({
     // isLoading: isRenaming,
   } = useShareRepositoryStatus(`/api/repositories/${info.repositoryId}`, {
     onSuccess: res => {
+      // TODO: 토스트 추가
       console.log('공유 상태 변경 완료:', res);
     },
     onError: err => {
@@ -72,12 +83,24 @@ const RepoListItem: React.FC<RepositoryProps> = ({
     // isLoading: isDeleting
   } = useDeleteRepository(`/api/repositories/${info.repositoryId}`, {
     onSuccess: () => {
+      // TODO: 토스트 추가
       console.log('삭제 성공');
     },
     onError: error => {
       console.error('삭제 실패', error);
     },
   });
+  const {
+    data: entryCodeRes,
+    isError: isEntryCodeError,
+    error: entryCodeError,
+  } = useGetRepositoryEntrycode(`/api/repositories/${info.repositoryId}/entrycode`);
+
+  useEffect(() => {
+    if (isEntryCodeError) {
+      console.error(entryCodeError); // TODO: 에러 처리 변경 필요
+    }
+  }, [isEntryCodeError, entryCodeError]);
 
   const handleMeatballClick = () => {
     if (meatballRef.current) {
@@ -127,6 +150,7 @@ const RepoListItem: React.FC<RepositoryProps> = ({
   };
 
   const handleConfirmChangeRepoName = (newName: string) => {
+    // TODO: 토스트 추가
     renameRepository(
       { repositoryName: newName },
       {
@@ -146,11 +170,27 @@ const RepoListItem: React.FC<RepositoryProps> = ({
     shareRepositoryStatus();
   };
   const handleShareLinkCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(info.shareLink);
-      alert('링크가 복사되었습니다!');
-    } catch (err) {
-      console.error('링크 복사 실패:', err);
+    // TODO: 토스트 추가
+    const isSuccess = await textCopy(info.shareLink);
+    if (isSuccess) {
+      alert('공유 링크가 복사되었습니다!');
+    } else {
+      alert('공유 링크 복사에 실패했습니다.');
+    }
+  };
+  const handleEntrycodeCopy = async () => {
+    // TODO: 토스트 추가
+    if (!entryCodeRes?.entryCode) {
+      alert('입장코드 복사에 실패했습니다.');
+      return;
+    }
+
+    const isSuccess = await textCopy(entryCodeRes.entryCode);
+
+    if (isSuccess) {
+      alert('입장코드가 복사되었습니다!');
+    } else {
+      alert('입장코드 복사에 실패했습니다.');
     }
   };
 
@@ -218,10 +258,11 @@ const RepoListItem: React.FC<RepositoryProps> = ({
                   onOpenChange={setIsModalOpen}
                   position={modalPosition}
                   shareLink={info.shareLink ?? ''}
-                  entryCode={''} // TODO: entryCode는 API 연동 후 추가
+                  // entryCode={entryCodeRes?.entryCode}
+                  entryCode={'대충테스트'}
                   onRename={() => openChangeRepoName()}
                   onShareLinkCopy={() => handleShareLinkCopy()}
-                  onEntryCodeCopy={() => console.log('코드 복사됨')}
+                  onEntryCodeCopy={() => handleEntrycodeCopy()}
                   onCancelShare={() => console.log('공유 취소')}
                 />
               );
