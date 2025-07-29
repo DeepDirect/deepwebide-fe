@@ -17,7 +17,7 @@ import CreateRepoModal from '@/features/Modals/CreateRepoModal/CreateRepoModal';
 import MainPageType from '@/constants/enums/MainPageType.enum';
 import type RepositoryType from '@/constants/enums/RepositoryType.enum';
 
-import type { RepositoryItem } from '@/schemas/main.schema';
+import type { RepositoryItem } from '@/schemas/repo.schema';
 import type { CreateRepoURL, RepositoryQueryURL } from '@/types/apiEndpoints.types';
 import type { Page } from '@/types/page.types';
 
@@ -40,22 +40,22 @@ const PrivateRepoPage = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false); // NOTE: 레포 생성 모달 열림 여부
   const { data, isSuccess, isError, error, refetch } = useGetRepository(getRepoURL, {
     page: (pagination.page || 1) - 1,
-    size: pagination.current || 7,
+    size: pagination.size || 7,
     liked: isLiked,
   });
   const createMutation = useCreateRepository(postRepoURL);
+  const { mutate: updateFavorite } = useRepositoryFavorite();
 
   // 성공
   useEffect(() => {
-    if (isSuccess && data) {
-      setRepositories(data.repositories);
+    if (isSuccess && data.data) {
+      setRepositories(data?.data.repositories);
       setPagination(prev => ({
         ...prev,
-        total: data.totalPages,
+        total: data?.data?.totalPages,
       }));
     }
   }, [isSuccess, data]);
-  const { mutate: updateFavorite } = useRepositoryFavorite();
 
   // 실패
   useEffect(() => {
@@ -81,7 +81,7 @@ const PrivateRepoPage = () => {
               repo.repositoryId === id ? { ...repo, isFavorite: data.isFavorite } : repo
             ) ?? null
         );
-        console.log('즐겨찾기 성공:', data.isFavorite);
+        refetch();
       },
       onError: error => {
         console.error('즐겨찾기 실패:', error.message);

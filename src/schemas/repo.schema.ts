@@ -1,4 +1,31 @@
 import { z } from 'zod';
+import type { ApiResponse } from '@/types/api';
+
+export const RepositoryItemSchema = z.object({
+  repositoryId: z.number(),
+  repositoryName: z.string(),
+  ownerId: z.number(),
+  ownerName: z.string(),
+  shareLink: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  isFavorite: z.boolean(),
+  isShared: z.boolean(),
+});
+
+export const RepositoryResponseSchema = z.object({
+  currentPage: z.number(),
+  pageSize: z.number(),
+  totalPages: z.number(),
+  totalElements: z.number(),
+  repositories: z.array(RepositoryItemSchema),
+});
+
+export const RepositoryRequestSchema = z.object({
+  page: z.number(),
+  size: z.number(),
+  liked: z.boolean(),
+});
 
 export const CreateRepoRequestSchema = z.object({
   repositoryName: z.string(),
@@ -55,6 +82,9 @@ export const RepositoryFavoriteResponseSchema = z.object({
   isFavorite: z.boolean(),
 });
 
+export type RepositoryRequest = z.infer<typeof RepositoryRequestSchema>;
+export type RepositoryItem = z.infer<typeof RepositoryItemSchema>;
+export type RepositoryResponse = z.infer<typeof RepositoryResponseSchema>;
 export type CreateRepoRequest = z.infer<typeof CreateRepoRequestSchema>;
 export type CreateRepoResponse = z.infer<typeof CreateRepoResponseSchema>;
 export type RepositoryRenameRequest = z.infer<typeof RepositoryRenameRequestSchema>;
@@ -64,3 +94,11 @@ export type UpdateRepositoryShareStatusResponse = z.infer<
 >;
 export type RepositoryEntrycodeResponse = z.infer<typeof RepositoryEntrycodeResponseSchema>;
 export type RepositoryFavoriteResponse = z.infer<typeof RepositoryFavoriteResponseSchema>;
+
+export type RepositoryApiResponse = ApiResponse<RepositoryResponse>;
+export type CreateRepoApiResponse = ApiResponse<CreateRepoResponse>;
+export type RepositoryRenameApiResponse = ApiResponse<RepositoryRenameResponse>;
+export type UpdateRepositoryShareStatusApiResponse =
+  ApiResponse<UpdateRepositoryShareStatusResponse>;
+export type RepositoryEntrycodeApiResponse = ApiResponse<RepositoryEntrycodeResponse>;
+export type RepositoryFavoriteApiResponse = ApiResponse<RepositoryFavoriteResponse>;
