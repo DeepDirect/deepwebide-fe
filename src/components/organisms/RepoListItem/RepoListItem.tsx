@@ -2,6 +2,7 @@ import 'dayjs/locale/ko';
 
 import dayjs from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
+import type { QueryObserverResult } from '@tanstack/react-query';
 
 import FillHeartIcon from '@/assets/icons/fill-heart.svg?react';
 import HeartIcon from '@/assets/icons/heart.svg?react';
@@ -24,7 +25,7 @@ import PrivateRepoMeatballModal from '@/features/Modals/PrivateRepoMeatballModal
 import SharedByMeRepoMeatballModal from '@/features/Modals/SharedByMeRepoMeatballModal/SharedByMeRepoMeatballModal';
 import SharedWithMeRepoMeatballModal from '@/features/Modals/SharedWithMeRepoMeatballModal/SharedWithMeRepoMeatballModal';
 
-import type { RepositoryItem } from '@/schemas/main.schema';
+import type { RepositoryItem, RepositoryApiResponse } from '@/schemas/repo.schema';
 
 import styles from './RepoListItem.module.scss';
 
@@ -33,6 +34,7 @@ type RepositoryProps = {
   pageType: MainPageType;
   handleFavoriteClick: (id: number) => void;
   handleRepoClick: (id: number) => void;
+  repositoryRefetch: () => Promise<QueryObserverResult<RepositoryApiResponse, unknown>>;
 };
 
 type positionType = {
@@ -59,6 +61,7 @@ const RepoListItem: React.FC<RepositoryProps> = ({
   handleFavoriteClick,
   handleRepoClick,
   pageType,
+  repositoryRefetch,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalPosition, setModalPosition] = useState<positionType>({});
@@ -82,6 +85,7 @@ const RepoListItem: React.FC<RepositoryProps> = ({
     onSuccess: res => {
       // TODO: 토스트 추가
       console.log('공유 상태 변경 완료:', res);
+      repositoryRefetch();
     },
     onError: err => {
       console.error('공유 상태 변경 실패:', err);
@@ -93,6 +97,7 @@ const RepoListItem: React.FC<RepositoryProps> = ({
   } = useDeleteRepository(`/api/repositories/${info.repositoryId}`, {
     onSuccess: () => {
       // TODO: 토스트 추가
+      repositoryRefetch();
       console.log('삭제 성공');
     },
     onError: error => {
@@ -105,6 +110,7 @@ const RepoListItem: React.FC<RepositoryProps> = ({
   } = useRepositoryExit(`/api/repositories/${info.repositoryId}/exit`, {
     onSuccess: () => {
       console.log('나가기 성공');
+      repositoryRefetch();
     },
     onError: error => {
       console.error('나가기 실패', error);
@@ -186,7 +192,8 @@ const RepoListItem: React.FC<RepositoryProps> = ({
       { repositoryName: newName },
       {
         onSuccess: () => {
-          console.log('레포 삭제 성공');
+          repositoryRefetch();
+          console.log('레포 이름변경 성공');
         },
         onError: error => {
           console.error(error);
@@ -202,7 +209,7 @@ const RepoListItem: React.FC<RepositoryProps> = ({
   };
   const handleEntrycodeCopy = () => {
     // TODO: 토스트 추가
-    if (!entryCodeRes?.entryCode) {
+    if (!entryCodeRes?.data.entryCode) {
       alert('입장코드 복사에 실패했습니다.');
       return;
     }
@@ -210,7 +217,7 @@ const RepoListItem: React.FC<RepositoryProps> = ({
     const successMessage = '입장코드가 복사되었습니다!';
     const failMessage = '입장코드 복사에 실패했습니다.';
 
-    textCopy(entryCodeRes.entryCode, successMessage, failMessage);
+    textCopy(entryCodeRes.data.entryCode, successMessage, failMessage);
   };
 
   return (
@@ -277,7 +284,7 @@ const RepoListItem: React.FC<RepositoryProps> = ({
                   onOpenChange={setIsModalOpen}
                   position={modalPosition}
                   shareLink={info.shareLink}
-                  entryCode={entryCodeRes?.entryCode}
+                  entryCode={entryCodeRes?.data.entryCode}
                   onRename={() => openChangeRepoName()}
                   onShareLinkCopy={() => handleShareLinkCopy()}
                   onEntryCodeCopy={() => handleEntrycodeCopy()}

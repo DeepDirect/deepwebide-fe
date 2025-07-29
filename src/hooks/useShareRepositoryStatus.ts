@@ -3,20 +3,23 @@ import type { AxiosError } from 'axios';
 
 import { apiClient } from '@/api/client';
 import type { RepositoryURL } from '@/types/apiEndpoints.types';
-import type { UpdateRepositoryShareStatusResponse } from '@/schemas/repo.schema';
+import type { UpdateRepositoryShareStatusApiResponse } from '@/schemas/repo.schema';
 
 type Options = Omit<
-  UseMutationOptions<UpdateRepositoryShareStatusResponse, AxiosError, void>,
+  UseMutationOptions<UpdateRepositoryShareStatusApiResponse, AxiosError, void>,
   'mutationFn'
 >;
 
 export const useShareRepositoryStatus = (url: RepositoryURL, options?: Options) => {
   const queryClient = useQueryClient();
 
-  return useMutation<UpdateRepositoryShareStatusResponse, AxiosError, void>({
+  return useMutation<UpdateRepositoryShareStatusApiResponse, AxiosError, void>({
     mutationKey: ['repository', 'post'],
     mutationFn: async body => {
-      const { data } = await apiClient.post<void, UpdateRepositoryShareStatusResponse>(url, body);
+      const { data } = await apiClient.post<void, UpdateRepositoryShareStatusApiResponse>(
+        url,
+        body
+      );
 
       return data;
     },
