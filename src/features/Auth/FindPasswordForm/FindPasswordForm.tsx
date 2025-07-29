@@ -1,33 +1,85 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from '@tanstack/react-router';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { findPasswordSchema, type FindPasswordFormValues } from '@/schemas/auth.schema';
 import Input from '@/components/atoms/Input/Input';
 import Button from '@/components/atoms/Button/Button';
 import FormField from '@/components/molecules/FormField/FormField';
+
+// 훅들과 URL 타입들 import
+import {
+  useFindPassword,
+  useSendPhoneCodeForFindPassword,
+  useVerifyPhoneCodeForFindPassword,
+} from '@/hooks/auth/useFindPassword';
+import type {
+  FindPasswordURL,
+  PhoneSendCodeURL,
+  PhoneVerifyCodeURL,
+} from '@/types/common/apiEndpoints.types';
+
 import styles from './FindPasswordForm.module.scss';
+
+// URL들 정의
+const findPasswordURL: FindPasswordURL = '/api/auth/password/verify-user';
+const phoneSendCodeURL: PhoneSendCodeURL = '/api/auth/phone/send-code';
+const phoneVerifyCodeURL: PhoneVerifyCodeURL = '/api/auth/phone/verify-code';
 
 export default function FindPasswordForm() {
   const {
     register,
     handleSubmit,
     watch,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<FindPasswordFormValues>({
     resolver: zodResolver(findPasswordSchema),
     mode: 'onChange',
   });
 
+  // 상태 관리
   const [codeSent, setCodeSent] = useState(false);
   const [codeVerified, setCodeVerified] = useState(false);
   const [timer, setTimer] = useState(0);
-  const [found, setFound] = useState<boolean | null>(null);
 
+  // 폼 데이터 감시
+  const username = watch('username');
   const phone = watch('phoneNumber');
   const phoneCode = watch('phoneCode');
 
-  // 인증번호 타이머
+  // URL을 파라미터로 전달하는 훅들 사용
+  const findPasswordMutation = useFindPassword(findPasswordURL, {
+    onError: () => {
+      alert('사용자 정보를 찾을 수 없습니다. 입력한 정보를 다시 확인해주세요.');
+    },
+  });
+
+  const sendPhoneCodeMutation = useSendPhoneCodeForFindPassword(phoneSendCodeURL, {
+    onSuccess: () => {
+      setCodeSent(true);
+      startTimer();
+      alert('인증번호가 발송되었습니다.');
+    },
+    onError: error => {
+      console.error('인증번호 발송 실패:', error);
+      alert(`인증번호 발송에 실패했습니다. (${error.response?.status || '알 수 없는 오류'})`);
+    },
+  });
+
+  const verifyPhoneCodeMutation = useVerifyPhoneCodeForFindPassword(phoneVerifyCodeURL, {
+    onSuccess: data => {
+      if (data.data.verified) {
+        setCodeVerified(true);
+        alert('휴대폰 인증이 완료되었습니다.');
+      } else {
+        alert('인증번호가 올바르지 않습니다.');
+      }
+    },
+    onError: () => {
+      alert('인증번호 확인에 실패했습니다.');
+    },
+  });
+
+  // 타이머 로직
   const startTimer = () => {
     setTimer(59);
     const interval = setInterval(() => {
@@ -41,35 +93,60 @@ export default function FindPasswordForm() {
     }, 1000);
   };
 
-  const handleSendCode = () => {
-    setCodeSent(true);
-    startTimer();
-    // TODO: 실제 API 연동
-  };
-
-  const handleVerifyCode = () => {
-    setCodeVerified(true);
-    // TODO: 실제 API 연동
-  };
-
-  const navigate = useNavigate();
-
-  const onSubmit = (data: FindPasswordFormValues) => {
-    // TODO: 실제로 백엔드와 연동
-    if (
-      data.username === '구름' &&
-      data.email === 'goorm@email.com' &&
-      data.phoneNumber === '01012345678' &&
-      data.phoneCode === '123456'
-    ) {
-      navigate({
-        to: '/find-password/change',
-        search: { email: data.email },
-      });
-    } else {
-      setFound(false);
+  // 인증번호 발송
+  const handleSendPhoneCode = () => {
+    if (!phone || !username) {
+      alert('이름과 휴대폰 번호를 입력해주세요.');
+      return;
     }
+
+    const cleanPhoneNumber = phone.replace(/-/g, '');
+    const requestData = {
+      phoneNumber: cleanPhoneNumber,
+      username: username.trim(),
+    };
+
+    console.log('비밀번호 찾기 - 인증번호 발송 요청 데이터:', requestData);
+    sendPhoneCodeMutation.mutate(requestData);
   };
+
+  // 인증번호 확인
+  const handleVerifyPhoneCode = () => {
+    if (!phoneCode || !phone) {
+      alert('인증번호를 입력해주세요.');
+      return;
+    }
+
+    const cleanPhoneNumber = phone.replace(/-/g, '');
+    const requestData = {
+      phoneNumber: cleanPhoneNumber,
+      phoneCode: phoneCode.trim(),
+    };
+
+    console.log('비밀번호 찾기 - 인증번호 확인 요청 데이터:', requestData);
+    verifyPhoneCodeMutation.mutate(requestData);
+  };
+
+  // 폼 제출 - 사용자 검증 API 호출
+  const onSubmit = (data: FindPasswordFormValues) => {
+    if (!codeVerified) {
+      alert('휴대폰 인증을 완료해주세요.');
+      return;
+    }
+
+    const verifyUserData = {
+      username: data.username,
+      email: data.email,
+      phoneNumber: data.phoneNumber.replace(/-/g, ''), // 하이픈 제거
+      phoneCode: data.phoneCode,
+    };
+
+    console.log('사용자 검증 요청 데이터:', verifyUserData);
+    findPasswordMutation.mutate(verifyUserData);
+  };
+
+  const isSubmitting = findPasswordMutation.isPending;
+  const isButtonDisabled = isSubmitting || !codeVerified;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
@@ -78,7 +155,7 @@ export default function FindPasswordForm() {
       </FormField>
 
       <FormField label="이메일" htmlFor="email" required error={errors.email?.message}>
-        <Input id="email" {...register('email')} placeholder="goorm@email.com" />
+        <Input id="email" {...register('email')} placeholder="user@goorm.com" />
       </FormField>
 
       <FormField
@@ -91,11 +168,15 @@ export default function FindPasswordForm() {
           <Input id="phoneNumber" {...register('phoneNumber')} placeholder="01012345678" />
           <Button
             type="button"
-            onClick={handleSendCode}
-            disabled={!phone || timer > 0}
+            onClick={handleSendPhoneCode}
+            disabled={!phone || !username || timer > 0 || sendPhoneCodeMutation.isPending}
             variant={codeSent ? 'inactive' : 'active'}
           >
-            {timer > 0 ? `0:${timer}` : '인증번호 발송'}
+            {sendPhoneCodeMutation.isPending
+              ? '발송 중...'
+              : timer > 0
+                ? `0:${timer}`
+                : '인증번호 발송'}
           </Button>
         </div>
       </FormField>
@@ -105,11 +186,15 @@ export default function FindPasswordForm() {
           <Input id="phoneCode" {...register('phoneCode')} placeholder="123456" />
           <Button
             type="button"
-            onClick={handleVerifyCode}
-            disabled={!phoneCode || codeVerified}
+            onClick={handleVerifyPhoneCode}
+            disabled={!phoneCode || codeVerified || verifyPhoneCodeMutation.isPending}
             variant={codeVerified ? 'inactive' : 'active'}
           >
-            {codeVerified ? '인증 완료' : '인증하기'}
+            {verifyPhoneCodeMutation.isPending
+              ? '확인 중...'
+              : codeVerified
+                ? '인증 완료'
+                : '인증하기'}
           </Button>
         </div>
       </FormField>
@@ -117,15 +202,11 @@ export default function FindPasswordForm() {
       <Button
         type="submit"
         className={styles.submitBtn}
-        disabled={isSubmitting || !codeVerified}
+        disabled={isButtonDisabled}
         variant={codeVerified ? 'active' : 'general'}
       >
-        비밀번호 찾기
+        {isSubmitting ? '확인 중...' : '비밀번호 찾기'}
       </Button>
-
-      {found === false && (
-        <div className={styles.error}>입력하신 정보로 가입된 계정을 찾을 수 없습니다.</div>
-      )}
     </form>
   );
 }
