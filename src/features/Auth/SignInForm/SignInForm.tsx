@@ -11,36 +11,46 @@ import { useNavigate } from '@tanstack/react-router';
 import { useAuthStore } from '@/stores/authStore';
 import { useEffect } from 'react';
 
+// 훅과 URL 타입 import
+import useSignIn from '@/hooks/auth/useSignIn';
+import type { SignInURL } from '@/types/common/apiEndpoints.types';
+
+// URL 정의
+const signInURL: SignInURL = '/api/auth/signin';
+
 export default function SignInForm() {
   const {
     register,
     handleSubmit,
     watch,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<SignInFormValues>({
     resolver: zodResolver(signInSchema),
     mode: 'onChange',
   });
+
   const navigate = useNavigate();
-  const { signin, isLoggedIn } = useAuthStore();
+  const { isLoggedIn } = useAuthStore();
+
+  // URL을 파라미터로 전달
+  const signInMutation = useSignIn(signInURL, {
+    onError: () => {
+      alert('로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.');
+    },
+  });
 
   const email = watch('email');
   const password = watch('password');
 
   const onSubmit = async (data: SignInFormValues) => {
-    try {
-      await signin(data);
-      navigate({ to: '/main' });
-    } catch (error) {
-      console.error('로그인 실패:', error);
-    }
+    signInMutation.mutate(data);
   };
 
   useEffect(() => {
     if (isLoggedIn) navigate({ to: '/main' });
   }, [isLoggedIn, navigate]);
 
-  const isButtonDisabled = isSubmitting || !email || !password;
+  const isButtonDisabled = signInMutation.isPending || !email || !password;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
@@ -65,7 +75,7 @@ export default function SignInForm() {
         type="submit"
         disabled={isButtonDisabled}
       >
-        로그인
+        {signInMutation.isPending ? '로그인 중...' : '로그인'}
       </Button>
     </form>
   );
