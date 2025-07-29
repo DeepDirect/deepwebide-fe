@@ -9,7 +9,7 @@
   background-color: var(--file-section-bg);
   transition: background-color 0.2s ease;
 
-  // 드래그 중일 때 전체 트리 스타일
+  // 내부 드래그 중일 때 전체 트리 스타일
   &.dragging {
     &::after {
       content: '';
@@ -22,6 +22,21 @@
       inset: 0;
     }
   }
+
+  // 외부 파일 드래그오버 중일 때 전체 트리 스타일 (테두리만 표시)
+  &.externalDragOver {
+    &::before {
+      content: '';
+      position: absolute;
+      z-index: 1;
+      border: 3px dashed var(--filetree-external-drag-border);
+      border-radius: 12px;
+      background: transparent; // 배경색 제거
+      animation: external-drag-border-pulse 2s ease-in-out infinite;
+      pointer-events: none;
+      inset: 0;
+    }
+  }
 }
 
 .treeContainer {
@@ -29,6 +44,7 @@
   box-sizing: border-box;
   width: 100%;
   height: 100%;
+  min-height: 100%; // 최소 높이 보장
   padding: 8px 0;
   overflow: visible auto;
   scroll-behavior: smooth;
@@ -59,9 +75,23 @@
   &::-webkit-scrollbar-corner {
     background: transparent;
   }
+
+  // 드롭존 확장 - 콘텐츠가 적어도 전체 높이 차지
+  &.dropZone {
+    min-height: 400px;
+
+    // 빈 공간을 채우는 가상 요소 추가
+    &::after {
+      content: '';
+      display: block;
+      width: 100%;
+      min-height: 200px;
+      pointer-events: none;
+    }
+  }
 }
 
-// 드래그 인디케이터
+// 내부 드래그 인디케이터
 .dragIndicator {
   position: fixed;
   bottom: 16px;
@@ -78,6 +108,64 @@
   transform: translateX(-50%);
   pointer-events: none;
   user-select: none;
+}
+
+// 외부 파일 드래그 인디케이터
+.externalDragIndicator {
+  position: fixed;
+  bottom: 56px; // 내부 드래그 인디케이터 위에 표시
+  left: 50%;
+  z-index: 1001;
+  padding: 10px 18px;
+  border: 2px solid var(--filetree-external-drag-indicator-border);
+  border-radius: 10px;
+  font-size: $font-size-xxsmall;
+  font-weight: $font-weight-semi-bold;
+  color: var(--filetree-external-drag-indicator-text);
+  background-color: var(--filetree-external-drag-indicator-bg);
+  box-shadow:
+    0 6px 16px var(--filetree-external-drag-indicator-shadow),
+    0 0 0 1px rgb(255 255 255 / 10%);
+  backdrop-filter: blur(8px);
+  animation: external-drag-slide-up 0.3s ease-out;
+  transform: translateX(-50%);
+  pointer-events: none;
+  user-select: none;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 20px;
+    width: 0;
+    height: 0;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid var(--filetree-external-drag-indicator-bg);
+    border-left: 6px solid transparent;
+  }
+}
+
+// 드롭존 영역 (파일 드래그 감지 영역 확장)
+.dropZone {
+  min-height: 100%;
+
+  // 빈 상태일 때도 충분한 드롭 영역 제공
+  &.empty {
+    min-height: 500px;
+  }
+
+  // 파일이 있는 상태에서도 하단 여백 확보
+  &:not(.empty) {
+    padding-bottom: 100px;
+
+    &::after {
+      content: '';
+      display: block;
+      width: 100%;
+      height: 100px;
+      pointer-events: none;
+    }
+  }
 }
 
 // 자식 노드 들여쓰기
@@ -190,13 +278,19 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 200px;
+  height: 100%;
+  min-height: 400px; // 충분한 드롭 영역 확보
   padding: 16px;
   transition: all 0.2s ease;
   cursor: context-menu;
 
   &:hover {
     background-color: var(--filetree-empty-hover);
+  }
+
+  // 드롭존 확장
+  &.dropZone {
+    min-height: 500px;
   }
 }
 
@@ -237,7 +331,7 @@
   }
 }
 
-// 드래그 애니메이션
+// 애니메이션들
 @keyframes slide-up {
   from {
     opacity: 0;
@@ -247,6 +341,35 @@
   to {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes external-drag-slide-up {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(30px) scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+@keyframes external-drag-border-pulse {
+  0% {
+    border-color: var(--filetree-external-drag-border);
+    opacity: 0.7;
+  }
+
+  50% {
+    border-color: var(--filetree-external-drag-border-active);
+    opacity: 1;
+  }
+
+  100% {
+    border-color: var(--filetree-external-drag-border);
+    opacity: 0.7;
   }
 }
 
@@ -264,12 +387,22 @@
   --filetree-retry-hover: #{$gray-10};
   --filetree-empty-hover: rgb(0 0 0 / 2%);
 
-  // 드래그 관련
+  // 내부 드래그 관련
   --filetree-drag-overlay: rgb(100 152 198 / 5%);
   --filetree-drag-border: #{$blue-3};
   --filetree-drag-indicator-bg: #{$blue-3};
   --filetree-drag-indicator-text: #{$white-2};
   --filetree-drag-indicator-shadow: rgb(0 0 0 / 25%);
+
+  // 외부 파일 드래그 관련
+  --filetree-external-drag-overlay: rgb(34 197 94 / 8%);
+  --filetree-external-drag-overlay-active: rgb(34 197 94 / 15%);
+  --filetree-external-drag-border: #{$green};
+  --filetree-external-drag-border-active: #{$green};
+  --filetree-external-drag-indicator-bg: #{$green};
+  --filetree-external-drag-indicator-text: #{$white-2};
+  --filetree-external-drag-indicator-border: rgb(34 197 94 / 50%);
+  --filetree-external-drag-indicator-shadow: rgb(0 0 0 / 30%);
 }
 
 :global(.dark) {
@@ -285,10 +418,20 @@
   --filetree-retry-hover: #{$gray-3};
   --filetree-empty-hover: rgb(255 255 255 / 3%);
 
-  // 드래그 관련
+  // 내부 드래그 관련
   --filetree-drag-overlay: rgb(100 152 198 / 8%);
   --filetree-drag-border: #{$blue-3};
   --filetree-drag-indicator-bg: #{$blue-3};
   --filetree-drag-indicator-text: #{$white-2};
   --filetree-drag-indicator-shadow: rgb(0 0 0 / 40%);
+
+  // 외부 파일 드래그 관련
+  --filetree-external-drag-overlay: rgb(34 197 94 / 12%);
+  --filetree-external-drag-overlay-active: rgb(34 197 94 / 20%);
+  --filetree-external-drag-border: #{$green};
+  --filetree-external-drag-border-active: #{$green};
+  --filetree-external-drag-indicator-bg: #{$green};
+  --filetree-external-drag-indicator-text: #{$white-2};
+  --filetree-external-drag-indicator-border: rgb(34 197 94 / 60%);
+  --filetree-external-drag-indicator-shadow: rgb(0 0 0 / 50%);
 }

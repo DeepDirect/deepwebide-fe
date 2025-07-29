@@ -22,7 +22,7 @@ interface ExtendedFileTreeItemProps extends FileTreeItemProps {
   onEditSave?: (node: import('../../types').FileTreeNode, newName: string) => Promise<void>;
   onEditCancel?: () => void;
 
-  // 드래그앤드롭 관련
+  // 내부 드래그앤드롭 관련
   isDragging?: boolean;
   isDropTarget?: boolean;
   canDrop?: boolean;
@@ -31,7 +31,13 @@ interface ExtendedFileTreeItemProps extends FileTreeItemProps {
   onDragOver?: (node: import('../../types').FileTreeNode, event: React.DragEvent) => void;
   onDragLeave?: () => void;
   onDrop?: (node: import('../../types').FileTreeNode, event: React.DragEvent) => void;
-  getDropPosition?: (nodeId: string) => import('../../types').DropPosition | null; // 추가
+  getDropPosition?: (nodeId: string) => import('../../types').DropPosition | null;
+
+  // 외부 파일 드롭 관련
+  isExternalDragOver?: boolean;
+  onExternalDragOver?: (node: import('../../types').FileTreeNode, event: React.DragEvent) => void;
+  onExternalDragLeave?: (node: import('../../types').FileTreeNode, event: React.DragEvent) => void;
+  onExternalDrop?: (node: import('../../types').FileTreeNode, event: React.DragEvent) => void;
 }
 
 const FileTreeItem: React.FC<ExtendedFileTreeItemProps> = ({
@@ -54,7 +60,7 @@ const FileTreeItem: React.FC<ExtendedFileTreeItemProps> = ({
   isEditing = false,
   onEditSave,
   onEditCancel,
-  // 드래그앤드롭
+  // 내부 드래그앤드롭
   isDragging = false,
   isDropTarget = false,
   canDrop = true,
@@ -63,7 +69,12 @@ const FileTreeItem: React.FC<ExtendedFileTreeItemProps> = ({
   onDragOver,
   onDragLeave,
   onDrop,
-  getDropPosition, // 추가
+  getDropPosition,
+  // 외부 파일 드롭
+  isExternalDragOver = false,
+  onExternalDragOver,
+  onExternalDragLeave,
+  onExternalDrop,
 }) => {
   const handleClick = (e: React.MouseEvent) => {
     // 편집 중이거나 드래그 중일 때는 클릭 이벤트 무시
@@ -123,7 +134,7 @@ const FileTreeItem: React.FC<ExtendedFileTreeItemProps> = ({
     }
   };
 
-  // 드래그 시작 핸들러
+  // 내부 드래그 시작 핸들러
   const handleDragStart = (e: React.DragEvent) => {
     if (isEditing) {
       e.preventDefault();
@@ -135,31 +146,68 @@ const FileTreeItem: React.FC<ExtendedFileTreeItemProps> = ({
     }
   };
 
-  // 드래그 종료 핸들러
+  // 내부 드래그 종료 핸들러
   const handleDragEnd = () => {
     if (onDragEnd) {
       onDragEnd();
     }
   };
 
-  // 드래그 오버 핸들러
-  const handleDragOver = (e: React.DragEvent) => {
-    if (onDragOver) {
-      onDragOver(node, e);
+  // 통합된 드래그 오버 핸들러 (내부 + 외부)
+  const handleCombinedDragOver = (e: React.DragEvent) => {
+    // 외부 파일 드래그인지 확인
+    const isExternalFile =
+      !e.dataTransfer.types.includes('application/json') && e.dataTransfer.types.includes('Files');
+
+    if (isExternalFile) {
+      // 외부 파일 드래그오버
+      if (onExternalDragOver) {
+        onExternalDragOver(node, e);
+      }
+    } else {
+      // 내부 드래그오버
+      e.preventDefault();
+      if (onDragOver) {
+        onDragOver(node, e);
+      }
     }
   };
 
-  // 드래그 리브 핸들러
-  const handleDragLeave = () => {
-    if (onDragLeave) {
-      onDragLeave();
+  // 통합된 드래그 리브 핸들러 (내부 + 외부)
+  const handleCombinedDragLeave = (e: React.DragEvent) => {
+    const isExternalFile =
+      !e.dataTransfer.types.includes('application/json') && e.dataTransfer.types.includes('Files');
+
+    if (isExternalFile) {
+      // 외부 파일 드래그리브
+      if (onExternalDragLeave) {
+        onExternalDragLeave(node, e);
+      }
+    } else {
+      // 내부 드래그리브 (preventDefault 필요)
+      e.preventDefault();
+      if (onDragLeave) {
+        onDragLeave();
+      }
     }
   };
 
-  // 드롭 핸들러
-  const handleDrop = (e: React.DragEvent) => {
-    if (onDrop) {
-      onDrop(node, e);
+  // 통합된 드롭 핸들러 (내부 + 외부)
+  const handleCombinedDrop = (e: React.DragEvent) => {
+    const isExternalFile =
+      !e.dataTransfer.types.includes('application/json') && e.dataTransfer.types.includes('Files');
+
+    if (isExternalFile) {
+      // 외부 파일 드롭
+      if (onExternalDrop) {
+        onExternalDrop(node, e);
+      }
+    } else {
+      // 내부 드롭 (preventDefault 필요)
+      e.preventDefault();
+      if (onDrop) {
+        onDrop(node, e);
+      }
     }
   };
 
@@ -236,10 +284,12 @@ const FileTreeItem: React.FC<ExtendedFileTreeItemProps> = ({
             [styles.canDrop]: canDrop && isDropTarget,
             [styles.cannotDrop]: !canDrop && isDropTarget,
             [styles.draggable]: !isEditing,
-            // 드롭 위치별 클래스 추가
+            // 내부 드롭 위치별 클래스
             [styles.dropBefore]: isDropTarget && getDropPosition?.(node.id) === 'before',
             [styles.dropInside]: isDropTarget && getDropPosition?.(node.id) === 'inside',
             [styles.dropAfter]: isDropTarget && getDropPosition?.(node.id) === 'after',
+            // 외부 파일 드래그오버 클래스
+            [styles.externalDragOver]: isExternalDragOver,
           },
           className
         )}
@@ -254,9 +304,9 @@ const FileTreeItem: React.FC<ExtendedFileTreeItemProps> = ({
         draggable={!isEditing}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
+        onDragOver={handleCombinedDragOver}
+        onDragLeave={handleCombinedDragLeave}
+        onDrop={handleCombinedDrop}
         // 최상단 레벨 여부를 data attribute로 전달
         data-is-top-level={isTopLevel}
       >
@@ -297,6 +347,17 @@ const FileTreeItem: React.FC<ExtendedFileTreeItemProps> = ({
           className={styles.name}
           validateInput={validateFileName}
         />
+
+        {/* 외부 파일 드래그오버 상태 표시 */}
+        {isExternalDragOver && (
+          <div className={styles.externalDropIndicator}>
+            {node.type === 'folder' ? (
+              <span className={styles.folderDropText}>📁 폴더 안으로 업로드</span>
+            ) : (
+              <span className={styles.fileDropText}>📄 같은 레벨에 업로드</span>
+            )}
+          </div>
+        )}
       </div>
     </FileTreeContextMenu>
   );

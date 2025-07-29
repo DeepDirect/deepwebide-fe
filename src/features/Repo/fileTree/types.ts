@@ -24,7 +24,7 @@ export interface FileTreeNode {
   children?: FileTreeNode[];
 }
 
-// 드래그앤드롭 관련 타입
+// 내부 드래그앤드롭 관련 타입
 export interface DragItem {
   id: string;
   type: 'file' | 'folder';
@@ -40,7 +40,18 @@ export interface DragDropState {
   dragPreview: string | null;
 }
 
-// 드롭 위치 타입 추가
+// 외부 파일 드롭 관련 타입
+export interface ExternalDropState {
+  isDragOver: boolean;
+  dropTarget: {
+    nodeId: string;
+    path: string;
+    type: 'folder' | 'file' | 'root';
+  } | null;
+  dragPreview: string | null;
+}
+
+// 드롭 위치 타입
 export type DropPosition = 'before' | 'inside' | 'after';
 
 // 컴포넌트 Props 타입
@@ -60,7 +71,8 @@ export interface FileTreeItemProps {
   onFileClick?: (node: FileTreeNode) => void;
   onFolderToggle?: (node: FileTreeNode) => void;
   className?: string;
-  // 드래그앤드롭 props
+
+  // 내부 드래그앤드롭 props
   isDragging?: boolean;
   isDropTarget?: boolean;
   canDrop?: boolean;
@@ -69,5 +81,11 @@ export interface FileTreeItemProps {
   onDragOver?: (node: FileTreeNode, event: React.DragEvent) => void;
   onDragLeave?: () => void;
   onDrop?: (node: FileTreeNode, event: React.DragEvent) => void;
-  getDropPosition?: (nodeId: string) => DropPosition | null; // 추가
+  getDropPosition?: (nodeId: string) => DropPosition | null;
+
+  // 외부 파일 드롭 props
+  isExternalDragOver?: boolean;
+  onExternalDragOver?: (node: FileTreeNode, event: React.DragEvent) => void;
+  onExternalDragLeave?: (node: FileTreeNode, event: React.DragEvent) => void;
+  onExternalDrop?: (node: FileTreeNode, event: React.DragEvent) => void;
 }
