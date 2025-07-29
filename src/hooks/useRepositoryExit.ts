@@ -10,7 +10,7 @@ const useRepositoryExit = (
 ) => {
   return useMutation<void, AxiosError, void>({
     mutationFn: async () => {
-      await apiClient.post(`${url}`);
+      await apiClient.post(url);
     },
     ...options,
   });

@@ -38,7 +38,7 @@ export const UpdateRepositoryShareStatusResponseSchema = z.object({
   isShared: z.boolean(),
 });
 
-export const RepositoryEntrycodeResponseSchema = z.object({
+export const RepositoryEntrycodeDataSchema = z.object({
   repositoryId: z.number(),
   repositoryName: z.string(),
   ownerId: z.number(),
@@ -48,6 +48,12 @@ export const RepositoryEntrycodeResponseSchema = z.object({
   createdAt: z.string(),
   updatedAt: z.string(),
   isShared: z.boolean(),
+});
+
+export const RepositoryEntrycodeResponseSchema = z.object({
+  status: z.number(),
+  message: z.string(),
+  data: RepositoryEntrycodeDataSchema,
 });
 
 export const RepositoryFavoriteResponseSchema = z.object({
@@ -62,5 +68,60 @@ export type RepositoryRenameResponse = z.infer<typeof RepositoryRenameResponseSc
 export type UpdateRepositoryShareStatusResponse = z.infer<
   typeof UpdateRepositoryShareStatusResponseSchema
 >;
+export type RepositoryEntrycodeData = z.infer<typeof RepositoryEntrycodeDataSchema>;
 export type RepositoryEntrycodeResponse = z.infer<typeof RepositoryEntrycodeResponseSchema>;
 export type RepositoryFavoriteResponse = z.infer<typeof RepositoryFavoriteResponseSchema>;
+
+// 환경설정 관련 스키마 정의 추가
+export const RepositoryMemberSchema = z.object({
+  userId: z.number(),
+  nickname: z.string(),
+  profileImageUrl: z.string(),
+  role: z.enum(['OWNER', 'MEMBER']),
+});
+
+export const RepositorySettingsDataSchema = z.object({
+  repositoryId: z.number(),
+  repositoryName: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  shareLink: z.string(),
+  members: z.array(RepositoryMemberSchema),
+  isShared: z.boolean(),
+});
+
+export const RepositorySettingsResponseSchema = z.object({
+  status: z.number(),
+  message: z.string(),
+  data: RepositorySettingsDataSchema,
+});
+
+export type RepositoryMember = z.infer<typeof RepositoryMemberSchema>;
+export type RepositorySettingsData = z.infer<typeof RepositorySettingsDataSchema>;
+export type RepositorySettingsResponse = z.infer<typeof RepositorySettingsResponseSchema>;
+
+// 멤버 추방
+export const KickedMemberResponse = z.object({
+  kickedUserId: z.number(),
+});
+
+export const ResponseDtoKickedMemberResponse = z.object({
+  status: z.number(),
+  message: z.string(),
+  data: KickedMemberResponse.nullable(),
+});
+
+export type KickedMemberResponseType = z.infer<typeof KickedMemberResponse>;
+export type ResponseDtoKickedMemberResponseType = z.infer<typeof ResponseDtoKickedMemberResponse>;
+
+export const RepositoryNewEntrycodeDataSchema = z.object({
+  newEntryCode: z.string(),
+});
+
+export const RepositoryNewEntrycodeSchema = z.object({
+  status: z.number(),
+  message: z.string(),
+  data: RepositorySettingsDataSchema,
+});
+
+export type RepositoryNewEntrycode = z.infer<typeof RepositoryNewEntrycodeSchema>;
