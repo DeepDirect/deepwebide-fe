@@ -10,7 +10,7 @@ import RepoListItem from '@/components/organisms/RepoListItem/RepoListItem';
 
 import MainPageType from '@/constants/enums/MainPageType.enum';
 
-import type { RepositoryItem } from '@/schemas/main.schema';
+import type { RepositoryItem } from '@/schemas/repo.schema';
 import type { RepositoryQueryURL } from '@/types/apiEndpoints.types';
 import type { Page } from '@/types/page.types';
 
@@ -32,11 +32,11 @@ const SharedByMeRepoPage = () => {
   const {
     data,
     isSuccess,
-    refetch,
+    refetch: repositoryRefetch,
     // isLoading
   } = useGetRepository(getRepoURL, {
-    page: (pagination.page || 1) - 1,
-    size: pagination.current || 7,
+    page: (pagination.current || 1) - 1,
+    size: pagination.size || 7,
     liked: isLiked,
   });
   const { mutate: updateFavorite } = useRepositoryFavorite();
@@ -44,10 +44,10 @@ const SharedByMeRepoPage = () => {
   // 성공
   useEffect(() => {
     if (isSuccess && data) {
-      setRepositories(data.repositories);
+      setRepositories(data?.data.repositories);
       setPagination(prev => ({
         ...prev,
-        total: data.totalPages,
+        total: data?.data?.totalPages,
       }));
     }
   }, [isSuccess, data]);
@@ -55,7 +55,7 @@ const SharedByMeRepoPage = () => {
   // 페이지
   const handlePageChange = (page: number) => {
     setPagination(prev => ({ ...prev, current: page }));
-    refetch();
+    repositoryRefetch();
   };
 
   // 레포 좋아요
@@ -69,7 +69,7 @@ const SharedByMeRepoPage = () => {
               repo.repositoryId === id ? { ...repo, isFavorite: data.isFavorite } : repo
             ) ?? null
         );
-        console.log('즐겨찾기 성공:', data.isFavorite);
+        repositoryRefetch();
       },
       onError: error => {
         console.error('즐겨찾기 실패:', error.message);
@@ -80,7 +80,7 @@ const SharedByMeRepoPage = () => {
   // 좋아요 필터
   const handleLikChange = () => {
     setIsLiked(!isLiked);
-    refetch();
+    repositoryRefetch();
   };
 
   const handleRepoClick = (repoId: number) => {
@@ -105,6 +105,7 @@ const SharedByMeRepoPage = () => {
             pageType={MainPageType.SHARED_BY_ME}
             handleFavoriteClick={handleFavoriteClick}
             handleRepoClick={handleRepoClick}
+            repositoryRefetch={repositoryRefetch}
           />
         ))}
       </div>

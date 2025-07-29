@@ -10,7 +10,7 @@ import RepoListItem from '@/components/organisms/RepoListItem/RepoListItem';
 
 import MainPageType from '@/constants/enums/MainPageType.enum';
 
-import type { RepositoryItem } from '@/schemas/main.schema';
+import type { RepositoryItem } from '@/schemas/repo.schema';
 import type { RepositoryQueryURL } from '@/types/apiEndpoints.types';
 import type { Page } from '@/types/page.types';
 
@@ -32,7 +32,7 @@ const SharedWithMeRepoPage = () => {
   const {
     data,
     isSuccess,
-    refetch,
+    refetch: repositoryRefetch,
     // isLoading
   } = useGetRepository(getRepoURL, {
     page: (pagination.page || 1) - 1,
@@ -44,10 +44,10 @@ const SharedWithMeRepoPage = () => {
   // 성공
   useEffect(() => {
     if (isSuccess && data) {
-      setRepositories(data.repositories);
+      setRepositories(data?.data.repositories);
       setPagination(prev => ({
         ...prev,
-        total: data.totalPages,
+        total: data?.data?.totalPages,
       }));
     }
   }, [isSuccess, data]);
@@ -55,7 +55,7 @@ const SharedWithMeRepoPage = () => {
   // 페이지
   const handlePageChange = (page: number) => {
     setPagination(prev => ({ ...prev, current: page }));
-    refetch();
+    repositoryRefetch();
   };
 
   // 레포 좋아요
@@ -80,7 +80,7 @@ const SharedWithMeRepoPage = () => {
   // 좋아요 필터
   const handleLikChange = () => {
     setIsLiked(!isLiked);
-    refetch();
+    repositoryRefetch();
   };
 
   const handleRepoClick = (repoId: number) => {
@@ -105,6 +105,7 @@ const SharedWithMeRepoPage = () => {
             pageType={MainPageType.SHARED_WITH_ME}
             handleFavoriteClick={handleFavoriteClick}
             handleRepoClick={handleRepoClick}
+            repositoryRefetch={repositoryRefetch}
           />
         ))}
       </div>
