@@ -2,7 +2,7 @@ import { useMutation, useQueryClient, type UseMutationOptions } from '@tanstack/
 import type { AxiosError } from 'axios';
 
 import { apiClient } from '@/api/client';
-import type { RepositoryURL } from '@/types/apiEndpoints.types';
+import type { RepositoryURL } from '@/types/common/apiEndpoints.types';
 import type { UpdateRepositoryShareStatusApiResponse } from '@/schemas/repo.schema';
 
 type Options = Omit<

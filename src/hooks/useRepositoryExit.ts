@@ -2,7 +2,7 @@ import { useMutation, type UseMutationOptions } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
 
 import { apiClient } from '@/api/client';
-import type { RepositoryExitURL } from '@/types/apiEndpoints.types';
+import type { RepositoryExitURL } from '@/types/common/apiEndpoints.types';
 
 const useRepositoryExit = (
   url: RepositoryExitURL,

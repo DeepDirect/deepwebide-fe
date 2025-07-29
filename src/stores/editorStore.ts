@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { RepoLanguageConfig } from '@/types/editor.types';
+import type { RepoLanguageConfig } from '@/types/repo/editor.types';
 import { LANGUAGE_CONFIGS, SUPPORTED_LANGUAGES } from '@/utils/editorLanguages';
 
 interface EditorStore {

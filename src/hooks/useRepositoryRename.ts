@@ -2,7 +2,7 @@ import { useMutation, useQueryClient, type UseMutationOptions } from '@tanstack/
 import type { AxiosError } from 'axios';
 import { apiClient } from '@/api/client';
 import type { RepositoryRenameRequest, RepositoryRenameApiResponse } from '@/schemas/repo.schema';
-import type { RepositoryURL } from '@/types/apiEndpoints.types';
+import type { RepositoryURL } from '@/types/common/apiEndpoints.types';
 
 export const useRepositoryRename = (
   url: RepositoryURL,

@@ -11,7 +11,7 @@ import type {
   MonacoBindingType,
   Disposable,
   AwarenessState,
-} from '@/types/yjs.types';
+} from '@/types/repo/yjs.types';
 
 // WebSocket URL 설정
 const getWebSocketUrl = (): string => {

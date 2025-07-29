@@ -18,8 +18,8 @@ import MainPageType from '@/constants/enums/MainPageType.enum';
 import type RepositoryType from '@/constants/enums/RepositoryType.enum';
 
 import type { RepositoryItem } from '@/schemas/repo.schema';
-import type { CreateRepoURL, RepositoryQueryURL } from '@/types/apiEndpoints.types';
-import type { Page } from '@/types/page.types';
+import type { CreateRepoURL, RepositoryQueryURL } from '@/types/common/apiEndpoints.types';
+import type { Page } from '@/types/common/page.types';
 
 import styles from './PrivateRepoPage.module.scss';
 

@@ -1,6 +1,6 @@
 import { createRouter } from '@tanstack/react-router';
 import { routeTree } from './routeTree';
-import type { AuthState } from '@/types/authState.types';
+import type { AuthState } from '@/types/auth/authState.types';
 
 /*
 이전 코드

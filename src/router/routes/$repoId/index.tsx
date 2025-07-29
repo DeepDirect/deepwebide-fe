@@ -3,7 +3,7 @@ import { rootRoute } from '@/router/root';
 import { RepoLayout } from '@/layouts/RepoLayout/RepoLayout';
 import { RepoPage } from '@/pages/Repo/RepoPage';
 import { checkRepositoryAccess } from '@/utils/repositoryAccessGuard';
-import type { AuthState } from '@/types/authState.types';
+import type { AuthState } from '@/types/auth/authState.types';
 
 export const repoLayoutRoute = createRoute({
   getParentRoute: () => rootRoute,

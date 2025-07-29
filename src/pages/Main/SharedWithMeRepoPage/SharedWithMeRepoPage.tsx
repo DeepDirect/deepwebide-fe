@@ -11,8 +11,8 @@ import RepoListItem from '@/components/organisms/RepoListItem/RepoListItem';
 import MainPageType from '@/constants/enums/MainPageType.enum';
 
 import type { RepositoryItem } from '@/schemas/repo.schema';
-import type { RepositoryQueryURL } from '@/types/apiEndpoints.types';
-import type { Page } from '@/types/page.types';
+import type { RepositoryQueryURL } from '@/types/common/apiEndpoints.types';
+import type { Page } from '@/types/common/page.types';
 
 import styles from './SharedWithMeRepoPage.module.scss';
 

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { AuthState } from '@/types/authState.types';
+import type { AuthState } from '@/types/auth/authState.types';
 import { authApi } from '@/api/auth.api';
 import type { SignInRequest } from '@/api/auth.api';
 

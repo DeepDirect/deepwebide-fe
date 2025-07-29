@@ -2,7 +2,7 @@ import { useMutation, useQueryClient, type UseMutationOptions } from '@tanstack/
 import type { AxiosError } from 'axios';
 import { apiClient } from '@/api/client';
 import type { RepositoryNewEntrycode } from '@/schemas/repo.schema';
-import type { RepositoryNewEntryCodeURL } from '@/types/apiEndpoints.types';
+import type { RepositoryNewEntryCodeURL } from '@/types/common/apiEndpoints.types';
 
 export const useRepositoryNewEntrycode = (
   url: RepositoryNewEntryCodeURL,
