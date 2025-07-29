@@ -5,12 +5,14 @@ import { useNavigate } from '@tanstack/react-router';
 import { apiClient } from '@/api/client';
 import type { SignInURL } from '@/types/common/apiEndpoints.types';
 import type { SignInRequest, SignInResponse } from '@/schemas/auth.schema';
+import { useAuthStore } from '@/stores/authStore';
 
 const useSignIn = (
   url: SignInURL,
   options?: Omit<UseMutationOptions<SignInResponse, AxiosError, SignInRequest>, 'mutationFn'>
 ) => {
   const navigate = useNavigate();
+  const { setLoggedIn } = useAuthStore();
 
   return useMutation<SignInResponse, AxiosError, SignInRequest>({
     mutationFn: async (data: SignInRequest) => {
@@ -18,6 +20,10 @@ const useSignIn = (
       return response.data;
     },
     onSuccess: (data, variables, context) => {
+      // authStore 상태 업데이트
+      const { accessToken, user } = data.data;
+      setLoggedIn(user, accessToken);
+
       navigate({ to: '/main' });
       options?.onSuccess?.(data, variables, context);
     },
