@@ -84,7 +84,7 @@ const PrivateRepoPage = () => {
         setRepositories(
           prev =>
             prev?.map(repo =>
-              repo.repositoryId === id ? { ...repo, isFavorite: data.isFavorite } : repo
+              repo.repositoryId === id ? { ...repo, isFavorite: data.data.isFavorite } : repo
             ) ?? null
         );
         repositoryRefetch();
