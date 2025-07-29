@@ -2,7 +2,12 @@ import { useMutation, type UseMutationOptions } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
 import { useNavigate } from '@tanstack/react-router';
 
-import { authApi } from '@/api/auth.api';
+import { apiClient } from '@/api/client';
+import type {
+  FindIdURL,
+  PhoneSendCodeURL,
+  PhoneVerifyCodeURL,
+} from '@/types/common/apiEndpoints.types';
 import type {
   FindIdRequest,
   FindIdResponse,
@@ -10,22 +15,25 @@ import type {
   SendPhoneCodeResponse,
   VerifyPhoneCodeRequest,
   VerifyPhoneCodeResponse,
-} from '@/api/auth.api';
+} from '@/schemas/auth.schema';
 
 // 아이디 찾기 훅
 export const useFindId = (
+  url: FindIdURL,
   options?: Omit<UseMutationOptions<FindIdResponse, AxiosError, FindIdRequest>, 'mutationFn'>
 ) => {
   const navigate = useNavigate();
 
   return useMutation<FindIdResponse, AxiosError, FindIdRequest>({
     mutationFn: async (data: FindIdRequest) => {
-      const response = await authApi.findId(data);
+      const response = await apiClient.post<FindIdRequest, FindIdResponse>(url, data);
       return response.data;
     },
     onSuccess: (data, variables, context) => {
-      // 아이디 찾기 성공 시 완료 페이지로 이동
-      navigate({ to: '/find-id/complete', search: { email: data.data.email } });
+      navigate({
+        to: '/find-id/complete',
+        search: { email: data.data.email },
+      });
       options?.onSuccess?.(data, variables, context);
     },
     onError: (error, variables, context) => {
@@ -36,16 +44,21 @@ export const useFindId = (
   });
 };
 
-// 휴대폰 인증번호 발송 훅 (FIND_ID용)
+// 아이디 찾기용 인증번호 발송 훅
 export const useSendPhoneCodeForFindId = (
+  url: PhoneSendCodeURL,
   options?: Omit<
-    UseMutationOptions<SendPhoneCodeResponse, AxiosError, SendPhoneCodeRequest>,
+    UseMutationOptions<SendPhoneCodeResponse, AxiosError, Omit<SendPhoneCodeRequest, 'authType'>>,
     'mutationFn'
   >
 ) => {
-  return useMutation<SendPhoneCodeResponse, AxiosError, SendPhoneCodeRequest>({
-    mutationFn: async (data: SendPhoneCodeRequest) => {
-      const response = await authApi.sendPhoneCode(data);
+  return useMutation<SendPhoneCodeResponse, AxiosError, Omit<SendPhoneCodeRequest, 'authType'>>({
+    mutationFn: async data => {
+      const requestData: SendPhoneCodeRequest = { ...data, authType: 'FIND_ID' };
+      const response = await apiClient.post<SendPhoneCodeRequest, SendPhoneCodeResponse>(
+        url,
+        requestData
+      );
       return response.data;
     },
     onError: (error, variables, context) => {
@@ -56,8 +69,9 @@ export const useSendPhoneCodeForFindId = (
   });
 };
 
-// 휴대폰 인증번호 확인 훅
+// 아이디 찾기용 인증번호 확인 훅
 export const useVerifyPhoneCodeForFindId = (
+  url: PhoneVerifyCodeURL,
   options?: Omit<
     UseMutationOptions<VerifyPhoneCodeResponse, AxiosError, VerifyPhoneCodeRequest>,
     'mutationFn'
@@ -65,7 +79,10 @@ export const useVerifyPhoneCodeForFindId = (
 ) => {
   return useMutation<VerifyPhoneCodeResponse, AxiosError, VerifyPhoneCodeRequest>({
     mutationFn: async (data: VerifyPhoneCodeRequest) => {
-      const response = await authApi.verifyPhoneCode(data);
+      const response = await apiClient.post<VerifyPhoneCodeRequest, VerifyPhoneCodeResponse>(
+        url,
+        data
+      );
       return response.data;
     },
     onError: (error, variables, context) => {

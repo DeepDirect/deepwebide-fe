@@ -8,13 +8,24 @@ import Input from '@/components/atoms/Input/Input';
 import Button from '@/components/atoms/Button/Button';
 import FormField from '@/components/molecules/FormField/FormField';
 
+// 훅들과 URL 타입들 import
 import {
   useFindId,
   useSendPhoneCodeForFindId,
   useVerifyPhoneCodeForFindId,
 } from '@/hooks/auth/useFindId';
+import type {
+  FindIdURL,
+  PhoneSendCodeURL,
+  PhoneVerifyCodeURL,
+} from '@/types/common/apiEndpoints.types';
 
 import styles from './FindIdForm.module.scss';
+
+// URL들 정의
+const findIdURL: FindIdURL = '/api/auth/email/find';
+const phoneSendCodeURL: PhoneSendCodeURL = '/api/auth/phone/send-code';
+const phoneVerifyCodeURL: PhoneVerifyCodeURL = '/api/auth/phone/verify-code';
 
 export default function FindIdForm() {
   const {
@@ -37,14 +48,14 @@ export default function FindIdForm() {
   const phone = watch('phoneNumber');
   const phoneCode = watch('phoneCode');
 
-  // TanStack Query 뮤테이션 훅들
-  const findIdMutation = useFindId({
+  // URL을 파라미터로 전달하는 훅들 사용
+  const findIdMutation = useFindId(findIdURL, {
     onError: () => {
       alert('일치하는 계정을 찾을 수 없습니다.');
     },
   });
 
-  const sendPhoneCodeMutation = useSendPhoneCodeForFindId({
+  const sendPhoneCodeMutation = useSendPhoneCodeForFindId(phoneSendCodeURL, {
     onSuccess: () => {
       setCodeSent(true);
       startTimer();
@@ -52,13 +63,11 @@ export default function FindIdForm() {
     },
     onError: error => {
       console.error('인증번호 발송 실패:', error);
-      console.error('에러 응답:', error.response?.data);
-      console.error('에러 상태:', error.response?.status);
       alert(`인증번호 발송에 실패했습니다. (${error.response?.status || '알 수 없는 오류'})`);
     },
   });
 
-  const verifyPhoneCodeMutation = useVerifyPhoneCodeForFindId({
+  const verifyPhoneCodeMutation = useVerifyPhoneCodeForFindId(phoneVerifyCodeURL, {
     onSuccess: data => {
       if (data.data.verified) {
         setCodeVerified(true);
@@ -93,18 +102,13 @@ export default function FindIdForm() {
       return;
     }
 
-    // 휴대폰 번호 정제 (하이픈 제거)
     const cleanPhoneNumber = phone.replace(/-/g, '');
-
     const requestData = {
       phoneNumber: cleanPhoneNumber,
       username: username.trim(),
-      authType: 'FIND_ID' as const,
     };
 
     console.log('아이디 찾기 - 인증번호 발송 요청 데이터:', requestData);
-    console.log('원본 전화번호:', phone, '→ 정제된 전화번호:', cleanPhoneNumber);
-
     sendPhoneCodeMutation.mutate(requestData);
   };
 
@@ -198,7 +202,7 @@ export default function FindIdForm() {
         disabled={isButtonDisabled}
         variant={codeVerified ? 'active' : 'general'}
       >
-        {isSubmitting ? '이메일 찾는 중...' : '이메일 찾기'}
+        {isSubmitting ? '아이디 찾는 중...' : '아이디 찾기'}
       </Button>
     </form>
   );
