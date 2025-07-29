@@ -66,10 +66,10 @@ const SharedWithMeRepoPage = () => {
         setRepositories(
           prev =>
             prev?.map(repo =>
-              repo.repositoryId === id ? { ...repo, isFavorite: data.isFavorite } : repo
+              repo.repositoryId === id ? { ...repo, isFavorite: data.data.isFavorite } : repo
             ) ?? null
         );
-        console.log('즐겨찾기 성공:', data.isFavorite);
+        repositoryRefetch();
       },
       onError: error => {
         console.error('즐겨찾기 실패:', error.message);
