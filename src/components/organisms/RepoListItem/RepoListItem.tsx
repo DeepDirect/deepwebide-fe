@@ -2,7 +2,7 @@ import 'dayjs/locale/ko';
 
 import dayjs from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
-import type { QueryObserverResult } from '@tanstack/react-router';
+import type { QueryObserverResult } from '@tanstack/react-query';
 
 import FillHeartIcon from '@/assets/icons/fill-heart.svg?react';
 import HeartIcon from '@/assets/icons/heart.svg?react';
@@ -63,7 +63,6 @@ const RepoListItem: React.FC<RepositoryProps> = ({
   pageType,
   repositoryRefetch,
 }) => {
-  console.log(info.repositoryId);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalPosition, setModalPosition] = useState<positionType>({});
   const meatballRef = useRef<HTMLButtonElement>(null);
