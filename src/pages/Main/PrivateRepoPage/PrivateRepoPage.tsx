@@ -17,7 +17,7 @@ import CreateRepoModal from '@/features/Modals/CreateRepoModal/CreateRepoModal';
 import MainPageType from '@/constants/enums/MainPageType.enum';
 import type RepositoryType from '@/constants/enums/RepositoryType.enum';
 
-import type { RepositoryItem } from '@/schemas/main.schema';
+import type { RepositoryItem } from '@/schemas/repo.schema';
 import type { CreateRepoURL, RepositoryQueryURL } from '@/types/apiEndpoints.types';
 import type { Page } from '@/types/page.types';
 
@@ -38,24 +38,30 @@ const PrivateRepoPage = () => {
   const [repositories, setRepositories] = useState<RepositoryItem[] | null>(null);
   const [isLiked, setIsLiked] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false); // NOTE: 레포 생성 모달 열림 여부
-  const { data, isSuccess, isError, error, refetch } = useGetRepository(getRepoURL, {
-    page: (pagination.page || 1) - 1,
-    size: pagination.current || 7,
+  const {
+    data,
+    isSuccess,
+    isError,
+    error,
+    refetch: repositoryRefetch,
+  } = useGetRepository(getRepoURL, {
+    page: (pagination.current || 1) - 1,
+    size: pagination.size || 7,
     liked: isLiked,
   });
   const createMutation = useCreateRepository(postRepoURL);
+  const { mutate: updateFavorite } = useRepositoryFavorite();
 
   // 성공
   useEffect(() => {
-    if (isSuccess && data) {
-      setRepositories(data.repositories);
+    if (isSuccess && data.data) {
+      setRepositories(data?.data.repositories);
       setPagination(prev => ({
         ...prev,
-        total: data.totalPages,
+        total: data?.data?.totalPages,
       }));
     }
   }, [isSuccess, data]);
-  const { mutate: updateFavorite } = useRepositoryFavorite();
 
   // 실패
   useEffect(() => {
@@ -67,7 +73,7 @@ const PrivateRepoPage = () => {
   // 페이지
   const handlePageChange = (page: number) => {
     setPagination(prev => ({ ...prev, current: page }));
-    refetch();
+    repositoryRefetch();
   };
 
   // 레포 좋아요
@@ -78,10 +84,10 @@ const PrivateRepoPage = () => {
         setRepositories(
           prev =>
             prev?.map(repo =>
-              repo.repositoryId === id ? { ...repo, isFavorite: data.isFavorite } : repo
+              repo.repositoryId === id ? { ...repo, isFavorite: data.data.isFavorite } : repo
             ) ?? null
         );
-        console.log('즐겨찾기 성공:', data.isFavorite);
+        repositoryRefetch();
       },
       onError: error => {
         console.error('즐겨찾기 실패:', error.message);
@@ -92,7 +98,7 @@ const PrivateRepoPage = () => {
   // 좋아요 필터
   const handleLikChange = () => {
     setIsLiked(!isLiked);
-    refetch();
+    repositoryRefetch();
   };
 
   const handleRepoClick = (repoId: number) => {
@@ -112,9 +118,8 @@ const PrivateRepoPage = () => {
     setIsCreateModalOpen(false);
 
     createMutation.mutate(data, {
-      onSuccess: data => {
-        console.log(data);
-        refetch();
+      onSuccess: () => {
+        repositoryRefetch();
       },
       onError: error => {
         console.error('생성 실패!', error);
@@ -148,13 +153,14 @@ const PrivateRepoPage = () => {
             pageType={MainPageType.PRIVATE_REPO}
             handleFavoriteClick={handleFavoriteClick}
             handleRepoClick={handleRepoClick}
+            repositoryRefetch={repositoryRefetch}
           />
         ))}
       </div>
 
       <div className={styles.paginationWrapper}>
         <Pagination
-          maxVisiblePages={pagination.total || 1}
+          maxVisiblePages={pagination.maxVisiblePages || 1}
           totalPages={pagination.total || 1}
           currentPage={pagination.current || 1}
           handlePageChange={handlePageChange}

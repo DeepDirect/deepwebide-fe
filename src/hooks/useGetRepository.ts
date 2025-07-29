@@ -5,19 +5,19 @@ import type { AxiosError } from 'axios';
 
 import { apiClient } from '@/api/client';
 
-import type { RepositoryRequest, RepositoryResponse } from '@/schemas/main.schema';
+import type { RepositoryRequest, RepositoryApiResponse } from '@/schemas/repo.schema';
 import type { RepositoryQueryURL } from '@/types/apiEndpoints.types';
 
 const useGetRepository = (
   url: RepositoryQueryURL,
   params: RepositoryRequest,
-  options?: Omit<UseQueryOptions<RepositoryResponse, AxiosError>, 'queryKey' | 'queryFn'>
+  options?: Omit<UseQueryOptions<RepositoryApiResponse, AxiosError>, 'queryKey' | 'queryFn'>
 ) => {
-  return useQuery<RepositoryResponse, AxiosError>({
+  return useQuery<RepositoryApiResponse, AxiosError>({
     queryKey: ['repository', url, params],
     queryFn: async () => {
-      const response = await apiClient.get<RepositoryResponse, RepositoryRequest>(url, params);
-      return response.data;
+      const response = await apiClient.get<RepositoryApiResponse, RepositoryRequest>(url, params);
+      return response.data as RepositoryApiResponse;
     },
     enabled: !!params,
     ...options,

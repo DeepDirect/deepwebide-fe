@@ -1,21 +1,21 @@
 import { useMutation, useQueryClient, type UseMutationOptions } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
 import { apiClient } from '@/api/client';
-import type { RepositoryRenameRequest, RepositoryRenameResponse } from '@/schemas/repo.schema';
+import type { RepositoryRenameRequest, RepositoryRenameApiResponse } from '@/schemas/repo.schema';
 import type { RepositoryURL } from '@/types/apiEndpoints.types';
 
 export const useRepositoryRename = (
   url: RepositoryURL,
   options?: Omit<
-    UseMutationOptions<RepositoryRenameResponse, AxiosError, RepositoryRenameRequest>,
+    UseMutationOptions<RepositoryRenameApiResponse, AxiosError, RepositoryRenameRequest>,
     'mutationFn'
   >
 ) => {
   const queryClient = useQueryClient();
 
-  return useMutation<RepositoryRenameResponse, AxiosError, RepositoryRenameRequest>({
+  return useMutation<RepositoryRenameApiResponse, AxiosError, RepositoryRenameRequest>({
     mutationFn: async rename => {
-      const { data } = await apiClient.patch<RepositoryRenameRequest, RepositoryRenameResponse>(
+      const { data } = await apiClient.patch<RepositoryRenameRequest, RepositoryRenameApiResponse>(
         url,
         rename
       );

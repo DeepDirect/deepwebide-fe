@@ -12,3 +12,9 @@ export type RepositoryEntryCodeURL = `/api/repositories/${number}/entrycode`;
 export type RepositoryExitURL = `/api/repositories/${number}/exit`;
 
 export type RepositoryFavoriteURL = `/api/repositories/${number}/favorite`;
+
+export type RepositorySettingsURL = `/api/repositories/${number}/settings`;
+
+export type KickedMemberURL = `/api/repositories/${number}/kicked`;
+
+export type RepositoryNewEntryCodeURL = `/api/repositories/${number}/new-entrycode`;
