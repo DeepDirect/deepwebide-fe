@@ -1,7 +1,7 @@
 import React from 'react';
 import { Dialog } from 'radix-ui';
 import Button from '@/components/atoms/Button/Button';
-import { useScrollLock } from '@/hooks/useScrollLock';
+import { useScrollLock } from '@/hooks/common/useScrollLock';
 import styles from './BaseModal.module.scss';
 
 export interface BaseModalProps {

@@ -1,9 +1,8 @@
-// src/hooks/useMonacoEditor.ts
 import { useRef, useEffect, useCallback } from 'react';
 import type { OnMount } from '@monaco-editor/react';
 import { getMonacoGlobal, disableLanguageDiagnostics } from '@/utils/monacoUtils';
 import { useThemeStore } from '@/stores/themeStore';
-import type { MonacoEditorInstance, MonacoTextModel, MonacoAction } from '@/types/yjs.types';
+import type { MonacoEditorInstance, MonacoTextModel, MonacoAction } from '@/types/repo/yjs.types';
 
 interface UseMonacoEditorProps {
   language: string;

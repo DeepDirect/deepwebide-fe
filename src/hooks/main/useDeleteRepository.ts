@@ -2,7 +2,7 @@ import { useMutation, type UseMutationOptions } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
 
 import { apiClient } from '@/api/client';
-import type { RepositoryURL } from '@/types/apiEndpoints.types';
+import type { RepositoryURL } from '@/types/common/apiEndpoints.types';
 
 const useDeleteRepository = (
   url: RepositoryURL,

@@ -3,7 +3,7 @@ import type { AxiosError } from 'axios';
 
 import { apiClient } from '@/api/client';
 import type { RepositoryFavoriteApiResponse } from '@/schemas/repo.schema';
-import type { RepositoryFavoriteURL } from '@/types/apiEndpoints.types';
+import type { RepositoryFavoriteURL } from '@/types/common/apiEndpoints.types';
 
 const useRepositoryFavorite = (
   options?: Omit<

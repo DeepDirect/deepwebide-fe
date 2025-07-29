@@ -2,7 +2,7 @@ import { useParams, useSearch } from '@tanstack/react-router';
 import { useEffect, useRef, useState } from 'react';
 import { useTabStore } from '@/stores/tabStore';
 import { useFileSectionStore } from '@/stores/fileSectionStore';
-import { useResizer } from '@/hooks/useResizer';
+import { useResizer } from '@/hooks/common/useResizer';
 import styles from './RepoPage.module.scss';
 import TabBar from '@/components/organisms/TabBar/TabBar';
 import MonacoCollaborativeEditor from '@/components/organisms/CodeEditor/MonacoCollaborativeEditor';

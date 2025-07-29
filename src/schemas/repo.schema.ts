@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { ApiResponse } from '@/types/api';
+import type { ApiResponse } from '@/types/common/api';
 
 export const RepositoryItemSchema = z.object({
   repositoryId: z.number(),

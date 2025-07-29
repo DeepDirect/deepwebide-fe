@@ -5,7 +5,7 @@ import type { AxiosError } from 'axios';
 import { apiClient } from '@/api/client';
 
 import type { CreateRepoRequest, CreateRepoResponse } from '@/schemas/repo.schema';
-import type { CreateRepoURL } from '@/types/apiEndpoints.types';
+import type { CreateRepoURL } from '@/types/common/apiEndpoints.types';
 
 const useCreateRepository = (
   url: CreateRepoURL,

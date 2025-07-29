@@ -6,7 +6,7 @@ import type { AxiosError } from 'axios';
 import { apiClient } from '@/api/client';
 
 import type { RepositoryRequest, RepositoryApiResponse } from '@/schemas/repo.schema';
-import type { RepositoryQueryURL } from '@/types/apiEndpoints.types';
+import type { RepositoryQueryURL } from '@/types/common/apiEndpoints.types';
 
 const useGetRepository = (
   url: RepositoryQueryURL,

@@ -1,7 +1,7 @@
 import styles from './DeleteSection.module.scss';
 import DeleteIcon from '@/assets/icons/trash.svg?react';
 import { useParams } from '@tanstack/react-router';
-import useDeleteRepository from '@/hooks/useDeleteRepository';
+import useDeleteRepository from '@/hooks/main/useDeleteRepository';
 import AlertDialogComponent from '@/components/molecules/AlertDialog/AlertDialog';
 import { useState } from 'react';
 // import { redirect } from '@tanstack/react-router';
