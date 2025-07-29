@@ -1,4 +1,3 @@
-// src/hooks/useMonacoEditor.ts
 import { useRef, useEffect, useCallback } from 'react';
 import type { OnMount } from '@monaco-editor/react';
 import { getMonacoGlobal, disableLanguageDiagnostics } from '@/utils/monacoUtils';

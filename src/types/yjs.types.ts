@@ -1,4 +1,3 @@
-// src/types/yjs.types.ts
 import type * as Y from 'yjs';
 
 // Monaco Editor 관련 타입 정의

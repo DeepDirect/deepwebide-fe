@@ -1,11 +1,19 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { findIdSchema, type FindIdFormValues } from '@/schemas/auth.schema';
+import { findIdSchema } from '@/schemas/auth.schema';
+import type { FindIdFormValues } from '@/schemas/auth.schema';
+
 import Input from '@/components/atoms/Input/Input';
 import Button from '@/components/atoms/Button/Button';
 import FormField from '@/components/molecules/FormField/FormField';
-import { useNavigate } from '@tanstack/react-router';
+
+import {
+  useFindId,
+  useSendPhoneCodeForFindId,
+  useVerifyPhoneCodeForFindId,
+} from '@/hooks/useFindId';
+
 import styles from './FindIdForm.module.scss';
 
 export default function FindIdForm() {
@@ -13,22 +21,58 @@ export default function FindIdForm() {
     register,
     handleSubmit,
     watch,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<FindIdFormValues>({
     resolver: zodResolver(findIdSchema),
     mode: 'onChange',
   });
 
+  // 상태 관리
   const [codeSent, setCodeSent] = useState(false);
   const [codeVerified, setCodeVerified] = useState(false);
   const [timer, setTimer] = useState(0);
-  const [foundEmail, setFoundEmail] = useState<string | null>(null);
 
-  const navigate = useNavigate();
-
+  // 폼 데이터 감시
+  const username = watch('username');
   const phone = watch('phoneNumber');
   const phoneCode = watch('phoneCode');
 
+  // TanStack Query 뮤테이션 훅들
+  const findIdMutation = useFindId({
+    onError: () => {
+      alert('일치하는 계정을 찾을 수 없습니다.');
+    },
+  });
+
+  const sendPhoneCodeMutation = useSendPhoneCodeForFindId({
+    onSuccess: () => {
+      setCodeSent(true);
+      startTimer();
+      alert('인증번호가 발송되었습니다.');
+    },
+    onError: error => {
+      console.error('인증번호 발송 실패:', error);
+      console.error('에러 응답:', error.response?.data);
+      console.error('에러 상태:', error.response?.status);
+      alert(`인증번호 발송에 실패했습니다. (${error.response?.status || '알 수 없는 오류'})`);
+    },
+  });
+
+  const verifyPhoneCodeMutation = useVerifyPhoneCodeForFindId({
+    onSuccess: data => {
+      if (data.data.verified) {
+        setCodeVerified(true);
+        alert('휴대폰 인증이 완료되었습니다.');
+      } else {
+        alert('인증번호가 올바르지 않습니다.');
+      }
+    },
+    onError: () => {
+      alert('인증번호 확인에 실패했습니다.');
+    },
+  });
+
+  // 타이머 로직
   const startTimer = () => {
     setTimer(59);
     const interval = setInterval(() => {
@@ -42,33 +86,64 @@ export default function FindIdForm() {
     }, 1000);
   };
 
-  const handleSendCode = () => {
-    setCodeSent(true);
-    startTimer();
-    // TODO: 실제 API 연동
-  };
-
-  const handleVerifyCode = () => {
-    setCodeVerified(true);
-    // TODO: 실제 API 연동
-  };
-
-  const onSubmit = (data: FindIdFormValues) => {
-    // TODO: 실제로 백엔드와 연동
-    if (
-      data.username === '구름' &&
-      data.phoneNumber === '01012345678' &&
-      data.phoneCode === '123456'
-    ) {
-      // 완료페이지로 email 전달하며 이동!
-      navigate({
-        to: '/find-id/complete',
-        search: { email: 'goorm@email.com' },
-      });
-    } else {
-      setFoundEmail('');
+  // 인증번호 발송
+  const handleSendPhoneCode = () => {
+    if (!phone || !username) {
+      alert('이름과 휴대폰 번호를 입력해주세요.');
+      return;
     }
+
+    // 휴대폰 번호 정제 (하이픈 제거)
+    const cleanPhoneNumber = phone.replace(/-/g, '');
+
+    const requestData = {
+      phoneNumber: cleanPhoneNumber,
+      username: username.trim(),
+      authType: 'FIND_ID' as const,
+    };
+
+    console.log('아이디 찾기 - 인증번호 발송 요청 데이터:', requestData);
+    console.log('원본 전화번호:', phone, '→ 정제된 전화번호:', cleanPhoneNumber);
+
+    sendPhoneCodeMutation.mutate(requestData);
   };
+
+  // 인증번호 확인
+  const handleVerifyPhoneCode = () => {
+    if (!phoneCode || !phone) {
+      alert('인증번호를 입력해주세요.');
+      return;
+    }
+
+    const cleanPhoneNumber = phone.replace(/-/g, '');
+    const requestData = {
+      phoneNumber: cleanPhoneNumber,
+      phoneCode: phoneCode.trim(),
+    };
+
+    console.log('아이디 찾기 - 인증번호 확인 요청 데이터:', requestData);
+    verifyPhoneCodeMutation.mutate(requestData);
+  };
+
+  // 폼 제출
+  const onSubmit = (data: FindIdFormValues) => {
+    if (!codeVerified) {
+      alert('휴대폰 인증을 완료해주세요.');
+      return;
+    }
+
+    const findIdData = {
+      username: data.username,
+      phoneNumber: data.phoneNumber.replace(/-/g, ''), // 하이픈 제거
+      phoneCode: data.phoneCode,
+    };
+
+    console.log('아이디 찾기 요청 데이터:', findIdData);
+    findIdMutation.mutate(findIdData);
+  };
+
+  const isSubmitting = findIdMutation.isPending;
+  const isButtonDisabled = isSubmitting || !codeVerified;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
@@ -86,11 +161,15 @@ export default function FindIdForm() {
           <Input id="phoneNumber" {...register('phoneNumber')} placeholder="01012345678" />
           <Button
             type="button"
-            onClick={handleSendCode}
-            disabled={!phone || timer > 0}
+            onClick={handleSendPhoneCode}
+            disabled={!phone || !username || timer > 0 || sendPhoneCodeMutation.isPending}
             variant={codeSent ? 'inactive' : 'active'}
           >
-            {timer > 0 ? `0:${timer}` : '인증번호 발송'}
+            {sendPhoneCodeMutation.isPending
+              ? '발송 중...'
+              : timer > 0
+                ? `0:${timer}`
+                : '인증번호 발송'}
           </Button>
         </div>
       </FormField>
@@ -100,11 +179,15 @@ export default function FindIdForm() {
           <Input id="phoneCode" {...register('phoneCode')} placeholder="123456" />
           <Button
             type="button"
-            onClick={handleVerifyCode}
-            disabled={!phoneCode || codeVerified}
+            onClick={handleVerifyPhoneCode}
+            disabled={!phoneCode || codeVerified || verifyPhoneCodeMutation.isPending}
             variant={codeVerified ? 'inactive' : 'active'}
           >
-            {codeVerified ? '인증 완료' : '인증하기'}
+            {verifyPhoneCodeMutation.isPending
+              ? '확인 중...'
+              : codeVerified
+                ? '인증 완료'
+                : '인증하기'}
           </Button>
         </div>
       </FormField>
@@ -112,15 +195,11 @@ export default function FindIdForm() {
       <Button
         type="submit"
         className={styles.submitBtn}
-        disabled={isSubmitting || !codeVerified}
+        disabled={isButtonDisabled}
         variant={codeVerified ? 'active' : 'general'}
       >
-        이메일 찾기
+        {isSubmitting ? '이메일 찾는 중...' : '이메일 찾기'}
       </Button>
-
-      {foundEmail === '' && (
-        <div className={styles.error}>입력하신 정보로 가입된 이메일을 찾을 수 없습니다.</div>
-      )}
     </form>
   );
 }

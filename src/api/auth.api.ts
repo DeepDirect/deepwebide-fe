@@ -88,6 +88,21 @@ export interface VerifyPhoneCodeResponse {
   };
 }
 
+// 아이디 찾기 관련 인터페이스
+export interface FindIdRequest {
+  username: string;
+  phoneNumber: string;
+  phoneCode: string;
+}
+
+export interface FindIdResponse {
+  status: number;
+  message: string;
+  data: {
+    email: string;
+  };
+}
+
 export const authApi = {
   /**
    * 로그인 API
@@ -132,5 +147,12 @@ export const authApi = {
       '/api/auth/phone/verify-code',
       data
     );
+  },
+
+  /**
+   * 아이디 찾기 API
+   */
+  findId: (data: FindIdRequest) => {
+    return apiClient.post<FindIdRequest, FindIdResponse>('/api/auth/email/find', data);
   },
 };
