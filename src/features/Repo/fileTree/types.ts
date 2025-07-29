@@ -14,20 +14,15 @@ export interface ApiFileTreeResponse {
   data: ApiFileNode[] | null;
 }
 
-// 내부 사용 타입
-export interface FileTreeNode {
-  id: string;
-  name: string;
-  type: 'file' | 'folder';
-  path: string;
+// 내부 사용 타입 - API 데이터에 UI 레벨만 추가
+export interface FileTreeNode extends ApiFileNode {
   level: number;
-  children?: FileTreeNode[];
 }
 
 // 내부 드래그앤드롭 관련 타입
 export interface DragItem {
   id: string;
-  type: 'file' | 'folder';
+  type: 'file' | 'folder'; // NOTE: 드래그앤드롭 라이브러리 호환성을 위해 소문자 유지
   path: string;
   name: string;
   node: FileTreeNode;
@@ -46,7 +41,7 @@ export interface ExternalDropState {
   dropTarget: {
     nodeId: string;
     path: string;
-    type: 'folder' | 'file' | 'root';
+    type: 'folder' | 'file' | 'root'; // NOTE: 드롭 타겟 분류용 소문자
   } | null;
   dragPreview: string | null;
 }

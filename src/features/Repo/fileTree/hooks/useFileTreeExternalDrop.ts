@@ -67,7 +67,7 @@ export const useFileTreeExternalDrop = ({
   const calculateTargetPath = useCallback((node: FileTreeNode | null): string => {
     if (!node) return ''; // 루트
 
-    if (node.type === 'folder') {
+    if (node.fileType === 'FOLDER') {
       return node.path; // 폴더 내부
     } else {
       // 파일과 같은 레벨 (부모 폴더)
@@ -193,9 +193,9 @@ export const useFileTreeExternalDrop = ({
       setExternalDropState(prev => ({
         ...prev,
         dropTarget: {
-          nodeId: node.id,
+          nodeId: node.fileId.toString(),
           path: targetPath,
-          type: node.type,
+          type: node.fileType === 'FOLDER' ? 'folder' : 'file',
         },
       }));
     },
@@ -212,7 +212,7 @@ export const useFileTreeExternalDrop = ({
       // 노드에서 벗어났을 때 해당 노드 타겟 해제
       setExternalDropState(prev => ({
         ...prev,
-        dropTarget: prev.dropTarget?.nodeId === node.id ? null : prev.dropTarget,
+        dropTarget: prev.dropTarget?.nodeId === node.fileId.toString() ? null : prev.dropTarget,
       }));
     },
     [isExternalFile, preventDefaultDrop]
@@ -234,7 +234,9 @@ export const useFileTreeExternalDrop = ({
         await onFileUpload(files, targetPath);
 
         const locationDesc =
-          node.type === 'folder' ? `"${node.name}" 폴더 내부` : `"${node.name}" 파일과 같은 레벨`;
+          node.fileType === 'FOLDER'
+            ? `"${node.fileName}" 폴더 내부`
+            : `"${node.fileName}" 파일과 같은 레벨`;
 
         console.log(`📁 ${locationDesc}에 ${files.length}개 파일 업로드 완료`);
       } catch (error) {

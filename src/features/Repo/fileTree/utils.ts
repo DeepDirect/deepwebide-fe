@@ -1,25 +1,20 @@
 import type { ApiFileNode, FileTreeNode } from './types';
 
-/**
- * API 응답 데이터를 FileTree 컴포넌트에서 사용할 수 있는 형태로 변환
- */
-export const transformApiDataToTree = (
-  apiData: ApiFileNode[],
-  level: number = 0
-): FileTreeNode[] => {
-  return apiData.map(node => ({
-    id: node.fileId.toString(),
-    name: node.fileName,
-    type: node.fileType === 'FOLDER' ? 'folder' : 'file',
-    path: node.path,
-    level,
-    children: node.children ? transformApiDataToTree(node.children, level + 1) : undefined,
-  }));
+// API 응답 데이터에 레벨 정보만 추가
+
+export const addLevelToTree = (apiData: ApiFileNode[], level: number = 0): FileTreeNode[] => {
+  return apiData.map(
+    node =>
+      ({
+        ...node,
+        level,
+        children: node.children ? addLevelToTree(node.children, level + 1) : undefined,
+      }) as FileTreeNode
+  ); // 타입 단언 추가
 };
 
-/**
- * 경로를 기반으로 부모 폴더들을 자동으로 확장하는 함수
- */
+// 경로를 기반으로 부모 폴더들을 자동으로 확장하는 함수
+
 export const getExpandedFoldersForPath = (
   filePath: string,
   treeData: FileTreeNode[]
@@ -28,11 +23,11 @@ export const getExpandedFoldersForPath = (
 
   const findAndExpandPath = (nodes: FileTreeNode[], targetPath: string): boolean => {
     for (const node of nodes) {
-      if (node.type === 'folder' && targetPath.startsWith(node.path + '/')) {
-        expandedFolders.add(node.id);
+      if (node.fileType === 'FOLDER' && targetPath.startsWith(node.path + '/')) {
+        expandedFolders.add(node.fileId.toString());
 
         if (node.children) {
-          findAndExpandPath(node.children, targetPath);
+          findAndExpandPath(node.children as FileTreeNode[], targetPath);
         }
         return true;
       }
@@ -41,9 +36,9 @@ export const getExpandedFoldersForPath = (
         return true;
       }
 
-      if (node.children && findAndExpandPath(node.children, targetPath)) {
-        if (node.type === 'folder') {
-          expandedFolders.add(node.id);
+      if (node.children && findAndExpandPath(node.children as FileTreeNode[], targetPath)) {
+        if (node.fileType === 'FOLDER') {
+          expandedFolders.add(node.fileId.toString());
         }
         return true;
       }
@@ -65,9 +60,47 @@ export const findNodeByPath = (nodes: FileTreeNode[], targetPath: string): FileT
     }
 
     if (node.children) {
-      const found = findNodeByPath(node.children, targetPath);
+      const found = findNodeByPath(node.children as FileTreeNode[], targetPath);
       if (found) return found;
     }
   }
   return null;
+};
+
+//  API 호출용 유틸리티 함수들
+
+// 파일/폴더 생성 요청 데이터
+export const createFileRequest = (
+  fileName: string,
+  fileType: 'FILE' | 'FOLDER',
+  parentNode?: FileTreeNode
+) => {
+  return {
+    fileName,
+    fileType,
+    parentId: parentNode ? parentNode.fileId : null,
+  };
+};
+
+// 파일/폴더 이름 변경 요청 데이터
+export const renameFileRequest = (node: FileTreeNode, newName: string) => {
+  return {
+    fileId: node.fileId,
+    fileName: newName,
+  };
+};
+
+// 파일/폴더 이동 요청 데이터
+export const moveFileRequest = (node: FileTreeNode, targetPath: string) => {
+  return {
+    fileId: node.fileId,
+    targetPath,
+  };
+};
+
+// 파일/폴더 삭제 요청 데이터
+export const deleteFileRequest = (node: FileTreeNode) => {
+  return {
+    fileId: node.fileId,
+  };
 };

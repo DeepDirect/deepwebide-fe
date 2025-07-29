@@ -159,18 +159,18 @@ const FileTree: React.FC<FileTreeProps> = ({
    */
   const renderTreeNodes = (nodes: FileTreeNode[]): React.ReactNode => {
     return nodes.map(node => {
-      const isExpanded = expandedFolders.has(node.id);
+      const isExpanded = expandedFolders.has(node.fileId.toString());
       const isSelected = selectedFile === node.path;
-      const isEditing = editingNode?.id === node.id;
-      const isNodeDragging = isDragging(node.id);
-      const isNodeDropTarget = isDropTarget(node.id);
-      const isNodeExternalDragOver = isExternalDragOver(node.id);
+      const isEditing = editingNode?.fileId === node.fileId;
+      const isNodeDragging = isDragging(node.fileId.toString());
+      const isNodeDropTarget = isDropTarget(node.fileId.toString());
+      const isNodeExternalDragOver = isExternalDragOver(node.fileId.toString());
       const canDropOnNode = dragDropState.draggedItem
         ? canDrop(dragDropState.draggedItem.node, node)
         : false;
 
       return (
-        <React.Fragment key={node.id}>
+        <React.Fragment key={node.fileId}>
           <FileTreeItem
             node={node}
             isExpanded={isExpanded}
@@ -178,8 +178,8 @@ const FileTree: React.FC<FileTreeProps> = ({
             onFileClick={handleFileClick}
             onFolderToggle={handleFolderToggle}
             // 컨텍스트 메뉴 관련
-            onNewFile={parent => openCreateModal('file', parent)}
-            onNewFolder={parent => openCreateModal('folder', parent)}
+            onNewFile={parent => openCreateModal('FILE', parent)}
+            onNewFolder={parent => openCreateModal('FOLDER', parent)}
             onRename={startEditing}
             onDelete={deleteItem}
             onCopy={copyNode}
@@ -208,9 +208,14 @@ const FileTree: React.FC<FileTreeProps> = ({
           />
 
           {/* 폴더가 확장되어 있고 자식이 있으면 재귀 렌더링 */}
-          {node.type === 'folder' && isExpanded && node.children && node.children.length > 0 && (
-            <div className={styles.children}>{renderTreeNodes(node.children)}</div>
-          )}
+          {node.fileType === 'FOLDER' &&
+            isExpanded &&
+            node.children &&
+            node.children.length > 0 && (
+              <div className={styles.children}>
+                {renderTreeNodes(node.children as FileTreeNode[])}
+              </div>
+            )}
         </React.Fragment>
       );
     });
@@ -267,9 +272,10 @@ const FileTree: React.FC<FileTreeProps> = ({
       console.log('🔄 Internal drag to root');
       if (dragDropState.draggedItem) {
         const rootTargetNode: FileTreeNode = {
-          id: 'root',
-          name: '',
-          type: 'folder',
+          fileId: 0,
+          fileName: '',
+          fileType: 'FOLDER',
+          parentId: null,
           path: '',
           level: -1,
         };
@@ -314,8 +320,8 @@ const FileTree: React.FC<FileTreeProps> = ({
   if (!apiData?.data || apiData.status !== 200 || treeData.length === 0) {
     return (
       <FileTreeContextMenu
-        onNewFile={() => openCreateModal('file')}
-        onNewFolder={() => openCreateModal('folder')}
+        onNewFile={() => openCreateModal('FILE')}
+        onNewFolder={() => openCreateModal('FOLDER')}
         onPaste={() => pasteNode()}
         canPaste={canPaste}
       >
@@ -344,8 +350,8 @@ const FileTree: React.FC<FileTreeProps> = ({
   return (
     <>
       <FileTreeContextMenu
-        onNewFile={() => openCreateModal('file')}
-        onNewFolder={() => openCreateModal('folder')}
+        onNewFile={() => openCreateModal('FILE')}
+        onNewFolder={() => openCreateModal('FOLDER')}
         onPaste={() => pasteNode()}
         canPaste={canPaste}
       >

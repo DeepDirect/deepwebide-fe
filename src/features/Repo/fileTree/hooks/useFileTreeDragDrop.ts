@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import type { FileTreeNode, DragItem, DragDropState } from '../types';
-import type { DropPosition } from '../types'; // 별도로 import
+import type { DropPosition } from '../types';
 
 interface UseFileTreeDragDropProps {
   onMoveNode: (
@@ -42,12 +42,12 @@ export const useFileTreeDragDrop = ({
   // 드롭 가능 여부 확인
   const canDrop = useCallback((draggedNode: FileTreeNode, targetNode: FileTreeNode): boolean => {
     // 자기 자신에게는 드롭 불가
-    if (draggedNode.id === targetNode.id) {
+    if (draggedNode.fileId === targetNode.fileId) {
       return false;
     }
 
     // 자신의 하위 폴더로는 이동 불가 (무한 루프 방지)
-    if (draggedNode.type === 'folder' && targetNode.path.startsWith(draggedNode.path + '/')) {
+    if (draggedNode.fileType === 'FOLDER' && targetNode.path.startsWith(draggedNode.path + '/')) {
       return false;
     }
 
@@ -57,7 +57,7 @@ export const useFileTreeDragDrop = ({
   // 드롭 위치 계산
   const calculateDropPosition = useCallback(
     (event: React.DragEvent, targetNode: FileTreeNode): DropPosition => {
-      if (targetNode.type === 'folder') {
+      if (targetNode.fileType === 'FOLDER') {
         const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
         const y = event.clientY - rect.top;
         const height = rect.height;
@@ -85,10 +85,10 @@ export const useFileTreeDragDrop = ({
   // 드래그 시작
   const handleDragStart = useCallback((node: FileTreeNode, event: React.DragEvent) => {
     const dragItem: DragItem = {
-      id: node.id,
-      type: node.type,
+      id: node.fileId.toString(),
+      type: node.fileType === 'FOLDER' ? 'folder' : 'file',
       path: node.path,
-      name: node.name,
+      name: node.fileName,
       node,
     };
 
@@ -98,7 +98,7 @@ export const useFileTreeDragDrop = ({
 
     // 커스텀 드래그 이미지 설정
     const dragImage = document.createElement('div');
-    dragImage.textContent = `${node.type === 'folder' ? '📁' : '📄'} ${node.name}`;
+    dragImage.textContent = `${node.fileType === 'FOLDER' ? '📁' : '📄'} ${node.fileName}`;
     dragImage.style.position = 'absolute';
     dragImage.style.top = '-1000px';
     dragImage.style.padding = '4px 8px';
@@ -119,7 +119,7 @@ export const useFileTreeDragDrop = ({
       ...prev,
       draggedItem: dragItem,
       isDragging: true,
-      dragPreview: node.name,
+      dragPreview: node.fileName,
     }));
   }, []);
 
@@ -159,14 +159,14 @@ export const useFileTreeDragDrop = ({
       setDragDropState(prev => ({
         ...prev,
         dropTarget: {
-          id: node.id,
+          id: node.fileId.toString(),
           path: node.path,
           canDrop: true,
         },
       }));
 
       setDropPosition({
-        nodeId: node.id,
+        nodeId: node.fileId.toString(),
         position,
       });
     },

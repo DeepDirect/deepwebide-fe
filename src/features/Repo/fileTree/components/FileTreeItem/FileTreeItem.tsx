@@ -85,9 +85,9 @@ const FileTreeItem: React.FC<ExtendedFileTreeItemProps> = ({
     }
 
     // 폴더 클릭 시 항상 토글 (확장 상태와 관계없이)
-    if (node.type === 'folder' && onFolderToggle) {
+    if (node.fileType === 'FOLDER' && onFolderToggle) {
       onFolderToggle(node);
-    } else if (node.type === 'file' && onFileClick) {
+    } else if (node.fileType === 'FILE' && onFileClick) {
       onFileClick(node);
     }
   };
@@ -96,9 +96,9 @@ const FileTreeItem: React.FC<ExtendedFileTreeItemProps> = ({
     // 편집 중이거나 드래그 중일 때는 키보드 이벤트 무시
     if (isEditing || isDragging) return;
 
-    if (node.type === 'folder' && onFolderToggle) {
+    if (node.fileType === 'FOLDER' && onFolderToggle) {
       onFolderToggle(node);
-    } else if (node.type === 'file' && onFileClick) {
+    } else if (node.fileType === 'FILE' && onFileClick) {
       onFileClick(node);
     }
   };
@@ -254,7 +254,7 @@ const FileTreeItem: React.FC<ExtendedFileTreeItemProps> = ({
     return '';
   };
 
-  const icon = node.type === 'folder' ? getFolderIcon(isExpanded) : getFileIcon(node.name);
+  const icon = node.fileType === 'FOLDER' ? getFolderIcon(isExpanded) : getFileIcon(node.fileName);
 
   // 최상단 레벨 폴더인지 확인 (level이 0, 1이고 path에 '/'가 없는 경우)
   const isTopLevel = node.level <= 1;
@@ -276,8 +276,8 @@ const FileTreeItem: React.FC<ExtendedFileTreeItemProps> = ({
           styles.fileTreeItem,
           {
             [styles.selected]: isSelected,
-            [styles.folder]: node.type === 'folder',
-            [styles.file]: node.type === 'file',
+            [styles.folder]: node.fileType === 'FOLDER',
+            [styles.file]: node.fileType === 'FILE',
             [styles.editing]: isEditing,
             [styles.dragging]: isDragging,
             [styles.dropTarget]: isDropTarget,
@@ -285,9 +285,12 @@ const FileTreeItem: React.FC<ExtendedFileTreeItemProps> = ({
             [styles.cannotDrop]: !canDrop && isDropTarget,
             [styles.draggable]: !isEditing,
             // 내부 드롭 위치별 클래스
-            [styles.dropBefore]: isDropTarget && getDropPosition?.(node.id) === 'before',
-            [styles.dropInside]: isDropTarget && getDropPosition?.(node.id) === 'inside',
-            [styles.dropAfter]: isDropTarget && getDropPosition?.(node.id) === 'after',
+            [styles.dropBefore]:
+              isDropTarget && getDropPosition?.(node.fileId.toString()) === 'before',
+            [styles.dropInside]:
+              isDropTarget && getDropPosition?.(node.fileId.toString()) === 'inside',
+            [styles.dropAfter]:
+              isDropTarget && getDropPosition?.(node.fileId.toString()) === 'after',
             // 외부 파일 드래그오버 클래스
             [styles.externalDragOver]: isExternalDragOver,
           },
@@ -298,7 +301,7 @@ const FileTreeItem: React.FC<ExtendedFileTreeItemProps> = ({
         onKeyDown={handleKeyDown}
         role="button"
         tabIndex={isEditing ? -1 : 0}
-        aria-expanded={node.type === 'folder' ? isExpanded : undefined}
+        aria-expanded={node.fileType === 'FOLDER' ? isExpanded : undefined}
         style={{ paddingLeft: `${8 + node.level * 16}px` }}
         // 드래그앤드롭 이벤트
         draggable={!isEditing}
@@ -311,7 +314,7 @@ const FileTreeItem: React.FC<ExtendedFileTreeItemProps> = ({
         data-is-top-level={isTopLevel}
       >
         <div className={styles.arrowArea}>
-          {node.type === 'folder' && (
+          {node.fileType === 'FOLDER' && (
             <div
               className={clsx(styles.arrow, {
                 [styles.expanded]: isExpanded,
@@ -334,13 +337,13 @@ const FileTreeItem: React.FC<ExtendedFileTreeItemProps> = ({
         <div className={styles.iconWrapper}>
           <img
             src={icon}
-            alt={node.type === 'folder' ? 'folder' : 'file'}
+            alt={node.fileType === 'FOLDER' ? 'folder' : 'file'}
             className={styles.icon}
           />
         </div>
 
         <InlineEdit
-          value={node.name}
+          value={node.fileName}
           isEditing={isEditing}
           onSave={handleEditSave}
           onCancel={onEditCancel || (() => {})}
@@ -351,7 +354,7 @@ const FileTreeItem: React.FC<ExtendedFileTreeItemProps> = ({
         {/* 외부 파일 드래그오버 상태 표시 */}
         {isExternalDragOver && (
           <div className={styles.externalDropIndicator}>
-            {node.type === 'folder' ? (
+            {node.fileType === 'FOLDER' ? (
               <span className={styles.folderDropText}>📁 폴더 안으로 업로드</span>
             ) : (
               <span className={styles.fileDropText}>📄 같은 레벨에 업로드</span>
