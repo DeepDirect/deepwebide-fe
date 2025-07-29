@@ -17,6 +17,7 @@ const useGetRepositorySettings = (
       );
       return response.data;
     },
+    retry: false,
     enabled: !!repositoryId,
     ...options,
   });
