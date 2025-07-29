@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearch } from '@tanstack/react-router';
-import { transformApiDataToTree, getExpandedFoldersForPath } from '../utils';
+import { addLevelToTree, getExpandedFoldersForPath } from '../utils';
 import type { ApiFileTreeResponse, FileTreeNode } from '../types';
 
 interface UseFileTreeProps {
@@ -32,12 +32,12 @@ export const useFileTree = ({
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // API 데이터를 트리 구조로 변환
+  // API 데이터를 트리 구조로 변환 (레벨만 추가)
   const treeData = useMemo(() => {
     if (!apiData?.data || apiData.status !== 200) {
       return [];
     }
-    return transformApiDataToTree(apiData.data);
+    return addLevelToTree(apiData.data);
   }, [apiData]);
 
   // 기본 확장 폴더들을 찾는 함수
@@ -47,18 +47,18 @@ export const useFileTree = ({
     // src 폴더를 찾아서 기본 확장에 추가
     const srcFolder = nodes.find(
       node =>
-        node.type === 'folder' &&
-        (node.name.toLowerCase() === 'src' || node.name.toLowerCase() === 'source')
+        node.fileType === 'FOLDER' &&
+        (node.fileName.toLowerCase() === 'src' || node.fileName.toLowerCase() === 'source')
     );
 
     if (srcFolder) {
-      defaultExpanded.add(srcFolder.id);
+      defaultExpanded.add(srcFolder.fileId.toString());
     } else {
       // src 폴더가 없으면 첫 번째 레벨의 폴더들을 최대 2개까지 확장
-      const firstLevelFolders = nodes.filter(node => node.type === 'folder').slice(0, 2);
+      const firstLevelFolders = nodes.filter(node => node.fileType === 'FOLDER').slice(0, 2);
 
       firstLevelFolders.forEach(folder => {
-        defaultExpanded.add(folder.id);
+        defaultExpanded.add(folder.fileId.toString());
       });
     }
 

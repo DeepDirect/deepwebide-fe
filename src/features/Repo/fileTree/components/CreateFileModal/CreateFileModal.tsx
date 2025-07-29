@@ -7,7 +7,7 @@ import type { FileTreeNode } from '../../types';
 interface CreateFileModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  type: 'file' | 'folder';
+  type: 'FILE' | 'FOLDER';
   parentNode?: FileTreeNode;
   onConfirm: (name: string, parentPath?: string) => void;
   onCancel?: () => void;
@@ -24,7 +24,7 @@ const CreateFileModal: React.FC<CreateFileModalProps> = ({
   const [fileName, setFileName] = useState('');
   const [error, setError] = useState('');
 
-  const isFile = type === 'file';
+  const isFile = type === 'FILE';
   const title = isFile ? '새 파일 생성' : '새 폴더 생성';
   const placeholder = isFile ? '파일명을 입력하세요 (예: index.js)' : '폴더명을 입력하세요';
 

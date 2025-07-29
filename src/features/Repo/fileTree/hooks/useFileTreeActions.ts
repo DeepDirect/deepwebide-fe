@@ -26,7 +26,7 @@ export const useFileTreeActions = ({
    */
   const handleFileClick = useCallback(
     (node: FileTreeNode) => {
-      if (node.type !== 'file') return;
+      if (node.fileType !== 'FILE') return;
 
       // 탭 열기
       openFileByPath(repoId, node.path);
@@ -51,15 +51,16 @@ export const useFileTreeActions = ({
    */
   const handleFolderToggle = useCallback(
     (node: FileTreeNode) => {
-      if (node.type !== 'folder') return;
+      if (node.fileType !== 'FOLDER') return;
 
       setExpandedFolders(prev => {
         const newExpanded = new Set(prev);
+        const nodeId = node.fileId.toString();
 
-        if (newExpanded.has(node.id)) {
-          newExpanded.delete(node.id);
+        if (newExpanded.has(nodeId)) {
+          newExpanded.delete(nodeId);
         } else {
-          newExpanded.add(node.id);
+          newExpanded.add(nodeId);
         }
 
         return newExpanded;
@@ -78,14 +79,14 @@ export const useFileTreeActions = ({
 
       const findFoldersInPath = (nodes: FileTreeNode[], currentPath: string[] = []): void => {
         for (const node of nodes) {
-          const nodePath = [...currentPath, node.name];
+          const nodePath = [...currentPath, node.fileName];
           const nodePathString = nodePath.join('/');
 
-          if (node.type === 'folder' && filePath.startsWith(nodePathString + '/')) {
-            foldersToExpand.add(node.id);
+          if (node.fileType === 'FOLDER' && filePath.startsWith(nodePathString + '/')) {
+            foldersToExpand.add(node.fileId.toString());
 
             if (node.children) {
-              findFoldersInPath(node.children, nodePath);
+              findFoldersInPath(node.children as FileTreeNode[], nodePath);
             }
           }
         }
@@ -118,11 +119,11 @@ export const useFileTreeActions = ({
 
       const collectFoldersAtLevel = (nodes: FileTreeNode[]): void => {
         for (const node of nodes) {
-          if (node.type === 'folder' && node.level <= level) {
-            foldersToExpand.add(node.id);
+          if (node.fileType === 'FOLDER' && node.level <= level) {
+            foldersToExpand.add(node.fileId.toString());
 
             if (node.children) {
-              collectFoldersAtLevel(node.children);
+              collectFoldersAtLevel(node.children as FileTreeNode[]);
             }
           }
         }
