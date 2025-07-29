@@ -1,29 +1,25 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearch } from '@tanstack/react-router';
 import { addLevelToTree, getExpandedFoldersForPath } from '../utils';
-import type { ApiFileTreeResponse, FileTreeNode } from '../types';
+import { useFileTreeQuery } from './useFileTreeApi';
+import type { FileTreeNode } from '../types';
 
-interface UseFileTreeProps {
-  apiData?: ApiFileTreeResponse | null;
-  isLoading?: boolean;
-  error?: string | null;
+interface UseFileTreeParams {
+  repositoryId: number;
 }
 
-interface UseFileTreeReturn {
+interface UseFileTreeResult {
   treeData: FileTreeNode[];
   expandedFolders: Set<string>;
   setExpandedFolders: React.Dispatch<React.SetStateAction<Set<string>>>;
   selectedFile: string | null;
   setSelectedFile: React.Dispatch<React.SetStateAction<string | null>>;
   isLoading: boolean;
-  error: string | null;
+  error: Error | null;
+  refetch: () => void;
 }
 
-export const useFileTree = ({
-  apiData,
-  isLoading = false,
-  error = null,
-}: UseFileTreeProps): UseFileTreeReturn => {
+export const useFileTree = ({ repositoryId }: UseFileTreeParams): UseFileTreeResult => {
   const search = useSearch({ strict: false });
   const currentFile = search?.file as string | undefined;
 
@@ -32,13 +28,16 @@ export const useFileTree = ({
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // API 데이터를 트리 구조로 변환 (레벨만 추가)
+  // API에서 데이터 가져오기
+  const { data: apiResponse, isLoading, error, refetch } = useFileTreeQuery(repositoryId);
+
+  // API 데이터를 FileTreeNode 형태로 변환
   const treeData = useMemo(() => {
-    if (!apiData?.data || apiData.status !== 200) {
+    if (!apiResponse?.data || apiResponse.status !== 200) {
       return [];
     }
-    return addLevelToTree(apiData.data);
-  }, [apiData]);
+    return addLevelToTree(apiResponse.data);
+  }, [apiResponse]);
 
   // 기본 확장 폴더들을 찾는 함수
   const getDefaultExpandedFolders = useCallback((nodes: FileTreeNode[]): Set<string> => {
@@ -116,5 +115,6 @@ export const useFileTree = ({
     setSelectedFile,
     isLoading,
     error,
+    refetch,
   };
 };
