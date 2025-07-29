@@ -21,6 +21,17 @@ interface ExtendedFileTreeItemProps extends FileTreeItemProps {
   isEditing?: boolean;
   onEditSave?: (node: import('../../types').FileTreeNode, newName: string) => Promise<void>;
   onEditCancel?: () => void;
+
+  // 드래그앤드롭 관련
+  isDragging?: boolean;
+  isDropTarget?: boolean;
+  canDrop?: boolean;
+  onDragStart?: (node: import('../../types').FileTreeNode, event: React.DragEvent) => void;
+  onDragEnd?: () => void;
+  onDragOver?: (node: import('../../types').FileTreeNode, event: React.DragEvent) => void;
+  onDragLeave?: () => void;
+  onDrop?: (node: import('../../types').FileTreeNode, event: React.DragEvent) => void;
+  getDropPosition?: (nodeId: string) => import('../../types').DropPosition | null; // 추가
 }
 
 const FileTreeItem: React.FC<ExtendedFileTreeItemProps> = ({
@@ -43,10 +54,20 @@ const FileTreeItem: React.FC<ExtendedFileTreeItemProps> = ({
   isEditing = false,
   onEditSave,
   onEditCancel,
+  // 드래그앤드롭
+  isDragging = false,
+  isDropTarget = false,
+  canDrop = true,
+  onDragStart,
+  onDragEnd,
+  onDragOver,
+  onDragLeave,
+  onDrop,
+  getDropPosition, // 추가
 }) => {
   const handleClick = (e: React.MouseEvent) => {
-    // 편집 중일 때는 클릭 이벤트 무시
-    if (isEditing) {
+    // 편집 중이거나 드래그 중일 때는 클릭 이벤트 무시
+    if (isEditing || isDragging) {
       e.preventDefault();
       e.stopPropagation();
       return;
@@ -61,8 +82,8 @@ const FileTreeItem: React.FC<ExtendedFileTreeItemProps> = ({
   };
 
   const handleKeyboardInteraction = () => {
-    // 편집 중일 때는 키보드 이벤트 무시
-    if (isEditing) return;
+    // 편집 중이거나 드래그 중일 때는 키보드 이벤트 무시
+    if (isEditing || isDragging) return;
 
     if (node.type === 'folder' && onFolderToggle) {
       onFolderToggle(node);
@@ -75,14 +96,14 @@ const FileTreeItem: React.FC<ExtendedFileTreeItemProps> = ({
     e.preventDefault();
     e.stopPropagation();
 
-    // 더블클릭으로 이름 편집 시작
-    if (onRename && !isEditing) {
+    // 더블클릭으로 이름 편집 시작 (드래그 중이 아닐 때만)
+    if (onRename && !isEditing && !isDragging) {
       onRename(node);
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (isEditing) return;
+    if (isEditing || isDragging) return;
 
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -99,6 +120,46 @@ const FileTreeItem: React.FC<ExtendedFileTreeItemProps> = ({
   const handleEditSave = async (newName: string) => {
     if (onEditSave) {
       await onEditSave(node, newName);
+    }
+  };
+
+  // 드래그 시작 핸들러
+  const handleDragStart = (e: React.DragEvent) => {
+    if (isEditing) {
+      e.preventDefault();
+      return;
+    }
+
+    if (onDragStart) {
+      onDragStart(node, e);
+    }
+  };
+
+  // 드래그 종료 핸들러
+  const handleDragEnd = () => {
+    if (onDragEnd) {
+      onDragEnd();
+    }
+  };
+
+  // 드래그 오버 핸들러
+  const handleDragOver = (e: React.DragEvent) => {
+    if (onDragOver) {
+      onDragOver(node, e);
+    }
+  };
+
+  // 드래그 리브 핸들러
+  const handleDragLeave = () => {
+    if (onDragLeave) {
+      onDragLeave();
+    }
+  };
+
+  // 드롭 핸들러
+  const handleDrop = (e: React.DragEvent) => {
+    if (onDrop) {
+      onDrop(node, e);
     }
   };
 
@@ -147,6 +208,9 @@ const FileTreeItem: React.FC<ExtendedFileTreeItemProps> = ({
 
   const icon = node.type === 'folder' ? getFolderIcon(isExpanded) : getFileIcon(node.name);
 
+  // 최상단 레벨 폴더인지 확인 (level이 0, 1이고 path에 '/'가 없는 경우)
+  const isTopLevel = node.level <= 1;
+
   return (
     <FileTreeContextMenu
       node={node}
@@ -167,6 +231,15 @@ const FileTreeItem: React.FC<ExtendedFileTreeItemProps> = ({
             [styles.folder]: node.type === 'folder',
             [styles.file]: node.type === 'file',
             [styles.editing]: isEditing,
+            [styles.dragging]: isDragging,
+            [styles.dropTarget]: isDropTarget,
+            [styles.canDrop]: canDrop && isDropTarget,
+            [styles.cannotDrop]: !canDrop && isDropTarget,
+            [styles.draggable]: !isEditing,
+            // 드롭 위치별 클래스 추가
+            [styles.dropBefore]: isDropTarget && getDropPosition?.(node.id) === 'before',
+            [styles.dropInside]: isDropTarget && getDropPosition?.(node.id) === 'inside',
+            [styles.dropAfter]: isDropTarget && getDropPosition?.(node.id) === 'after',
           },
           className
         )}
@@ -177,8 +250,16 @@ const FileTreeItem: React.FC<ExtendedFileTreeItemProps> = ({
         tabIndex={isEditing ? -1 : 0}
         aria-expanded={node.type === 'folder' ? isExpanded : undefined}
         style={{ paddingLeft: `${8 + node.level * 16}px` }}
+        // 드래그앤드롭 이벤트
+        draggable={!isEditing}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        // 최상단 레벨 여부를 data attribute로 전달
+        data-is-top-level={isTopLevel}
       >
-        {/* 화살표 영역 - 항상 동일한 크기 유지 */}
         <div className={styles.arrowArea}>
           {node.type === 'folder' && (
             <div
@@ -200,7 +281,6 @@ const FileTreeItem: React.FC<ExtendedFileTreeItemProps> = ({
           )}
         </div>
 
-        {/* 아이콘 */}
         <div className={styles.iconWrapper}>
           <img
             src={icon}
@@ -209,7 +289,6 @@ const FileTreeItem: React.FC<ExtendedFileTreeItemProps> = ({
           />
         </div>
 
-        {/* 파일/폴더 이름 - 인라인 편집 지원 */}
         <InlineEdit
           value={node.name}
           isEditing={isEditing}

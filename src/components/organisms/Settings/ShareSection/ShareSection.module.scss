@@ -170,3 +170,17 @@
     padding: 8px 25px;
   }
 }
+
+.beforeLoadEntryCode,
+.afterLoadEntryCode {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+
+  .icon {
+    width: 20px;
+    height: 20px;
+  }
+}

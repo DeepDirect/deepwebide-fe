@@ -5,17 +5,20 @@ import type { AxiosError } from 'axios';
 
 import { apiClient } from '@/api/client';
 
-import type { RepositoryEntrycodeResponse } from '@/schemas/repo.schema';
+import type { RepositoryEntrycodeApiResponse } from '@/schemas/repo.schema';
 import type { RepositoryEntryCodeURL } from '@/types/apiEndpoints.types';
 
 const useGetRepositoryEntrycode = (
   url: RepositoryEntryCodeURL,
-  options?: Omit<UseQueryOptions<RepositoryEntrycodeResponse, AxiosError>, 'queryKey' | 'queryFn'>
+  options?: Omit<
+    UseQueryOptions<RepositoryEntrycodeApiResponse, AxiosError>,
+    'queryKey' | 'queryFn'
+  >
 ) => {
-  return useQuery<RepositoryEntrycodeResponse, AxiosError>({
+  return useQuery<RepositoryEntrycodeApiResponse, AxiosError>({
     queryKey: ['repository', url],
     queryFn: async () => {
-      const response = await apiClient.get<RepositoryEntrycodeResponse>(url);
+      const response = await apiClient.get<RepositoryEntrycodeApiResponse>(url);
       return response.data;
     },
     ...options,
