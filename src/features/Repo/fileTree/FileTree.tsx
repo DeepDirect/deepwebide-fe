@@ -6,6 +6,7 @@ import CreateFileModal from './components/CreateFileModal/CreateFileModal';
 import { useFileTree } from './hooks/useFileTree';
 import { useFileTreeActions } from './hooks/useFileTreeActions';
 import { useFileTreeOperations } from './hooks/useFileTreeOperations';
+import { useFileTreeDragDrop } from './hooks/useFileTreeDragDrop';
 import styles from './FileTree.module.scss';
 import type { ApiFileTreeResponse, FileTreeNode } from './types';
 
@@ -54,6 +55,7 @@ const FileTree: React.FC<FileTreeProps> = ({
     createItem,
     renameItem,
     deleteItem,
+    moveItem,
 
     // 클립보드 작업
     canPaste,
@@ -64,6 +66,22 @@ const FileTree: React.FC<FileTreeProps> = ({
     repoId,
   });
 
+  // 드래그앤드롭 훅
+  const {
+    dragDropState,
+    handleDragStart,
+    handleDragEnd,
+    handleDragOver,
+    handleDragLeave,
+    handleDrop,
+    isDragging,
+    isDropTarget,
+    getDropPosition, // 이 함수를 destructure
+    canDrop,
+  } = useFileTreeDragDrop({
+    onMoveNode: moveItem,
+  });
+
   /**
    * 트리 노드들을 재귀적으로 렌더링
    */
@@ -72,6 +90,11 @@ const FileTree: React.FC<FileTreeProps> = ({
       const isExpanded = expandedFolders.has(node.id);
       const isSelected = selectedFile === node.path;
       const isEditing = editingNode?.id === node.id;
+      const isNodeDragging = isDragging(node.id);
+      const isNodeDropTarget = isDropTarget(node.id);
+      const canDropOnNode = dragDropState.draggedItem
+        ? canDrop(dragDropState.draggedItem.node, node)
+        : false;
 
       return (
         <React.Fragment key={node.id}>
@@ -94,6 +117,16 @@ const FileTree: React.FC<FileTreeProps> = ({
             isEditing={isEditing}
             onEditSave={renameItem}
             onEditCancel={stopEditing}
+            // 드래그앤드롭 관련
+            isDragging={isNodeDragging}
+            isDropTarget={isNodeDropTarget}
+            canDrop={canDropOnNode}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            getDropPosition={getDropPosition} // 이제 전달됨
           />
 
           {/* 폴더가 확장되어 있고 자식이 있으면 재귀 렌더링 */}
@@ -103,6 +136,33 @@ const FileTree: React.FC<FileTreeProps> = ({
         </React.Fragment>
       );
     });
+  };
+
+  // 전체 파일트리 영역에 대한 드롭 핸들러 (빈 공간에 드롭)
+  const handleTreeAreaDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleTreeAreaDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+
+    // 빈 공간에 드롭하는 경우 루트 레벨로 이동
+    if (dragDropState.draggedItem) {
+      const rootTargetNode: FileTreeNode = {
+        id: 'root',
+        name: '',
+        type: 'folder',
+        path: '',
+        level: -1,
+      };
+
+      moveItem(dragDropState.draggedItem.node, rootTargetNode, 'inside').catch(error => {
+        console.error('루트로 이동 실패:', error);
+      });
+    }
+
+    handleDragEnd();
   };
 
   // 로딩 상태
@@ -141,7 +201,11 @@ const FileTree: React.FC<FileTreeProps> = ({
         onPaste={() => pasteNode()}
         canPaste={canPaste}
       >
-        <div className={clsx(styles.fileTree, className)}>
+        <div
+          className={clsx(styles.fileTree, className)}
+          onDragOver={handleTreeAreaDragOver}
+          onDrop={handleTreeAreaDrop}
+        >
           <div className={styles.empty}>
             <div className={styles.emptyIcon}>📁</div>
             <span className={styles.emptyText}>파일이 없습니다</span>
@@ -160,8 +224,19 @@ const FileTree: React.FC<FileTreeProps> = ({
         onPaste={() => pasteNode()}
         canPaste={canPaste}
       >
-        <div className={clsx(styles.fileTree, className)}>
+        <div
+          className={clsx(styles.fileTree, className, {
+            [styles.dragging]: dragDropState.isDragging,
+          })}
+          onDragOver={handleTreeAreaDragOver}
+          onDrop={handleTreeAreaDrop}
+        >
           <div className={styles.treeContainer}>{renderTreeNodes(treeData)}</div>
+
+          {/* 드래그 프리뷰 표시 */}
+          {dragDropState.isDragging && dragDropState.dragPreview && (
+            <div className={styles.dragIndicator}>📄 {dragDropState.dragPreview} 이동 중...</div>
+          )}
         </div>
       </FileTreeContextMenu>
 

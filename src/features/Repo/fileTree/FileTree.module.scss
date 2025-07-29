@@ -8,9 +8,24 @@
   font-family: $font-family-inter;
   background-color: var(--file-section-bg);
   transition: background-color 0.2s ease;
+
+  // 드래그 중일 때 전체 트리 스타일
+  &.dragging {
+    &::after {
+      content: '';
+      position: absolute;
+      z-index: 1;
+      border: 2px dashed var(--filetree-drag-border);
+      border-radius: 8px;
+      background: var(--filetree-drag-overlay);
+      pointer-events: none;
+      inset: 0;
+    }
+  }
 }
 
 .treeContainer {
+  position: relative;
   box-sizing: border-box;
   width: 100%;
   height: 100%;
@@ -44,6 +59,30 @@
   &::-webkit-scrollbar-corner {
     background: transparent;
   }
+}
+
+// 드래그 인디케이터
+.dragIndicator {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  z-index: 1000;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: $font-size-xxsmall;
+  font-weight: $font-weight-medium;
+  color: var(--filetree-drag-indicator-text);
+  background-color: var(--filetree-drag-indicator-bg);
+  box-shadow: 0 4px 12px var(--filetree-drag-indicator-shadow);
+  animation: slide-up 0.2s ease-out;
+  transform: translateX(-50%);
+  pointer-events: none;
+  user-select: none;
+}
+
+// 자식 노드 들여쓰기
+.children {
+  position: relative;
 }
 
 // 로딩 상태
@@ -198,6 +237,19 @@
   }
 }
 
+// 드래그 애니메이션
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
 // 다크모드/라이트모드 색상 변수
 :root {
   // 라이트모드
@@ -211,6 +263,13 @@
   --filetree-retry-text: #{$gray-1};
   --filetree-retry-hover: #{$gray-10};
   --filetree-empty-hover: rgb(0 0 0 / 2%);
+
+  // 드래그 관련
+  --filetree-drag-overlay: rgb(100 152 198 / 5%);
+  --filetree-drag-border: #{$blue-3};
+  --filetree-drag-indicator-bg: #{$blue-3};
+  --filetree-drag-indicator-text: #{$white-2};
+  --filetree-drag-indicator-shadow: rgb(0 0 0 / 25%);
 }
 
 :global(.dark) {
@@ -225,4 +284,11 @@
   --filetree-retry-text: #{$white-2};
   --filetree-retry-hover: #{$gray-3};
   --filetree-empty-hover: rgb(255 255 255 / 3%);
+
+  // 드래그 관련
+  --filetree-drag-overlay: rgb(100 152 198 / 8%);
+  --filetree-drag-border: #{$blue-3};
+  --filetree-drag-indicator-bg: #{$blue-3};
+  --filetree-drag-indicator-text: #{$white-2};
+  --filetree-drag-indicator-shadow: rgb(0 0 0 / 40%);
 }
