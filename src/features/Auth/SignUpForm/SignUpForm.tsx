@@ -9,14 +9,27 @@ import PasswordInput from '@/components/atoms/Input/PasswordInput';
 import Button from '@/components/atoms/Button/Button';
 import FormField from '@/components/molecules/FormField/FormField';
 
+// 훅들과 URL 타입들 import
 import {
   useSignUp,
   useCheckEmail,
   useSendPhoneCode,
   useVerifyPhoneCode,
 } from '@/hooks/auth/useSignUp';
+import type {
+  SignUpURL,
+  EmailCheckURL,
+  PhoneSendCodeURL,
+  PhoneVerifyCodeURL,
+} from '@/types/common/apiEndpoints.types';
 
 import styles from './SignUpForm.module.scss';
+
+// URL들 정의
+const signUpURL: SignUpURL = '/api/auth/signup';
+const emailCheckURL: EmailCheckURL = '/api/auth/email/check';
+const phoneSendCodeURL: PhoneSendCodeURL = '/api/auth/phone/send-code';
+const phoneVerifyCodeURL: PhoneVerifyCodeURL = '/api/auth/phone/verify-code';
 
 export default function SignUpForm() {
   const {
@@ -41,14 +54,14 @@ export default function SignUpForm() {
   const phone = watch('phoneNumber');
   const phoneCode = watch('phoneCode');
 
-  // TanStack Query 뮤테이션 훅들
-  const signUpMutation = useSignUp({
+  // URL을 파라미터로 전달하는 훅들 사용
+  const signUpMutation = useSignUp(signUpURL, {
     onError: () => {
       alert('회원가입에 실패했습니다. 다시 시도해주세요.');
     },
   });
 
-  const checkEmailMutation = useCheckEmail({
+  const checkEmailMutation = useCheckEmail(emailCheckURL, {
     onSuccess: data => {
       if (data.data.isAvailable) {
         setEmailVerified(true);
@@ -62,7 +75,7 @@ export default function SignUpForm() {
     },
   });
 
-  const sendPhoneCodeMutation = useSendPhoneCode({
+  const sendPhoneCodeMutation = useSendPhoneCode(phoneSendCodeURL, {
     onSuccess: () => {
       setCodeSent(true);
       startTimer();
@@ -70,13 +83,11 @@ export default function SignUpForm() {
     },
     onError: error => {
       console.error('인증번호 발송 실패:', error);
-      console.error('에러 응답:', error.response?.data);
-      console.error('에러 상태:', error.response?.status);
       alert(`인증번호 발송에 실패했습니다. (${error.response?.status || '알 수 없는 오류'})`);
     },
   });
 
-  const verifyPhoneCodeMutation = useVerifyPhoneCode({
+  const verifyPhoneCodeMutation = useVerifyPhoneCode(phoneVerifyCodeURL, {
     onSuccess: data => {
       if (data.data.verified) {
         setCodeVerified(true);
@@ -110,28 +121,22 @@ export default function SignUpForm() {
       alert('이메일을 입력해주세요.');
       return;
     }
-    console.log('이메일 중복 확인 요청:', { email });
-    checkEmailMutation.mutate({ email });
+
+    checkEmailMutation.mutate({ email: email.trim() });
   };
 
   // 인증번호 발송
   const handleSendPhoneCode = () => {
     if (!phone || !username) {
-      alert('휴대폰 번호와 이름을 입력해주세요.');
+      alert('이름과 휴대폰 번호를 입력해주세요.');
       return;
     }
 
-    // 휴대폰 번호 정제 (하이픈 제거)
     const cleanPhoneNumber = phone.replace(/-/g, '');
-
     const requestData = {
       phoneNumber: cleanPhoneNumber,
       username: username.trim(),
-      authType: 'SIGN_UP' as const,
     };
-
-    console.log('인증번호 발송 요청 데이터:', requestData);
-    console.log('원본 전화번호:', phone, '→ 정제된 전화번호:', cleanPhoneNumber);
 
     sendPhoneCodeMutation.mutate(requestData);
   };
@@ -149,27 +154,26 @@ export default function SignUpForm() {
       phoneCode: phoneCode.trim(),
     };
 
-    console.log('인증번호 확인 요청 데이터:', requestData);
     verifyPhoneCodeMutation.mutate(requestData);
   };
 
   // 폼 제출
   const onSubmit = (data: SignUpFormValues) => {
-    if (!emailVerified || !codeVerified) {
-      alert('이메일 중복 확인과 휴대폰 인증을 완료해주세요.');
+    if (!emailVerified) {
+      alert('이메일 중복 확인을 완료해주세요.');
       return;
     }
 
-    // phoneCode는 회원가입 API에서 제외하고 전송
+    if (!codeVerified) {
+      alert('휴대폰 인증을 완료해주세요.');
+      return;
+    }
+
     const signUpData = {
-      email: data.email,
-      username: data.username,
-      password: data.password,
-      passwordCheck: data.passwordCheck,
+      ...data,
       phoneNumber: data.phoneNumber.replace(/-/g, ''), // 하이픈 제거
     };
 
-    console.log('회원가입 요청 데이터:', signUpData);
     signUpMutation.mutate(signUpData);
   };
 

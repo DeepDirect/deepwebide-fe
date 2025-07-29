@@ -2,7 +2,13 @@ import { useMutation, type UseMutationOptions } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
 import { useNavigate } from '@tanstack/react-router';
 
-import { authApi } from '@/api/auth.api';
+import { apiClient } from '@/api/client';
+import type {
+  SignUpURL,
+  EmailCheckURL,
+  PhoneSendCodeURL,
+  PhoneVerifyCodeURL,
+} from '@/types/common/apiEndpoints.types';
 import type {
   SignUpRequest,
   SignUpResponse,
@@ -12,21 +18,21 @@ import type {
   SendPhoneCodeResponse,
   VerifyPhoneCodeRequest,
   VerifyPhoneCodeResponse,
-} from '@/api/auth.api';
+} from '@/schemas/auth.schema';
 
 // 회원가입 훅
 export const useSignUp = (
+  url: SignUpURL,
   options?: Omit<UseMutationOptions<SignUpResponse, AxiosError, SignUpRequest>, 'mutationFn'>
 ) => {
   const navigate = useNavigate();
 
   return useMutation<SignUpResponse, AxiosError, SignUpRequest>({
     mutationFn: async (data: SignUpRequest) => {
-      const response = await authApi.signUp(data);
+      const response = await apiClient.post<SignUpRequest, SignUpResponse>(url, data);
       return response.data;
     },
     onSuccess: (data, variables, context) => {
-      // 회원가입 성공 시 완료 페이지로 이동
       navigate({ to: '/sign-up/complete' });
       options?.onSuccess?.(data, variables, context);
     },
@@ -40,6 +46,7 @@ export const useSignUp = (
 
 // 이메일 중복 확인 훅
 export const useCheckEmail = (
+  url: EmailCheckURL,
   options?: Omit<
     UseMutationOptions<CheckEmailResponse, AxiosError, CheckEmailRequest>,
     'mutationFn'
@@ -47,7 +54,7 @@ export const useCheckEmail = (
 ) => {
   return useMutation<CheckEmailResponse, AxiosError, CheckEmailRequest>({
     mutationFn: async (data: CheckEmailRequest) => {
-      const response = await authApi.checkEmail(data);
+      const response = await apiClient.post<CheckEmailRequest, CheckEmailResponse>(url, data);
       return response.data;
     },
     onError: (error, variables, context) => {
@@ -58,16 +65,21 @@ export const useCheckEmail = (
   });
 };
 
-// 휴대폰 인증번호 발송 훅
+// 회원가입용 인증번호 발송 훅
 export const useSendPhoneCode = (
+  url: PhoneSendCodeURL,
   options?: Omit<
-    UseMutationOptions<SendPhoneCodeResponse, AxiosError, SendPhoneCodeRequest>,
+    UseMutationOptions<SendPhoneCodeResponse, AxiosError, Omit<SendPhoneCodeRequest, 'authType'>>,
     'mutationFn'
   >
 ) => {
-  return useMutation<SendPhoneCodeResponse, AxiosError, SendPhoneCodeRequest>({
-    mutationFn: async (data: SendPhoneCodeRequest) => {
-      const response = await authApi.sendPhoneCode(data);
+  return useMutation<SendPhoneCodeResponse, AxiosError, Omit<SendPhoneCodeRequest, 'authType'>>({
+    mutationFn: async data => {
+      const requestData: SendPhoneCodeRequest = { ...data, authType: 'SIGN_UP' };
+      const response = await apiClient.post<SendPhoneCodeRequest, SendPhoneCodeResponse>(
+        url,
+        requestData
+      );
       return response.data;
     },
     onError: (error, variables, context) => {
@@ -78,8 +90,9 @@ export const useSendPhoneCode = (
   });
 };
 
-// 휴대폰 인증번호 확인 훅
+// 회원가입용 인증번호 확인 훅
 export const useVerifyPhoneCode = (
+  url: PhoneVerifyCodeURL,
   options?: Omit<
     UseMutationOptions<VerifyPhoneCodeResponse, AxiosError, VerifyPhoneCodeRequest>,
     'mutationFn'
@@ -87,7 +100,10 @@ export const useVerifyPhoneCode = (
 ) => {
   return useMutation<VerifyPhoneCodeResponse, AxiosError, VerifyPhoneCodeRequest>({
     mutationFn: async (data: VerifyPhoneCodeRequest) => {
-      const response = await authApi.verifyPhoneCode(data);
+      const response = await apiClient.post<VerifyPhoneCodeRequest, VerifyPhoneCodeResponse>(
+        url,
+        data
+      );
       return response.data;
     },
     onError: (error, variables, context) => {
