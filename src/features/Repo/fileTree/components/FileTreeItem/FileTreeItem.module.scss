@@ -83,8 +83,127 @@
     }
   }
 
+  // 드래그앤드롭 상태
+  &.dragging {
+    background-color: var(--filetree-item-dragging);
+    opacity: 0.5;
+    transform: scale(0.98);
+    cursor: grabbing;
+
+    &::after {
+      content: '';
+      position: absolute;
+      border: 2px dashed var(--filetree-drag-border);
+      border-radius: 4px;
+      background-color: var(--filetree-drag-overlay);
+      inset: 0;
+    }
+  }
+
+  // 드롭 타겟 상태 - 폴더와 파일 구분
+  &.dropTarget {
+    &.folder {
+      // 폴더 내부로 들어가는 경우 - 전체 배경 하이라이트
+      background-color: var(--filetree-folder-drop-target);
+      box-shadow: inset 0 0 0 2px var(--filetree-folder-drop-border);
+
+      &::before {
+        content: '📁 폴더 안으로 이동';
+        position: absolute;
+        top: -20px;
+        left: 50%;
+        z-index: 10;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: $font-size-xxxsmall;
+        font-weight: $font-weight-medium;
+        white-space: nowrap;
+        color: var(--filetree-drop-tooltip-text);
+        background-color: var(--filetree-drop-tooltip-bg);
+        box-shadow: 0 2px 8px var(--filetree-drop-tooltip-shadow);
+        animation: tooltip-appear 0.2s ease-out;
+        transform: translateX(-50%);
+      }
+    }
+
+    &.file {
+      // 파일 위/아래 정렬의 경우 - 라인만 표시
+      &::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        right: 0;
+        left: 0;
+        height: 2px;
+        border-radius: 1px;
+        background-color: var(--filetree-drop-line);
+        box-shadow: 0 0 4px var(--filetree-drop-line);
+      }
+    }
+  }
+
+  // 드롭 위치별 세분화
+  &.dropBefore {
+    &::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      right: 0;
+      left: 0;
+      height: 2px;
+      border-radius: 1px;
+      background-color: var(--filetree-drop-line);
+    }
+  }
+
+  &.dropAfter {
+    &::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      bottom: -2px;
+      left: 0;
+      height: 2px;
+      border-radius: 1px;
+      background-color: var(--filetree-drop-line);
+    }
+  }
+
+  &.dropInside {
+    background-color: var(--filetree-folder-drop-target);
+    box-shadow: inset 0 0 0 2px var(--filetree-folder-drop-border);
+  }
+
+  &.canDrop {
+    &:hover {
+      background-color: var(--filetree-can-drop-hover);
+    }
+  }
+
+  &.cannotDrop {
+    cursor: not-allowed;
+
+    &::after {
+      content: '🚫';
+      position: absolute;
+      top: 50%;
+      right: 8px;
+      font-size: 12px;
+      transform: translateY(-50%);
+    }
+  }
+
+  // 드래그 가능한 상태
+  &.draggable {
+    cursor: grab;
+
+    &:active {
+      cursor: grabbing;
+    }
+  }
+
   // 액티브 상태
-  &:active:not(.editing) {
+  &:active:not(.editing, .dragging) {
     background-color: var(--filetree-item-active);
     transform: scale(0.98);
   }
@@ -186,6 +305,19 @@
   }
 }
 
+// 툴팁 애니메이션
+@keyframes tooltip-appear {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-4px) scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
 // 다크모드/라이트모드 색상 변수
 :root {
   // 라이트모드
@@ -205,6 +337,20 @@
   --filetree-focus-indicator: #{$blue-3};
   --filetree-selected-indicator: #{$orange};
   --filetree-editing-indicator: #{$yellow};
+
+  // 드래그앤드롭 색상
+  --filetree-item-dragging: #{$gray-8};
+  --filetree-drag-border: #{$blue-3};
+  --filetree-drag-overlay: rgb(100 152 198 / 10%);
+  --filetree-drop-line: #{$blue-3};
+  --filetree-can-drop-hover: rgb(100 152 198 / 20%);
+
+  // 폴더 드롭 관련 색상
+  --filetree-folder-drop-target: rgb(34 197 94 / 10%);
+  --filetree-folder-drop-border: #{$green};
+  --filetree-drop-tooltip-bg: #{$green};
+  --filetree-drop-tooltip-text: #{$white-2};
+  --filetree-drop-tooltip-shadow: rgb(0 0 0 / 25%);
 }
 
 :global(.dark) {
@@ -225,4 +371,18 @@
   --filetree-focus-indicator: #{$blue-3};
   --filetree-selected-indicator: #{$orange};
   --filetree-editing-indicator: #{$yellow};
+
+  // 드래그앤드롭 색상
+  --filetree-item-dragging: #{$gray-5};
+  --filetree-drag-border: #{$blue-3};
+  --filetree-drag-overlay: rgb(100 152 198 / 15%);
+  --filetree-drop-line: #{$blue-3};
+  --filetree-can-drop-hover: rgb(100 152 198 / 25%);
+
+  // 폴더 드롭 관련 색상
+  --filetree-folder-drop-target: rgb(34 197 94 / 15%);
+  --filetree-folder-drop-border: #{$green};
+  --filetree-drop-tooltip-bg: #{$green};
+  --filetree-drop-tooltip-text: #{$white-2};
+  --filetree-drop-tooltip-shadow: rgb(0 0 0 / 40%);
 }
