@@ -6,16 +6,20 @@ import CheckIcon from '@/assets/icons/arrow-down-box.svg?react';
 import RecycleIcon from '@/assets/icons/recycle.svg?react';
 import UnshareIcon from '@/assets/icons/mail-off.svg?react';
 import ForwardIcon from '@/assets/icons/forward.svg?react';
+import useRepoSettingsStore from '@/stores/repoSettingsStore';
 
 type shareSectionProps = {
-  shareLink: string;
   onShareLinkCopy?: () => void;
 };
 
-const ShareSection = ({ shareLink, onShareLinkCopy }: shareSectionProps) => {
+const ShareSection = ({ onShareLinkCopy }: shareSectionProps) => {
+  const settingsData = useRepoSettingsStore(state => state.settingsData);
+
+  if (!settingsData) return null;
+
   const handleShareLinkCopy = () => {
-    if (shareLink && onShareLinkCopy) {
-      navigator.clipboard.writeText(shareLink);
+    if (settingsData.shareLink && onShareLinkCopy) {
+      navigator.clipboard.writeText(settingsData.shareLink);
       onShareLinkCopy();
     }
   };
@@ -39,8 +43,9 @@ const ShareSection = ({ shareLink, onShareLinkCopy }: shareSectionProps) => {
               <CopyIcon className={styles.icon} />
             </div>
           </div>
-
-          <input type="text" value={shareLink} readOnly className={styles.input} />
+          {settingsData.shareLink && (
+            <input type="text" value={settingsData.shareLink} readOnly className={styles.input} />
+          )}
         </div>
       </div>
 
@@ -108,7 +113,7 @@ const ShareSection = ({ shareLink, onShareLinkCopy }: shareSectionProps) => {
           <button
             className={styles.shareButton}
             onClick={() => {
-              console.log('공유하기기 클릭');
+              console.log('공유하기 클릭');
             }}
           >
             <ForwardIcon className={styles.buttonIcon} />
