@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { OpenTab } from '@/types/repo.types';
+import type { OpenTab } from '@/types/repo/repo.types';
 import { repoMockData } from '@/mocks/repoMockData';
 
 interface TabStore {
