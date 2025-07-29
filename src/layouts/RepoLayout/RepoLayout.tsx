@@ -14,28 +14,21 @@ export function RepoLayout() {
   const [isChatOpen, setIsChatOpen] = useState(false);
 
   useMockRepoInitializer();
-  const { isDarkMode } = useThemeStore();
+  const { isDarkMode, enableRepoTheme, disableRepoTheme } = useThemeStore();
   const { isVisible: isFileSectionVisible } = useFileSectionStore();
 
   const handleChatToggle = () => {
     setIsChatOpen(prev => !prev);
   };
 
-  // 레포 페이지에서만 다크모드를 DOM에 적용
+  // 레포 페이지에서만 테마 관리
   useEffect(() => {
-    const htmlElement = document.documentElement;
+    enableRepoTheme();
 
-    if (isDarkMode) {
-      htmlElement.classList.add('dark');
-    } else {
-      htmlElement.classList.remove('dark');
-    }
-
-    // 컴포넌트 언마운트 시 다크모드 클래스 제거 (레포 페이지를 벗어날 때)
     return () => {
-      htmlElement.classList.remove('dark');
+      disableRepoTheme();
     };
-  }, [isDarkMode]);
+  }, [enableRepoTheme, disableRepoTheme]);
 
   return (
     <div
