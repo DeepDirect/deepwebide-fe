@@ -17,7 +17,6 @@ import MainHeader from '@/components/organisms/Header/MainHeader/MainHeader';
 import useGetRepositorySettings from '@/hooks/useGetRepositorySettings';
 import Loading from '@/components/molecules/Loading/Loading';
 import useRepoSettingsStore from '@/stores/repoSettingsStore';
-import type { AxiosError } from 'axios';
 
 const SettingsPage: React.FC = () => {
   const { repoId } = useParams({ strict: false });
@@ -26,22 +25,11 @@ const SettingsPage: React.FC = () => {
 
   const { data, isLoading, error } = useGetRepositorySettings(repoId);
 
-  //   if (error) {
-  //     console.log('error:', error);
-  //     Navigate({
-  //       to: '/main',
-  //     });
-  //   }
-
   // TODO - Error 처리
   useEffect(() => {
     if (error) {
-      const axiosError = error as AxiosError;
-      if (axiosError.response?.status === 404) {
-        console.log('Repository not found:', axiosError);
-        // alert() -> main으로 이동
-        router.navigate({ to: '/main' });
-      }
+      alert('접근할 수 없는 페이지입니다.');
+      router.navigate({ to: '/main' });
     }
   }, [error, router]);
 
@@ -65,7 +53,6 @@ const SettingsPage: React.FC = () => {
     if (canGoBack) router.history.back();
   };
 
-  // 로딩 중이거나 settingsData null일 때
   if (isLoading || !settingsData) {
     return (
       <div className={styles.settingsLayout}>
@@ -95,6 +82,7 @@ const SettingsPage: React.FC = () => {
               <BackIcon className={styles.icon} />
             </button>
           </div>
+
           {/* 섹션 스크롤링 버튼 */}
           <div className={styles.sectionsWrapper}>
             <div className={styles.sectionLabel}>
@@ -117,6 +105,7 @@ const SettingsPage: React.FC = () => {
                   <span>MEMBER</span>
                 </div>
               )}
+
               <div
                 className={styles.label}
                 role="button"
@@ -125,6 +114,7 @@ const SettingsPage: React.FC = () => {
                 <ShareIcon className={styles.icon} />
                 <span>SHARE</span>
               </div>
+
               {!settingsData.isShared && (
                 <div
                   className={`${styles.label} ${styles.redColor}`}
@@ -139,12 +129,16 @@ const SettingsPage: React.FC = () => {
 
             {/* 섹션별 내용 */}
             <div className={styles.contentArea}>
+              {/* INFO - 공통 */}
               <InfoSection />
 
+              {/* MEMBERS - 공유 레포지토리 */}
               {settingsData.isShared && <MemberSection />}
 
+              {/* SHARE - 공통 */}
               <ShareSection />
 
+              {/* DELETE - 개인 */}
               {!settingsData.isShared && <DeleteSection />}
             </div>
           </div>
