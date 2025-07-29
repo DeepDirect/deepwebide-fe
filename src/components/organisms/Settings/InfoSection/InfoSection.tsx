@@ -9,7 +9,7 @@ import EditIcon from '@/assets/icons/edit-box.svg?react';
 import useRepoSettingsStore from '@/stores/repoSettingsStore';
 import ChangeRepoNameModal from '@/features/Modals/ChangeRepoNameModal/ChangeRepoNameModal';
 import { useState } from 'react';
-import useRepositoryRename from '@/hooks/useRepositoryRename';
+import useRepositoryRename from '@/hooks/common/useRepositoryRename';
 import { useParams } from '@tanstack/react-router';
 import { useQueryClient } from '@tanstack/react-query';
 

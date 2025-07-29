@@ -12,7 +12,7 @@ import {
   useFindId,
   useSendPhoneCodeForFindId,
   useVerifyPhoneCodeForFindId,
-} from '@/hooks/useFindId';
+} from '@/hooks/auth/useFindId';
 
 import styles from './FindIdForm.module.scss';
 

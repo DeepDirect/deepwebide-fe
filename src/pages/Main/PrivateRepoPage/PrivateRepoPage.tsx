@@ -3,9 +3,9 @@ import { useNavigate } from '@tanstack/react-router';
 
 import FileIcon from '@/assets/icons/file.svg?react';
 
-import useCreateRepository from '@/hooks/useCreateRepository';
-import useGetRepository from '@/hooks/useGetRepository';
-import useRepositoryFavorite from '@/hooks/useRepositoryFavorite';
+import useCreateRepository from '@/hooks/main/useCreateRepository';
+import useGetRepository from '@/hooks/main/useGetRepository';
+import useRepositoryFavorite from '@/hooks/main/useRepositoryFavorite';
 
 import Button from '@/components/atoms/Button/Button';
 import Toggle from '@/components/atoms/Toggle/Toggle';

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 
-import useGetRepository from '@/hooks/useGetRepository';
-import useRepositoryFavorite from '@/hooks/useRepositoryFavorite';
+import useGetRepository from '@/hooks/main/useGetRepository';
+import useRepositoryFavorite from '@/hooks/main/useRepositoryFavorite';
 
 import Toggle from '@/components/atoms/Toggle/Toggle';
 import Pagination from '@/components/molecules/Pagination/Pagination';

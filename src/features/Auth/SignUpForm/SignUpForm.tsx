@@ -9,7 +9,12 @@ import PasswordInput from '@/components/atoms/Input/PasswordInput';
 import Button from '@/components/atoms/Button/Button';
 import FormField from '@/components/molecules/FormField/FormField';
 
-import { useSignUp, useCheckEmail, useSendPhoneCode, useVerifyPhoneCode } from '@/hooks/useSignUp';
+import {
+  useSignUp,
+  useCheckEmail,
+  useSendPhoneCode,
+  useVerifyPhoneCode,
+} from '@/hooks/auth/useSignUp';
 
 import styles from './SignUpForm.module.scss';
 
