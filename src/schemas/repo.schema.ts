@@ -38,7 +38,7 @@ export const UpdateRepositoryShareStatusResponseSchema = z.object({
   isShared: z.boolean(),
 });
 
-export const RepositoryEntrycodeResponseSchema = z.object({
+export const RepositoryEntrycodeDataSchema = z.object({
   repositoryId: z.number(),
   repositoryName: z.string(),
   ownerId: z.number(),
@@ -48,6 +48,12 @@ export const RepositoryEntrycodeResponseSchema = z.object({
   createdAt: z.string(),
   updatedAt: z.string(),
   isShared: z.boolean(),
+});
+
+export const RepositoryEntrycodeResponseSchema = z.object({
+  status: z.number(),
+  message: z.string(),
+  data: RepositoryEntrycodeDataSchema,
 });
 
 export const RepositoryFavoriteResponseSchema = z.object({
@@ -62,6 +68,7 @@ export type RepositoryRenameResponse = z.infer<typeof RepositoryRenameResponseSc
 export type UpdateRepositoryShareStatusResponse = z.infer<
   typeof UpdateRepositoryShareStatusResponseSchema
 >;
+export type RepositoryEntrycodeData = z.infer<typeof RepositoryEntrycodeDataSchema>;
 export type RepositoryEntrycodeResponse = z.infer<typeof RepositoryEntrycodeResponseSchema>;
 export type RepositoryFavoriteResponse = z.infer<typeof RepositoryFavoriteResponseSchema>;
 
@@ -106,3 +113,15 @@ export const ResponseDtoKickedMemberResponse = z.object({
 
 export type KickedMemberResponseType = z.infer<typeof KickedMemberResponse>;
 export type ResponseDtoKickedMemberResponseType = z.infer<typeof ResponseDtoKickedMemberResponse>;
+
+export const RepositoryNewEntrycodeDataSchema = z.object({
+  newEntryCode: z.string(),
+});
+
+export const RepositoryNewEntrycodeSchema = z.object({
+  status: z.number(),
+  message: z.string(),
+  data: RepositorySettingsDataSchema,
+});
+
+export type RepositoryNewEntrycode = z.infer<typeof RepositoryNewEntrycodeSchema>;
