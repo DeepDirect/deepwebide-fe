@@ -208,6 +208,9 @@ const FileTreeItem: React.FC<ExtendedFileTreeItemProps> = ({
 
   const icon = node.type === 'folder' ? getFolderIcon(isExpanded) : getFileIcon(node.name);
 
+  // 최상단 레벨 폴더인지 확인 (level이 0, 1이고 path에 '/'가 없는 경우)
+  const isTopLevel = node.level <= 1;
+
   return (
     <FileTreeContextMenu
       node={node}
@@ -254,8 +257,9 @@ const FileTreeItem: React.FC<ExtendedFileTreeItemProps> = ({
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
+        // 최상단 레벨 여부를 data attribute로 전달
+        data-is-top-level={isTopLevel}
       >
-        {/* 화살표 영역 - 항상 동일한 크기 유지 */}
         <div className={styles.arrowArea}>
           {node.type === 'folder' && (
             <div
@@ -277,7 +281,6 @@ const FileTreeItem: React.FC<ExtendedFileTreeItemProps> = ({
           )}
         </div>
 
-        {/* 아이콘 */}
         <div className={styles.iconWrapper}>
           <img
             src={icon}
@@ -286,7 +289,6 @@ const FileTreeItem: React.FC<ExtendedFileTreeItemProps> = ({
           />
         </div>
 
-        {/* 파일/폴더 이름 - 인라인 편집 지원 */}
         <InlineEdit
           value={node.name}
           isEditing={isEditing}

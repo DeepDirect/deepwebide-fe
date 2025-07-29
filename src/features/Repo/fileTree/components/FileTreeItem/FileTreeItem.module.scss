@@ -102,28 +102,12 @@
 
   // 드롭 타겟 상태 - 폴더와 파일 구분
   &.dropTarget {
+    // 기본 상태 제거, 상황별로 분리
+
     &.folder {
       // 폴더 내부로 들어가는 경우 - 전체 배경 하이라이트
       background-color: var(--filetree-folder-drop-target);
       box-shadow: inset 0 0 0 2px var(--filetree-folder-drop-border);
-
-      &::before {
-        content: '📁 폴더 안으로 이동';
-        position: absolute;
-        top: -20px;
-        left: 50%;
-        z-index: 10;
-        padding: 2px 8px;
-        border-radius: 4px;
-        font-size: $font-size-xxxsmall;
-        font-weight: $font-weight-medium;
-        white-space: nowrap;
-        color: var(--filetree-drop-tooltip-text);
-        background-color: var(--filetree-drop-tooltip-bg);
-        box-shadow: 0 2px 8px var(--filetree-drop-tooltip-shadow);
-        animation: tooltip-appear 0.2s ease-out;
-        transform: translateX(-50%);
-      }
     }
 
     &.file {
@@ -172,6 +156,63 @@
   &.dropInside {
     background-color: var(--filetree-folder-drop-target);
     box-shadow: inset 0 0 0 2px var(--filetree-folder-drop-border);
+
+    // 툴팁 스타일 - 동적 위치 조정
+    &::before {
+      content: '📁 폴더 안으로 이동';
+      position: absolute;
+
+      // 기본적으로는 위쪽에 표시
+      top: -36px;
+      left: 50%;
+      z-index: 1000;
+      min-width: 140px;
+      padding: 6px 12px;
+      border: 1px solid var(--filetree-drop-tooltip-border);
+      border-radius: 6px;
+      font-size: $font-size-xxxsmall;
+      font-weight: $font-weight-medium;
+      text-align: center;
+      white-space: nowrap;
+      color: var(--filetree-drop-tooltip-text);
+      background-color: var(--filetree-drop-tooltip-bg);
+      box-shadow:
+        0 4px 12px var(--filetree-drop-tooltip-shadow),
+        0 0 0 1px rgb(255 255 255 / 20%);
+      backdrop-filter: blur(4px);
+      animation: tooltip-appear 0.2s ease-out;
+      transform: translateX(-50%);
+      pointer-events: none;
+
+      // 툴팁 화살표 (아래쪽)
+      &::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-top: 6px solid var(--filetree-drop-tooltip-bg);
+        border-right: 6px solid transparent;
+        border-left: 6px solid transparent;
+        transform: translateX(-50%);
+      }
+    }
+
+    // 최상단 폴더인 경우 (level 0이고 path에 '/'가 없는 경우) 아래쪽에 표시
+    &[data-is-top-level='true'] {
+      &::before {
+        top: 100%;
+        margin-top: 4px;
+
+        // 화살표 방향 변경 (위쪽)
+        &::after {
+          top: -6px;
+          border-top: none;
+          border-bottom: 6px solid var(--filetree-drop-tooltip-bg);
+        }
+      }
+    }
   }
 
   &.canDrop {
@@ -188,6 +229,7 @@
       position: absolute;
       top: 50%;
       right: 8px;
+      z-index: 100;
       font-size: 12px;
       transform: translateY(-50%);
     }
@@ -309,12 +351,34 @@
 @keyframes tooltip-appear {
   from {
     opacity: 0;
-    transform: translateX(-50%) translateY(-4px) scale(0.9);
+    transform: translateX(-50%) translateY(-8px) scale(0.9);
   }
 
   to {
     opacity: 1;
     transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+// 아래쪽에 나타나는 툴팁용 애니메이션
+@keyframes tooltip-appear-below {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px) scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+// 최상단 레벨에서는 다른 애니메이션 사용
+.fileTreeItem[data-is-top-level='true'] {
+  &.dropInside {
+    &::before {
+      animation: tooltip-appear-below 0.2s ease-out;
+    }
   }
 }
 
@@ -350,6 +414,7 @@
   --filetree-folder-drop-border: #{$green};
   --filetree-drop-tooltip-bg: #{$green};
   --filetree-drop-tooltip-text: #{$white-2};
+  --filetree-drop-tooltip-border: #{$green};
   --filetree-drop-tooltip-shadow: rgb(0 0 0 / 25%);
 }
 
@@ -384,5 +449,6 @@
   --filetree-folder-drop-border: #{$green};
   --filetree-drop-tooltip-bg: #{$green};
   --filetree-drop-tooltip-text: #{$white-2};
+  --filetree-drop-tooltip-border: #{$green};
   --filetree-drop-tooltip-shadow: rgb(0 0 0 / 40%);
 }
