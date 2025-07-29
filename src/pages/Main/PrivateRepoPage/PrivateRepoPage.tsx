@@ -55,7 +55,6 @@ const PrivateRepoPage = () => {
   // 성공
   useEffect(() => {
     if (isSuccess && data.data) {
-      console.log(data.data);
       setRepositories(data?.data.repositories);
       setPagination(prev => ({
         ...prev,
@@ -70,12 +69,6 @@ const PrivateRepoPage = () => {
       console.error(error);
     }
   }, [isError, error]);
-
-  useEffect(() => {
-    if (pagination.current) {
-      repositoryRefetch();
-    }
-  }, [pagination.current]);
 
   // 페이지
   const handlePageChange = (page: number) => {
