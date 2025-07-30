@@ -33,11 +33,33 @@ export const useFileContentLoader = ({
     enabled: shouldLoadContent,
   });
 
+  // 탭 전환 디버깅 로그
+  useEffect(() => {
+    if (activeTab) {
+      console.log(`활성 탭:`, {
+        tabId: activeTab.id,
+        path: activeTab.path,
+        contentLength: activeTab.content?.length || 0,
+        isEmpty: activeTab.content === '',
+        shouldLoadContent,
+      });
+    }
+  }, [activeTab?.id, shouldLoadContent]);
+
   // 파일 내용이 로드되면 탭에 설정
   useEffect(() => {
-    if (fileContentData?.data?.content && activeTab && shouldLoadContent) {
+    if (fileContentData?.data?.content !== undefined && activeTab && shouldLoadContent) {
       const tabId = activeTab.id;
-      setTabContent(tabId, fileContentData.data.content);
+      const content = fileContentData.data.content;
+
+      console.log(`파일 내용 설정:`, {
+        tabId,
+        filePath: activeTab.path,
+        contentLength: content.length,
+        contentPreview: content.substring(0, 50) + '...',
+      });
+
+      setTabContent(tabId, content);
     }
   }, [fileContentData, activeTab, shouldLoadContent, setTabContent]);
 

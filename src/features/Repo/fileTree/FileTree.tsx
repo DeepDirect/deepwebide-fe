@@ -27,6 +27,7 @@ const FileTree: React.FC<FileTreeProps> = ({ repoId, repositoryId, className = '
 
   const { handleFileClick, handleFolderToggle } = useFileTreeActions({
     repoId,
+    repositoryId,
     setExpandedFolders,
     setSelectedFile,
   });

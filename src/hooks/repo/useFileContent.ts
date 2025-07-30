@@ -17,8 +17,7 @@ interface UseFileContentParams {
   enabled?: boolean;
 }
 
-// 파일 내용을 가져오는 훅
-
+// 파일 내용을 가져오는 훅 - API 연동 추가
 export const useFileContent = ({
   repositoryId,
   filePath,
@@ -27,10 +26,23 @@ export const useFileContent = ({
   return useQuery({
     queryKey: ['fileContent', repositoryId, filePath],
     queryFn: async (): Promise<FileContentResponse> => {
+      console.log(`파일 내용 요청:`, {
+        repositoryId,
+        filePath,
+        url: `/api/repositories/${repositoryId}/files/content`,
+      });
+
+      // 실제 API 호출
       const response = await apiClient.get<FileContentResponse>(
-        `/api/repositories/${repositoryId}/files/content`,
-        { path: filePath }
+        `/api/repositories/${repositoryId}/files/content?path=${encodeURIComponent(filePath)}`
       );
+
+      console.log(`파일 내용 응답:`, {
+        status: response.status,
+        filePath,
+        contentLength: response.data?.data?.content?.length || 0,
+      });
+
       return response.data;
     },
     enabled: enabled && !!repositoryId && !!filePath,
@@ -49,17 +61,18 @@ export const useFileContent = ({
   });
 };
 
-//  여러 파일의 내용을 병렬로 가져오는 훅
-
+// 여러 파일의 내용을 병렬로 가져오는 훅
 export const useMultipleFileContents = (
   files: Array<{ repositoryId: number; filePath: string }>
 ) => {
   return useQuery({
     queryKey: ['multipleFileContents', files],
     queryFn: async () => {
+      console.log(`여러 파일 내용 요청:`, { fileCount: files.length });
+
       const promises = files.map(({ repositoryId, filePath }) =>
         apiClient.get<FileContentResponse>(`/api/repositories/${repositoryId}/files/content`, {
-          path: filePath,
+          params: { path: filePath },
         })
       );
 

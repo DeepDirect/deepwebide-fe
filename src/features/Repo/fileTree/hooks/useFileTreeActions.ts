@@ -1,20 +1,23 @@
 import { useCallback } from 'react';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { useTabStore } from '@/stores/tabStore';
+import { apiClient } from '@/api/client';
 import type { FileTreeNode } from '../types';
 
 interface UseFileTreeActionsProps {
   repoId: string;
+  repositoryId?: number;
   setExpandedFolders: React.Dispatch<React.SetStateAction<Set<string>>>;
   setSelectedFile: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 export const useFileTreeActions = ({
   repoId,
+  repositoryId, // repositoryId 받기
   setExpandedFolders,
   setSelectedFile,
 }: UseFileTreeActionsProps) => {
-  const { openFileByPath } = useTabStore();
+  const { openFileByPath, setTabContent } = useTabStore(); // 사용하지 않는 변수 제거
   const navigate = useNavigate();
   const params = useParams({ strict: false });
 
@@ -25,13 +28,63 @@ export const useFileTreeActions = ({
    * - 선택된 파일 상태 업데이트
    */
   const handleFileClick = useCallback(
-    (node: FileTreeNode) => {
+    async (node: FileTreeNode) => {
       if (node.fileType !== 'FILE') return;
 
       // 탭 열기
       openFileByPath(repoId, node.path);
 
-      // URL 업데이트 - 현재 라우트로 이동하면서 search 파라미터만 업데이트
+      // API 연동 추가: 파일 내용 로드
+      if (repositoryId) {
+        try {
+          console.log(`파일 내용 로드: ${node.path}`, {
+            fileId: node.fileId,
+            fileName: node.fileName,
+            repositoryId,
+          });
+
+          console.log(
+            `시도: fileId 사용 - /api/repositories/${repositoryId}/files/${node.fileId}/content`
+          );
+          const response = await apiClient.get<{
+            status: number;
+            data: {
+              content: string;
+            } | null;
+          }>(`/api/repositories/${repositoryId}/files/${node.fileId}/content`);
+
+          if (response.data?.status === 200 && response.data?.data?.content !== undefined) {
+            const tabId = `${repoId}/${node.path}`;
+            const content = response.data.data.content;
+
+            console.log(`파일 내용 로드 완료: ${node.fileName}`, {
+              contentLength: content.length,
+              contentPreview: content.substring(0, 100) + (content.length > 100 ? '...' : ''),
+              tabId,
+              isEmpty: content === '',
+              responseData: response.data.data,
+            });
+
+            setTabContent(tabId, content);
+          } else {
+            console.warn('응답 구조가 예상과 다름:', {
+              status: response.data?.status,
+              hasData: !!response.data?.data,
+              hasContent: !!response.data?.data?.content,
+              fullResponse: response.data,
+            });
+          }
+        } catch (error) {
+          console.error(`파일 내용 로드 실패:`, error);
+
+          const tabId = `${repoId}/${node.path}`;
+          const errorMessage = `// 파일을 불러올 수 없습니다.
+// 경로: ${node.path}
+// 오류: ${error instanceof Error ? error.message : '알 수 없는 오류'}`;
+          setTabContent(tabId, errorMessage);
+        }
+      }
+
       navigate({
         to: '/$repoId',
         params: { repoId: params.repoId || repoId },
@@ -39,10 +92,9 @@ export const useFileTreeActions = ({
         replace: false,
       });
 
-      // 선택된 파일 상태 업데이트
       setSelectedFile(node.path);
     },
-    [repoId, openFileByPath, navigate, params.repoId, setSelectedFile]
+    [repoId, repositoryId, openFileByPath, setTabContent, navigate, params.repoId, setSelectedFile]
   );
 
   /**
@@ -94,10 +146,10 @@ export const useFileTreeActions = ({
 
       findFoldersInPath(treeData);
 
-      // 폴더들을 확장
-      setExpandedFolders(prev => new Set([...prev, ...foldersToExpand]));
+      if (foldersToExpand.size > 0) {
+        setExpandedFolders(prev => new Set([...prev, ...foldersToExpand]));
+      }
 
-      // 파일 선택
       setSelectedFile(filePath);
     },
     [setExpandedFolders, setSelectedFile]

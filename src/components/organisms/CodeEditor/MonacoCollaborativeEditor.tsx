@@ -82,10 +82,11 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
         <Editor
           height="100%"
           language={language}
-          value={enableCollaboration ? undefined : activeTab.content}
+          value={activeTab.content || ''}
           onChange={handleEditorChange}
           onMount={handleEditorDidMount}
           options={editorOptions}
+          theme={isDarkMode ? 'vs-dark' : 'vs'}
           loading={
             <div className={styles.editorLoading}>
               <div className={styles.loadingSpinner} />
