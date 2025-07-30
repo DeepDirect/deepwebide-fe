@@ -21,6 +21,7 @@ const FileTreeContextMenu: React.FC<FileTreeContextMenuProps> = ({
   onDelete,
 }) => {
   const isFolder = node?.fileType === 'FOLDER';
+  const isRootLevel = node?.parentId === null; // 루트 레벨 항목인지 확인
 
   return (
     <ContextMenu.Root>
@@ -60,16 +61,21 @@ const FileTreeContextMenu: React.FC<FileTreeContextMenuProps> = ({
                 <span className={styles.shortcut}>F2</span>
               </ContextMenu.Item>
 
-              <ContextMenu.Separator className={styles.separator} />
+              {/* 루트 레벨이 아닐 때만 삭제 메뉴 표시 */}
+              {!isRootLevel && (
+                <>
+                  <ContextMenu.Separator className={styles.separator} />
 
-              <ContextMenu.Item
-                className={`${styles.item} ${styles.danger}`}
-                onClick={() => onDelete?.(node)}
-              >
-                <span className={styles.icon}>🗑️</span>
-                삭제
-                <span className={styles.shortcut}>Delete</span>
-              </ContextMenu.Item>
+                  <ContextMenu.Item
+                    className={`${styles.item} ${styles.danger}`}
+                    onClick={() => onDelete?.(node)}
+                  >
+                    <span className={styles.icon}>🗑️</span>
+                    삭제
+                    <span className={styles.shortcut}>Delete</span>
+                  </ContextMenu.Item>
+                </>
+              )}
             </>
           )}
         </ContextMenu.Content>

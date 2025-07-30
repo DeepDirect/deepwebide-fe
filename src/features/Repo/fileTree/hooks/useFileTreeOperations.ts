@@ -130,6 +130,13 @@ export const useFileTreeOperations = ({
 
   const deleteItem = async (node: FileTreeNode) => {
     try {
+      // 루트 레벨 항목(parentId가 null) 삭제 방지
+      if (node.parentId === null) {
+        console.warn('⚠️ 루트 레벨 항목 삭제 시도 - 삭제 불가');
+        window.alert('최상위 프로젝트 폴더는 삭제할 수 없습니다.');
+        return;
+      }
+
       const confirmed = window.confirm(
         `"${node.fileName}"을(를) 삭제하시겠습니까?${
           node.fileType === 'FOLDER' ? '\n폴더와 하위 모든 파일이 삭제됩니다.' : ''
