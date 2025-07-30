@@ -8,7 +8,9 @@ import type { UpdateRepositoryShareStatusApiResponse } from '@/schemas/repo.sche
 type Options = Omit<
   UseMutationOptions<UpdateRepositoryShareStatusApiResponse, AxiosError, void>,
   'mutationFn'
->;
+> & {
+  enabled?: boolean;
+};
 
 export const useShareRepositoryStatus = (url: RepositoryURL, options?: Options) => {
   const queryClient = useQueryClient();

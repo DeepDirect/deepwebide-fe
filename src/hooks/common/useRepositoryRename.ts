@@ -9,7 +9,9 @@ export const useRepositoryRename = (
   options?: Omit<
     UseMutationOptions<RepositoryRenameApiResponse, AxiosError, RepositoryRenameRequest>,
     'mutationFn'
-  >
+  > & {
+    enabled?: boolean;
+  }
 ) => {
   const queryClient = useQueryClient();
 

@@ -13,7 +13,9 @@ const useGetRepositoryEntrycode = (
   options?: Omit<
     UseQueryOptions<RepositoryEntrycodeApiResponse, AxiosError>,
     'queryKey' | 'queryFn'
-  >
+  > & {
+    enabled?: boolean;
+  }
 ) => {
   return useQuery<RepositoryEntrycodeApiResponse, AxiosError>({
     queryKey: ['repository', url],
