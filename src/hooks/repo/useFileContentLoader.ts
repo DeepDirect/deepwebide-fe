@@ -5,10 +5,15 @@ import { useFileContent } from './useFileContent';
 interface UseFileContentLoaderParams {
   repositoryId: number;
   repoId: string;
+  enabled?: boolean; // 하이드레이션 완료 후에만 동작하도록
 }
 
 // 현재 활성 탭의 파일 내용을 자동으로 로드하는 훅
-export const useFileContentLoader = ({ repositoryId, repoId }: UseFileContentLoaderParams) => {
+export const useFileContentLoader = ({
+  repositoryId,
+  repoId,
+  enabled = true,
+}: UseFileContentLoaderParams) => {
   const { openTabs, setTabContent } = useTabStore();
 
   // 현재 활성 탭 찾기
@@ -16,7 +21,7 @@ export const useFileContentLoader = ({ repositoryId, repoId }: UseFileContentLoa
 
   // 활성 탭이 있고, 내용이 비어있으며, 해당 레포의 탭인 경우에만 파일 내용 로드
   const shouldLoadContent =
-    activeTab && activeTab.content === '' && activeTab.id.startsWith(`${repoId}/`);
+    enabled && activeTab && activeTab.content === '' && activeTab.id.startsWith(`${repoId}/`);
 
   const {
     data: fileContentData,
