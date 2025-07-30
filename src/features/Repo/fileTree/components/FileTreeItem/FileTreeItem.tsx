@@ -6,41 +6,7 @@ import InlineEdit from '../InlineEdit/InlineEdit';
 import styles from './FileTreeItem.module.scss';
 import type { FileTreeItemProps } from '../../types';
 
-interface ExtendedFileTreeItemProps extends FileTreeItemProps {
-  // 컨텍스트 메뉴 관련
-  onNewFile?: (parentNode?: import('../../types').FileTreeNode) => void;
-  onNewFolder?: (parentNode?: import('../../types').FileTreeNode) => void;
-  onRename?: (node: import('../../types').FileTreeNode) => void;
-  onDelete?: (node: import('../../types').FileTreeNode) => void;
-  onCopy?: (node: import('../../types').FileTreeNode) => void;
-  onCut?: (node: import('../../types').FileTreeNode) => void;
-  onPaste?: (parentNode?: import('../../types').FileTreeNode) => void;
-  canPaste?: boolean;
-
-  // 인라인 편집 관련
-  isEditing?: boolean;
-  onEditSave?: (node: import('../../types').FileTreeNode, newName: string) => Promise<void>;
-  onEditCancel?: () => void;
-
-  // 내부 드래그앤드롭 관련
-  isDragging?: boolean;
-  isDropTarget?: boolean;
-  canDrop?: boolean;
-  onDragStart?: (node: import('../../types').FileTreeNode, event: React.DragEvent) => void;
-  onDragEnd?: () => void;
-  onDragOver?: (node: import('../../types').FileTreeNode, event: React.DragEvent) => void;
-  onDragLeave?: () => void;
-  onDrop?: (node: import('../../types').FileTreeNode, event: React.DragEvent) => void;
-  getDropPosition?: (nodeId: string) => import('../../types').DropPosition | null;
-
-  // 외부 파일 드롭 관련
-  isExternalDragOver?: boolean;
-  onExternalDragOver?: (node: import('../../types').FileTreeNode, event: React.DragEvent) => void;
-  onExternalDragLeave?: (node: import('../../types').FileTreeNode, event: React.DragEvent) => void;
-  onExternalDrop?: (node: import('../../types').FileTreeNode, event: React.DragEvent) => void;
-}
-
-const FileTreeItem: React.FC<ExtendedFileTreeItemProps> = ({
+const FileTreeItem: React.FC<FileTreeItemProps> = ({
   node,
   isExpanded,
   isSelected,
