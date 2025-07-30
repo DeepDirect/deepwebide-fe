@@ -1,5 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getFileTree, createFile, moveFile, renameFile, deleteFile } from '@/api/fileTree';
+import {
+  getFileTree,
+  createFile,
+  moveFile,
+  renameFile,
+  deleteFile,
+  uploadFile,
+} from '@/api/fileTree';
 import type { CreateFileRequest, MoveFileRequest, RenameFileRequest } from '../types';
 
 // 파일 트리 조회
@@ -37,6 +44,22 @@ export const useCreateFileMutation = (repositoryId: number) => {
     },
     onError: error => {
       console.error('파일 생성 실패:', error);
+    },
+  });
+};
+
+// 파일 업로드 (외부 드래그앤드롭용)
+export const useUploadFileMutation = (repositoryId: number) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ file, parentPath }: { file: File; parentPath?: string }) =>
+      uploadFile(repositoryId, file, parentPath),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['fileTree', repositoryId] });
+    },
+    onError: error => {
+      console.error('파일 업로드 실패:', error);
     },
   });
 };

@@ -66,18 +66,14 @@ export interface FileTreeItemProps {
 
   // 편집 관련
   isEditing?: boolean;
-  onEditSave?: (newName: string) => void;
+  onEditSave?: (node: FileTreeNode, newName: string) => Promise<void>;
   onEditCancel?: () => void;
 
   // 컨텍스트 메뉴 액션
-  onNewFile?: () => void;
-  onNewFolder?: () => void;
-  onRename?: () => void;
-  onDelete?: () => void;
-  onCopy?: () => void;
-  onCut?: () => void;
-  onPaste?: () => void;
-  canPaste?: boolean;
+  onNewFile?: (parentNode?: FileTreeNode) => void;
+  onNewFolder?: (parentNode?: FileTreeNode) => void;
+  onRename?: (node: FileTreeNode) => void;
+  onDelete?: (node: FileTreeNode) => void;
 
   // 내부 드래그앤드롭 props
   isDragging?: boolean;
@@ -105,7 +101,7 @@ export interface CreateFileRequest {
 }
 
 export interface MoveFileRequest {
-  newParentId: number;
+  newParentId: number | null; // 루트 이동용
 }
 
 export interface RenameFileRequest {

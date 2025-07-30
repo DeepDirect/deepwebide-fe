@@ -51,6 +51,21 @@ export const useFileTreeDragDrop = ({
       return false;
     }
 
+    // 같은 부모를 가진 경우 체크
+    if (targetNode.fileType === 'FOLDER') {
+      // 폴더로 드롭하려는데 이미 그 폴더 안에 있는 경우
+      if (draggedNode.parentId === targetNode.fileId) {
+        console.log('⚠️ 이미 해당 폴더에 있는 파일입니다');
+        return false;
+      }
+    } else {
+      // 파일과 같은 레벨로 드롭하려는데 이미 같은 레벨에 있는 경우
+      if (draggedNode.parentId === targetNode.parentId) {
+        console.log('⚠️ 이미 같은 레벨에 있는 파일입니다');
+        return false;
+      }
+    }
+
     return true;
   }, []);
 
@@ -201,11 +216,31 @@ export const useFileTreeDragDrop = ({
       try {
         // 드롭 위치 계산
         const position = calculateDropPosition(event, node);
-        await onMoveNode(draggedItem.node, node, position);
 
-        console.log(`이동 완료: ${draggedItem.name} → ${node.path} (${position})`);
+        console.log('🎯 드롭 상세 정보:', {
+          draggedItem: draggedItem.name,
+          targetNode: node.fileName,
+          position,
+          targetType: node.fileType,
+        });
+
+        // 위치에 따른 실제 타겟 노드 결정
+        let actualTargetNode = node;
+
+        if (position === 'inside' && node.fileType === 'FOLDER') {
+          // 폴더 안으로 드롭 - 그대로 사용
+          actualTargetNode = node;
+        } else if (position === 'before' || position === 'after') {
+          // 파일/폴더의 앞/뒤로 드롭 - 같은 레벨 (부모와 같은 레벨)
+          // 실제로는 부모 폴더를 타겟으로 해야 함
+          actualTargetNode = node; // 현재 로직에서는 moveItem 함수에서 처리
+        }
+
+        await onMoveNode(draggedItem.node, actualTargetNode, position);
+
+        console.log(`✅ 이동 완료: ${draggedItem.name} → ${node.path} (${position})`);
       } catch (error) {
-        console.error('파일 이동 실패:', error);
+        console.error('❌ 파일 이동 실패:', error);
       } finally {
         handleDragEnd();
       }

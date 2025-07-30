@@ -1,5 +1,5 @@
 import api from './api';
-import type { AxiosResponse } from 'axios';
+import type { AxiosResponse, AxiosRequestConfig } from 'axios';
 
 export type ApiResponse<Res> = Promise<AxiosResponse<Res>>;
 
@@ -7,7 +7,8 @@ export const apiClient = {
   get: <Res, Params = Record<string, unknown>>(url: string, params?: Params): ApiResponse<Res> =>
     api.get(url, { params }),
 
-  post: <Req, Res>(url: string, data?: Req): ApiResponse<Res> => api.post(url, data),
+  post: <Req, Res>(url: string, data?: Req, config?: AxiosRequestConfig): ApiResponse<Res> =>
+    api.post(url, data, config),
 
   put: <Req, Res>(url: string, data?: Req): ApiResponse<Res> => api.put(url, data),
 

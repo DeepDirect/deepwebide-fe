@@ -10,10 +10,6 @@ interface FileTreeContextMenuProps {
   onNewFolder?: (parentNode?: FileTreeNode) => void;
   onRename?: (node: FileTreeNode) => void;
   onDelete?: (node: FileTreeNode) => void;
-  onCopy?: (node: FileTreeNode) => void;
-  onCut?: (node: FileTreeNode) => void;
-  onPaste?: (parentNode?: FileTreeNode) => void;
-  canPaste?: boolean;
 }
 
 const FileTreeContextMenu: React.FC<FileTreeContextMenuProps> = ({
@@ -23,12 +19,9 @@ const FileTreeContextMenu: React.FC<FileTreeContextMenuProps> = ({
   onNewFolder,
   onRename,
   onDelete,
-  onCopy,
-  onCut,
-  onPaste,
-  canPaste = false,
 }) => {
   const isFolder = node?.fileType === 'FOLDER';
+  const isRootLevel = node?.parentId === null; // 루트 레벨 항목인지 확인
 
   return (
     <ContextMenu.Root>
@@ -54,7 +47,8 @@ const FileTreeContextMenu: React.FC<FileTreeContextMenuProps> = ({
                 <span className={styles.icon}>📁</span>새 폴더
               </ContextMenu.Item>
 
-              <ContextMenu.Separator className={styles.separator} />
+              {/* 루트가 아닐 때만 구분선 표시 */}
+              {node && <ContextMenu.Separator className={styles.separator} />}
             </>
           )}
 
@@ -67,42 +61,21 @@ const FileTreeContextMenu: React.FC<FileTreeContextMenuProps> = ({
                 <span className={styles.shortcut}>F2</span>
               </ContextMenu.Item>
 
-              <ContextMenu.Separator className={styles.separator} />
+              {/* 루트 레벨이 아닐 때만 삭제 메뉴 표시 */}
+              {!isRootLevel && (
+                <>
+                  <ContextMenu.Separator className={styles.separator} />
 
-              <ContextMenu.Item className={styles.item} onClick={() => onCopy?.(node)}>
-                <span className={styles.icon}>📋</span>
-                복사
-                <span className={styles.shortcut}>Ctrl+C</span>
-              </ContextMenu.Item>
-
-              <ContextMenu.Item className={styles.item} onClick={() => onCut?.(node)}>
-                <span className={styles.icon}>✂️</span>
-                잘라내기
-                <span className={styles.shortcut}>Ctrl+X</span>
-              </ContextMenu.Item>
-
-              <ContextMenu.Separator className={styles.separator} />
-
-              <ContextMenu.Item
-                className={`${styles.item} ${styles.danger}`}
-                onClick={() => onDelete?.(node)}
-              >
-                <span className={styles.icon}>🗑️</span>
-                삭제
-                <span className={styles.shortcut}>Delete</span>
-              </ContextMenu.Item>
-            </>
-          )}
-
-          {/* 붙여넣기 - 클립보드에 데이터가 있을 때만 */}
-          {canPaste && (isFolder || !node) && (
-            <>
-              <ContextMenu.Separator className={styles.separator} />
-              <ContextMenu.Item className={styles.item} onClick={() => onPaste?.(node)}>
-                <span className={styles.icon}>📄</span>
-                붙여넣기
-                <span className={styles.shortcut}>Ctrl+V</span>
-              </ContextMenu.Item>
+                  <ContextMenu.Item
+                    className={`${styles.item} ${styles.danger}`}
+                    onClick={() => onDelete?.(node)}
+                  >
+                    <span className={styles.icon}>🗑️</span>
+                    삭제
+                    <span className={styles.shortcut}>Delete</span>
+                  </ContextMenu.Item>
+                </>
+              )}
             </>
           )}
         </ContextMenu.Content>

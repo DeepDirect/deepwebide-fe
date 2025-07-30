@@ -1,15 +1,17 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import {
   useCreateFileMutation,
   useMoveFileMutation,
   useRenameFileMutation,
   useDeleteFileMutation,
+  useUploadFileMutation,
 } from './useFileTreeApi';
 import type { FileTreeNode } from '../types';
 
 interface UseFileTreeOperationsParams {
   repositoryId: number;
   onSuccess?: () => void;
+  rootFolderId?: number;
 }
 
 interface UseFileTreeOperationsResult {
@@ -17,12 +19,12 @@ interface UseFileTreeOperationsResult {
   createModalOpen: boolean;
   createModalType: 'FILE' | 'FOLDER' | null;
   createModalParent: FileTreeNode | null;
-  editingNode: string | null; // string으로 변경
+  editingNode: string | null;
 
   // 모달 제어
   openCreateModal: (type: 'FILE' | 'FOLDER', parent?: FileTreeNode) => void;
   closeCreateModal: () => void;
-  startEditing: (nodeId: string) => void; // string을 받도록 변경
+  startEditing: (nodeId: string) => void;
   stopEditing: () => void;
 
   // CRUD 작업
@@ -30,41 +32,33 @@ interface UseFileTreeOperationsResult {
   renameItem: (node: FileTreeNode, newName: string) => Promise<void>;
   deleteItem: (node: FileTreeNode) => Promise<void>;
   moveItem: (sourceNode: FileTreeNode, targetNode: FileTreeNode) => Promise<void>;
-
-  // 클립보드 작업
-  canPaste: boolean;
-  copyNode: (node: FileTreeNode) => void;
-  cutNode: (node: FileTreeNode) => void;
-  pasteNode: (targetNode?: FileTreeNode) => Promise<void>;
+  uploadFiles: (files: File[], targetPath: string) => Promise<void>;
 
   // 로딩 상태
   isCreating: boolean;
   isRenaming: boolean;
   isDeleting: boolean;
   isMoving: boolean;
+  isUploading: boolean;
 }
 
 export const useFileTreeOperations = ({
   repositoryId,
   onSuccess,
+  rootFolderId,
 }: UseFileTreeOperationsParams): UseFileTreeOperationsResult => {
   // 모달 상태
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [createModalType, setCreateModalType] = useState<'FILE' | 'FOLDER' | null>(null);
   const [createModalParent, setCreateModalParent] = useState<FileTreeNode | null>(null);
-  const [editingNode, setEditingNode] = useState<string | null>(null); // string으로 변경
-
-  // 클립보드 상태
-  const clipboardRef = useRef<{
-    node: FileTreeNode;
-    operation: 'copy' | 'cut';
-  } | null>(null);
+  const [editingNode, setEditingNode] = useState<string | null>(null);
 
   // API Mutations
   const createMutation = useCreateFileMutation(repositoryId);
   const renameMutation = useRenameFileMutation(repositoryId);
   const deleteMutation = useDeleteFileMutation(repositoryId);
   const moveMutation = useMoveFileMutation(repositoryId);
+  const uploadMutation = useUploadFileMutation(repositoryId);
 
   // 모달 제어 함수들
   const openCreateModal = (type: 'FILE' | 'FOLDER', parent?: FileTreeNode) => {
@@ -92,10 +86,23 @@ export const useFileTreeOperations = ({
     if (!createModalType) return;
 
     try {
+      // parentId가 없으면 최상단 폴더 사용
+      let targetParentId = createModalParent?.fileId;
+
+      if (!targetParentId && rootFolderId) {
+        // 루트에 생성하려고 하면 최상단 폴더로 리다이렉트
+        targetParentId = rootFolderId;
+        console.log(`📂 루트 생성 → 최상단 폴더(${rootFolderId})로 리다이렉트`);
+      }
+
+      if (!targetParentId) {
+        throw new Error('파일을 생성할 폴더를 찾을 수 없습니다.');
+      }
+
       await createMutation.mutateAsync({
         fileName,
         fileType: createModalType,
-        parentId: createModalParent?.fileId,
+        parentId: targetParentId,
       });
 
       closeCreateModal();
@@ -123,6 +130,13 @@ export const useFileTreeOperations = ({
 
   const deleteItem = async (node: FileTreeNode) => {
     try {
+      // 루트 레벨 항목(parentId가 null) 삭제 방지
+      if (node.parentId === null) {
+        console.warn('⚠️ 루트 레벨 항목 삭제 시도 - 삭제 불가');
+        window.alert('최상위 프로젝트 폴더는 삭제할 수 없습니다.');
+        return;
+      }
+
       const confirmed = window.confirm(
         `"${node.fileName}"을(를) 삭제하시겠습니까?${
           node.fileType === 'FOLDER' ? '\n폴더와 하위 모든 파일이 삭제됩니다.' : ''
@@ -141,47 +155,118 @@ export const useFileTreeOperations = ({
 
   const moveItem = async (sourceNode: FileTreeNode, targetNode: FileTreeNode) => {
     try {
+      console.log('🔄 파일 이동 시작:', {
+        source: {
+          id: sourceNode.fileId,
+          name: sourceNode.fileName,
+          path: sourceNode.path,
+          currentParentId: sourceNode.parentId,
+        },
+        target: {
+          id: targetNode.fileId,
+          name: targetNode.fileName,
+          path: targetNode.path,
+          type: targetNode.fileType,
+        },
+      });
+
       // 타겟이 폴더인 경우 해당 폴더로 이동, 아니면 같은 레벨로 이동
-      const newParentId =
-        targetNode.fileType === 'FOLDER' ? targetNode.fileId : targetNode.parentId;
+      let newParentId: number | null;
+
+      if (targetNode.fileType === 'FOLDER') {
+        // 폴더 안으로 이동
+        newParentId = targetNode.fileId;
+        console.log(`📁 폴더 "${targetNode.fileName}" 안으로 이동`);
+      } else {
+        // 파일과 같은 레벨로 이동 (파일의 부모와 같은 레벨)
+        newParentId = targetNode.parentId;
+        console.log(
+          `📄 파일 "${targetNode.fileName}"와 같은 레벨로 이동 (parentId: ${targetNode.parentId})`
+        );
+      }
+
+      // 루트(null)로 이동하려는 경우 방지
+      if (newParentId === null) {
+        console.error('❌ 루트로 이동 불가 - 최상단 프로젝트 폴더 안에서만 이동 가능');
+        throw new Error('파일을 루트로 이동할 수 없습니다. 폴더 안으로만 이동 가능합니다.');
+      }
+
+      // 같은 위치로 이동하려는 경우 체크
+      if (sourceNode.parentId === newParentId) {
+        console.log('⚠️ 같은 위치로 이동하려고 시도 - 이동 취소');
+        console.log({
+          currentParentId: sourceNode.parentId,
+          targetParentId: newParentId,
+          message: '이미 해당 위치에 있습니다',
+        });
+        return; // 이동하지 않고 종료
+      }
+
+      console.log('🎯 최종 이동 대상:', {
+        sourceFileId: sourceNode.fileId,
+        currentParentId: sourceNode.parentId,
+        newParentId,
+        isValidMove: sourceNode.parentId !== newParentId,
+      });
 
       await moveMutation.mutateAsync({
         fileId: sourceNode.fileId,
-        data: { newParentId: newParentId || 0 }, // null인 경우 루트로 이동
+        data: { newParentId },
       });
 
+      console.log('✅ 파일 이동 완료');
       onSuccess?.();
     } catch (error) {
-      console.error('파일 이동 실패:', error);
+      console.error('❌ 파일 이동 실패:', error);
       throw error;
     }
   };
 
-  // 클립보드 작업 함수들
-  const copyNode = (node: FileTreeNode) => {
-    clipboardRef.current = { node, operation: 'copy' };
-  };
-
-  const cutNode = (node: FileTreeNode) => {
-    clipboardRef.current = { node, operation: 'cut' };
-  };
-
-  const pasteNode = async (targetNode?: FileTreeNode) => {
-    if (!clipboardRef.current) return;
-
-    const { node: sourceNode, operation } = clipboardRef.current;
-
+  // 파일 업로드 함수 (외부 드래그앤드롭용)
+  const uploadFiles = async (files: File[], targetPath: string) => {
     try {
-      if (operation === 'cut') {
-        // 잘라내기: 이동 작업
-        await moveItem(sourceNode, targetNode || sourceNode);
-        clipboardRef.current = null; // 잘라내기 후 클립보드 비우기
-      } else {
-        // 복사: 새로운 파일 생성 (TODO: 실제 복사 API 구현 필요)
-        console.log('복사 기능은 아직 구현되지 않았습니다.');
+      console.log(`📤 파일 업로드 시작:`, {
+        files: files.map(f => f.name),
+        targetPath: targetPath || '(루트)',
+        repositoryId,
+      });
+
+      // 루트에 업로드하려는 경우 방지
+      if (!targetPath) {
+        throw new Error('루트에는 파일을 업로드할 수 없습니다. 폴더 안으로 드래그해주세요.');
       }
+
+      // 현재 제한사항 알림
+      const fileNames = files.map(f => f.name).join(', ');
+      const proceed = window.confirm(
+        `현재 파일 내용 업로드는 지원되지 않습니다.\n` +
+          `빈 파일로 생성됩니다: ${fileNames}\n\n` +
+          `계속하시겠습니까?`
+      );
+
+      if (!proceed) {
+        console.log('❌ 사용자가 업로드를 취소했습니다');
+        return;
+      }
+
+      // 여러 파일을 순차적으로 업로드
+      for (const file of files) {
+        await uploadMutation.mutateAsync({
+          file,
+          parentPath: targetPath,
+        });
+      }
+
+      console.log(`✅ 파일 생성 완료: ${files.length}개 파일 (빈 파일)`);
+      onSuccess?.();
     } catch (error) {
-      console.error('붙여넣기 실패:', error);
+      console.error('❌ 파일 업로드 실패:', error);
+
+      // 사용자에게 에러 알림
+      window.alert(
+        `파일 생성에 실패했습니다.\n${error instanceof Error ? error.message : '알 수 없는 오류'}`
+      );
+
       throw error;
     }
   };
@@ -204,17 +289,13 @@ export const useFileTreeOperations = ({
     renameItem,
     deleteItem,
     moveItem,
-
-    // 클립보드 작업
-    canPaste: !!clipboardRef.current,
-    copyNode,
-    cutNode,
-    pasteNode,
+    uploadFiles,
 
     // 로딩 상태
     isCreating: createMutation.isPending,
     isRenaming: renameMutation.isPending,
     isDeleting: deleteMutation.isPending,
     isMoving: moveMutation.isPending,
+    isUploading: uploadMutation.isPending,
   };
 };
