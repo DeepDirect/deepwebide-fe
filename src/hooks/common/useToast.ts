@@ -12,5 +12,7 @@ export const useToast = () => {
       showToast({ message, type: 'warning', duration, showCloseButton }),
     info: (message: string, duration?: number, showCloseButton?: boolean) =>
       showToast({ message, type: 'info', duration, showCloseButton }),
+    default: (message: string, duration?: number, showCloseButton?: boolean) =>
+      showToast({ message, type: 'default', duration, showCloseButton }),
   };
 };

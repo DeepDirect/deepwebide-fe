@@ -40,6 +40,11 @@ $animation-timing: cubic-bezier(0.16, 1, 0.3, 1);
   background: $color-bg;
   box-shadow: $toast-shadow;
 
+  &.default {
+    border-left: 4px solid $color-info;
+    background: $white-2;
+  }
+
   // 타입별 스타일
   &.success {
     background: color-mix(in srgb, $color-success 5%, white);

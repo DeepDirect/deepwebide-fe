@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-type ToastType = 'success' | 'error' | 'warning' | 'info';
+type ToastType = 'success' | 'error' | 'warning' | 'info' | 'default';
 
 type propsType = {
   message: string;
@@ -20,12 +20,12 @@ interface ToastState {
 }
 
 export const useToastStore = create<ToastState>(set => ({
-  type: 'info',
+  type: 'default',
   open: false,
   message: '',
   duration: 3000,
   showCloseButton: false,
-  showToast: ({ message, type = 'info', duration = 3000, showCloseButton = false }) => {
+  showToast: ({ message, type = 'default', duration = 7000, showCloseButton = false }) => {
     set({ open: false });
 
     setTimeout(() => {
