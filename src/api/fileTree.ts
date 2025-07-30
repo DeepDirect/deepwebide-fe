@@ -77,6 +77,49 @@ export const createFile = async (
   return response.data;
 };
 
+// TODO: 파일 업로드 (외부 드래그앤드롭용). 추후 API 생성시 수정 필요
+export const uploadFile = async (
+  repositoryId: number,
+  file: File,
+  parentPath?: string
+): Promise<FileOperationResponse> => {
+  const formData = new FormData();
+  formData.append('file', file);
+  if (parentPath) {
+    formData.append('parentPath', parentPath);
+  }
+
+  try {
+    console.log(`📤 파일 업로드 시작:`, {
+      repositoryId,
+      fileName: file.name,
+      fileSize: file.size,
+      parentPath: parentPath || '(루트)',
+      url: `api/repositories/${repositoryId}/files/upload`,
+    });
+
+    const response = await apiClient.post<FormData, FileOperationResponse>(
+      `api/repositories/${repositoryId}/files/upload`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+
+    console.log('📤 파일 업로드 성공:', {
+      status: response.status,
+      fileName: file.name,
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('❌ 파일 업로드 실패:', error);
+    throw error;
+  }
+};
+
 // 파일/폴더 이동
 export const moveFile = async (
   repositoryId: number,

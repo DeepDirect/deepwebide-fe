@@ -18,10 +18,6 @@ const FileTreeItem: React.FC<FileTreeItemProps> = ({
   onNewFolder,
   onRename,
   onDelete,
-  onCopy,
-  onCut,
-  onPaste,
-  canPaste = false,
   // 인라인 편집
   isEditing = false,
   onEditSave,
@@ -232,10 +228,6 @@ const FileTreeItem: React.FC<FileTreeItemProps> = ({
       onNewFolder={onNewFolder}
       onRename={onRename}
       onDelete={onDelete}
-      onCopy={onCopy}
-      onCut={onCut}
-      onPaste={onPaste}
-      canPaste={canPaste}
     >
       <div
         className={clsx(

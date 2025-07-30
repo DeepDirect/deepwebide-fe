@@ -10,10 +10,6 @@ interface FileTreeContextMenuProps {
   onNewFolder?: (parentNode?: FileTreeNode) => void;
   onRename?: (node: FileTreeNode) => void;
   onDelete?: (node: FileTreeNode) => void;
-  onCopy?: (node: FileTreeNode) => void;
-  onCut?: (node: FileTreeNode) => void;
-  onPaste?: (parentNode?: FileTreeNode) => void;
-  canPaste?: boolean;
 }
 
 const FileTreeContextMenu: React.FC<FileTreeContextMenuProps> = ({
@@ -23,10 +19,6 @@ const FileTreeContextMenu: React.FC<FileTreeContextMenuProps> = ({
   onNewFolder,
   onRename,
   onDelete,
-  onCopy,
-  onCut,
-  onPaste,
-  canPaste = false,
 }) => {
   const isFolder = node?.fileType === 'FOLDER';
 
@@ -69,20 +61,6 @@ const FileTreeContextMenu: React.FC<FileTreeContextMenuProps> = ({
 
               <ContextMenu.Separator className={styles.separator} />
 
-              <ContextMenu.Item className={styles.item} onClick={() => onCopy?.(node)}>
-                <span className={styles.icon}>📋</span>
-                복사
-                <span className={styles.shortcut}>Ctrl+C</span>
-              </ContextMenu.Item>
-
-              <ContextMenu.Item className={styles.item} onClick={() => onCut?.(node)}>
-                <span className={styles.icon}>✂️</span>
-                잘라내기
-                <span className={styles.shortcut}>Ctrl+X</span>
-              </ContextMenu.Item>
-
-              <ContextMenu.Separator className={styles.separator} />
-
               <ContextMenu.Item
                 className={`${styles.item} ${styles.danger}`}
                 onClick={() => onDelete?.(node)}
@@ -90,18 +68,6 @@ const FileTreeContextMenu: React.FC<FileTreeContextMenuProps> = ({
                 <span className={styles.icon}>🗑️</span>
                 삭제
                 <span className={styles.shortcut}>Delete</span>
-              </ContextMenu.Item>
-            </>
-          )}
-
-          {/* 붙여넣기 - 클립보드에 데이터가 있을 때만 */}
-          {canPaste && (isFolder || !node) && (
-            <>
-              <ContextMenu.Separator className={styles.separator} />
-              <ContextMenu.Item className={styles.item} onClick={() => onPaste?.(node)}>
-                <span className={styles.icon}>📄</span>
-                붙여넣기
-                <span className={styles.shortcut}>Ctrl+V</span>
               </ContextMenu.Item>
             </>
           )}

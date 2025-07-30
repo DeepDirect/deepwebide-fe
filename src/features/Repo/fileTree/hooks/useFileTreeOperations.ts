@@ -1,9 +1,10 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import {
   useCreateFileMutation,
   useMoveFileMutation,
   useRenameFileMutation,
   useDeleteFileMutation,
+  useUploadFileMutation,
 } from './useFileTreeApi';
 import type { FileTreeNode } from '../types';
 
@@ -17,12 +18,12 @@ interface UseFileTreeOperationsResult {
   createModalOpen: boolean;
   createModalType: 'FILE' | 'FOLDER' | null;
   createModalParent: FileTreeNode | null;
-  editingNode: string | null; // string으로 변경
+  editingNode: string | null;
 
   // 모달 제어
   openCreateModal: (type: 'FILE' | 'FOLDER', parent?: FileTreeNode) => void;
   closeCreateModal: () => void;
-  startEditing: (nodeId: string) => void; // string을 받도록 변경
+  startEditing: (nodeId: string) => void;
   stopEditing: () => void;
 
   // CRUD 작업
@@ -30,18 +31,14 @@ interface UseFileTreeOperationsResult {
   renameItem: (node: FileTreeNode, newName: string) => Promise<void>;
   deleteItem: (node: FileTreeNode) => Promise<void>;
   moveItem: (sourceNode: FileTreeNode, targetNode: FileTreeNode) => Promise<void>;
-
-  // 클립보드 작업
-  canPaste: boolean;
-  copyNode: (node: FileTreeNode) => void;
-  cutNode: (node: FileTreeNode) => void;
-  pasteNode: (targetNode?: FileTreeNode) => Promise<void>;
+  uploadFiles: (files: File[], targetPath: string) => Promise<void>;
 
   // 로딩 상태
   isCreating: boolean;
   isRenaming: boolean;
   isDeleting: boolean;
   isMoving: boolean;
+  isUploading: boolean;
 }
 
 export const useFileTreeOperations = ({
@@ -52,19 +49,14 @@ export const useFileTreeOperations = ({
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [createModalType, setCreateModalType] = useState<'FILE' | 'FOLDER' | null>(null);
   const [createModalParent, setCreateModalParent] = useState<FileTreeNode | null>(null);
-  const [editingNode, setEditingNode] = useState<string | null>(null); // string으로 변경
-
-  // 클립보드 상태
-  const clipboardRef = useRef<{
-    node: FileTreeNode;
-    operation: 'copy' | 'cut';
-  } | null>(null);
+  const [editingNode, setEditingNode] = useState<string | null>(null);
 
   // API Mutations
   const createMutation = useCreateFileMutation(repositoryId);
   const renameMutation = useRenameFileMutation(repositoryId);
   const deleteMutation = useDeleteFileMutation(repositoryId);
   const moveMutation = useMoveFileMutation(repositoryId);
+  const uploadMutation = useUploadFileMutation(repositoryId);
 
   // 모달 제어 함수들
   const openCreateModal = (type: 'FILE' | 'FOLDER', parent?: FileTreeNode) => {
@@ -157,31 +149,27 @@ export const useFileTreeOperations = ({
     }
   };
 
-  // 클립보드 작업 함수들
-  const copyNode = (node: FileTreeNode) => {
-    clipboardRef.current = { node, operation: 'copy' };
-  };
-
-  const cutNode = (node: FileTreeNode) => {
-    clipboardRef.current = { node, operation: 'cut' };
-  };
-
-  const pasteNode = async (targetNode?: FileTreeNode) => {
-    if (!clipboardRef.current) return;
-
-    const { node: sourceNode, operation } = clipboardRef.current;
-
+  // 파일 업로드 함수 (외부 드래그앤드롭용)
+  const uploadFiles = async (files: File[], targetPath: string) => {
     try {
-      if (operation === 'cut') {
-        // 잘라내기: 이동 작업
-        await moveItem(sourceNode, targetNode || sourceNode);
-        clipboardRef.current = null; // 잘라내기 후 클립보드 비우기
-      } else {
-        // 복사: 새로운 파일 생성 (TODO: 실제 복사 API 구현 필요)
-        console.log('복사 기능은 아직 구현되지 않았습니다.');
+      console.log(`📤 파일 업로드 시작:`, {
+        files: files.map(f => f.name),
+        targetPath: targetPath || '(루트)',
+        repositoryId,
+      });
+
+      // 여러 파일을 순차적으로 업로드
+      for (const file of files) {
+        await uploadMutation.mutateAsync({
+          file,
+          parentPath: targetPath || undefined,
+        });
       }
+
+      console.log(`✅ 파일 업로드 완료: ${files.length}개 파일`);
+      onSuccess?.();
     } catch (error) {
-      console.error('붙여넣기 실패:', error);
+      console.error('❌ 파일 업로드 실패:', error);
       throw error;
     }
   };
@@ -204,17 +192,13 @@ export const useFileTreeOperations = ({
     renameItem,
     deleteItem,
     moveItem,
-
-    // 클립보드 작업
-    canPaste: !!clipboardRef.current,
-    copyNode,
-    cutNode,
-    pasteNode,
+    uploadFiles,
 
     // 로딩 상태
     isCreating: createMutation.isPending,
     isRenaming: renameMutation.isPending,
     isDeleting: deleteMutation.isPending,
     isMoving: moveMutation.isPending,
+    isUploading: uploadMutation.isPending,
   };
 };

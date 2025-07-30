@@ -49,18 +49,14 @@ const FileTree: React.FC<FileTreeProps> = ({ repoId, repositoryId, className = '
     renameItem,
     deleteItem,
     moveItem,
-
-    // 클립보드 작업
-    canPaste,
-    copyNode,
-    cutNode,
-    pasteNode,
+    uploadFiles,
 
     // 로딩 상태
     isCreating,
     isRenaming,
     isDeleting,
     isMoving,
+    isUploading,
   } = useFileTreeOperations({
     repositoryId,
     onSuccess: refetch,
@@ -82,28 +78,6 @@ const FileTree: React.FC<FileTreeProps> = ({ repoId, repositoryId, className = '
     onMoveNode: moveItem,
   });
 
-  // 파일 업로드 핸들러
-  const handleFileUpload = async (files: File[], targetPath: string): Promise<void> => {
-    try {
-      console.log(`📤 파일 업로드 시작:`, {
-        files: files.map(f => f.name),
-        targetPath: targetPath || '(루트)',
-        repositoryId,
-      });
-
-      // TODO: 실제 파일 업로드 연결 필요. 생성 API 사용하면 될 듯
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // 업로드 성공 후 데이터 새로고침
-      refetch();
-
-      console.log(`✅ 파일 업로드 완료: ${files.length}개 파일`);
-    } catch (error) {
-      console.error('❌ 파일 업로드 실패:', error);
-      throw error;
-    }
-  };
-
   // 외부 파일 드롭 훅
   const {
     externalDropState,
@@ -116,7 +90,7 @@ const FileTree: React.FC<FileTreeProps> = ({ repoId, repositoryId, className = '
     handleNodeExternalDrop,
     isExternalDragOver,
   } = useFileTreeExternalDrop({
-    onFileUpload: handleFileUpload,
+    onFileUpload: uploadFiles, // 실제 API 업로드 함수 연결
   });
 
   // 전역 드래그 이벤트 방지 (파일 자동 열림 완전 차단)
@@ -219,10 +193,6 @@ const FileTree: React.FC<FileTreeProps> = ({ repoId, repositoryId, className = '
             onNewFolder={() => openCreateModal('FOLDER', node)}
             onRename={() => startEditing(node.fileId.toString())}
             onDelete={() => deleteItem(node)}
-            onCopy={() => copyNode(node)}
-            onCut={() => cutNode(node)}
-            onPaste={() => pasteNode(node)}
-            canPaste={canPaste}
             // 내부 드래그앤드롭
             isDragging={isDragging(node.fileId.toString())}
             isDropTarget={isDropTarget(node.fileId.toString())}
@@ -281,8 +251,6 @@ const FileTree: React.FC<FileTreeProps> = ({ repoId, repositoryId, className = '
       <FileTreeContextMenu
         onNewFile={() => openCreateModal('FILE')}
         onNewFolder={() => openCreateModal('FOLDER')}
-        onPaste={() => pasteNode()}
-        canPaste={canPaste}
       >
         <div className={clsx(styles.fileTree, className)}>
           <div className={styles.emptyContainer}>
@@ -301,14 +269,12 @@ const FileTree: React.FC<FileTreeProps> = ({ repoId, repositoryId, className = '
       <FileTreeContextMenu
         onNewFile={() => openCreateModal('FILE')}
         onNewFolder={() => openCreateModal('FOLDER')}
-        onPaste={() => pasteNode()}
-        canPaste={canPaste}
       >
         <div
           className={clsx(styles.fileTree, className, {
             [styles.dragging]: dragDropState.isDragging,
             [styles.externalDragOver]: externalDropState.isDragOver,
-            [styles.loading]: isCreating || isRenaming || isDeleting || isMoving,
+            [styles.loading]: isCreating || isRenaming || isDeleting || isMoving || isUploading,
           })}
           data-file-tree-container
           onDragEnter={handleCombinedDragEnter}
@@ -333,7 +299,7 @@ const FileTree: React.FC<FileTreeProps> = ({ repoId, repositoryId, className = '
           )}
 
           {/* 로딩 인디케이터 */}
-          {(isCreating || isRenaming || isDeleting || isMoving) && (
+          {(isCreating || isRenaming || isDeleting || isMoving || isUploading) && (
             <div className={styles.operationIndicator}>
               <div className={styles.loadingSpinner} />
               <span>
@@ -341,6 +307,7 @@ const FileTree: React.FC<FileTreeProps> = ({ repoId, repositoryId, className = '
                 {isRenaming && '이름 변경 중...'}
                 {isDeleting && '삭제 중...'}
                 {isMoving && '이동 중...'}
+                {isUploading && '업로드 중...'}
               </span>
             </div>
           )}
