@@ -5,6 +5,7 @@ import FileIcon from '@/assets/icons/file.svg?react';
 
 import useCreateRepository from '@/hooks/main/useCreateRepository';
 import useGetRepository from '@/hooks/main/useGetRepository';
+import { useToast } from '@/hooks/common/useToast';
 import useRepositoryFavorite from '@/hooks/main/useRepositoryFavorite';
 
 import Button from '@/components/atoms/Button/Button';
@@ -28,6 +29,7 @@ const postRepoURL: CreateRepoURL = '/api/repositories';
 
 const PrivateRepoPage = () => {
   const navigate = useNavigate();
+  const toast = useToast();
   const [pagination, setPagination] = useState<Page>({
     maxVisiblePages: 5,
     page: null, // 1부터 시작
@@ -66,7 +68,7 @@ const PrivateRepoPage = () => {
   // 실패
   useEffect(() => {
     if (isError && error) {
-      console.error(error);
+      toast.error('리스트를 불러오는데 실패했습니다.');
     }
   }, [isError, error]);
 
@@ -80,11 +82,11 @@ const PrivateRepoPage = () => {
   const handleFavoriteClick = (id: number) => {
     // TODO: 토스트 추가
     updateFavorite(id, {
-      onSuccess: data => {
+      onSuccess: () => {
         setRepositories(
           prev =>
             prev?.map(repo =>
-              repo.repositoryId === id ? { ...repo, isFavorite: data.data.isFavorite } : repo
+              repo.repositoryId === id ? { ...repo, isFavorite: !repo.isFavorite } : repo
             ) ?? null
         );
         repositoryRefetch();
@@ -119,6 +121,7 @@ const PrivateRepoPage = () => {
 
     createMutation.mutate(data, {
       onSuccess: () => {
+        toast.success('새 레포지토리가 생성되었습니다.');
         repositoryRefetch();
       },
       onError: error => {
