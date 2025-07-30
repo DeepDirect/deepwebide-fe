@@ -4,6 +4,7 @@ import { useTabStoreHydrated } from '@/hooks/repo/useTabStore.ts';
 import { useFileSectionStore } from '@/stores/fileSectionStore';
 import { useResizer } from '@/hooks/common/useResizer';
 import { useFileContentLoader } from '@/hooks/repo/useFileContentLoader';
+import { useRepositoryInfo } from '@/hooks/repo/useRepositoryInfo'; // 추가
 import Loading from '@/components/molecules/Loading/Loading';
 import styles from './RepoPage.module.scss';
 import TabBar from '@/components/organisms/TabBar/TabBar';
@@ -36,11 +37,20 @@ export function RepoPage() {
   // repoId를 숫자로 변환 (FileTree 컴포넌트에서 필요)
   const repositoryId = repoId ? parseInt(repoId, 10) : 0;
 
+  // 저장소 정보 조회 - 추가된 부분
+  const { data: repositoryInfo } = useRepositoryInfo({
+    repositoryId: repoId || '',
+    enabled: hasHydrated && !!repoId,
+  });
+
+  // 협업 모드 자동 설정 - 추가된 부분
+  const enableCollaboration = Boolean(repositoryInfo?.isShared);
+
   // 파일 내용 자동 로드 훅 (하이드레이션 완료 후에만)
   useFileContentLoader({
     repositoryId,
     repoId: repoId || '',
-    enabled: hasHydrated, // 하이드레이션 완료 후에만 동작
+    enabled: hasHydrated,
   });
 
   // 레포 변경 감지 및 다른 레포 탭 정리
@@ -139,7 +149,7 @@ export function RepoPage() {
           <div className={styles.editorContainer}>
             <MonacoCollaborativeEditor
               repoId={repoId}
-              enableCollaboration={true}
+              enableCollaboration={enableCollaboration} // 자동 설정으로 변경
               userId="current-user-id"
               userName="사용자명"
             />

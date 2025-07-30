@@ -197,6 +197,8 @@ export const useYjsCollaboration = ({
         throw new Error('Monaco Editor 모델을 찾을 수 없습니다.');
       }
 
+      const initialModelContent = model.getValue();
+
       // Monaco 바인딩 생성
       const editorSet = new Set([editor]);
       const binding = new MonacoBinding(
@@ -206,6 +208,23 @@ export const useYjsCollaboration = ({
         (typedProvider as any).awareness // eslint-disable-line @typescript-eslint/no-explicit-any
       ) as MonacoBindingType;
       bindingRef.current = binding;
+
+      const syncInitialContent = () => {
+        const currentYjsContent = yText.toString();
+
+        console.log('초기 내용 동기화 확인:', {
+          roomId,
+          initialContentLength: initialModelContent.length,
+          yjsContentLength: currentYjsContent.length,
+          shouldSync: currentYjsContent.length === 0 && initialModelContent.length > 0,
+        });
+
+        // Yjs 문서가 비어있고 탭에 기존 내용이 있다면 Yjs에 설정
+        if (currentYjsContent.length === 0 && initialModelContent.length > 0) {
+          console.log('탭 내용을 Yjs 문서에 초기화');
+          yText.insert(0, initialModelContent);
+        }
+      };
 
       // Provider 상태 이벤트 핸들러
       typedProvider.on('status', (event: { status: string }) => {
@@ -219,6 +238,7 @@ export const useYjsCollaboration = ({
 
           // 연결 성공 시 사용자 정보 설정
           typedProvider.awareness.setLocalStateField('user', currentUser);
+          setTimeout(syncInitialContent, 300);
         } else {
           console.log('WebSocket 연결 실패 또는 끊김');
           if (event.status === 'disconnected') {

@@ -82,7 +82,7 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
         <Editor
           height="100%"
           language={language}
-          value={enableCollaboration ? undefined : activeTab.content}
+          value={activeTab.content || ''}
           onChange={handleEditorChange}
           onMount={handleEditorDidMount}
           options={editorOptions}
