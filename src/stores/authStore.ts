@@ -10,6 +10,17 @@ export interface UserInfo {
   profileImageUrl: string;
 }
 
+export interface SignInUser {
+  accessToken: string;
+  user: {
+    id: number;
+    username: string;
+    email: string;
+    nickname: string;
+    profileImageUrl: string;
+  };
+}
+
 // 로컬스토리지에서 사용자 정보 가져오기
 const getUserFromStorage = (): UserInfo | null => {
   try {
@@ -38,6 +49,7 @@ interface AuthState {
   // 상태 업데이트 메서드 (개별 훅에서 호출)
   setLoggedIn: (user: UserInfo, accessToken: string) => void;
   setLoggedOut: () => void;
+  setAuthSocialLogin: (data: SignInUser) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -51,6 +63,15 @@ export const useAuthStore = create<AuthState>()(
       getUserInfo: () => {
         const state = get();
         return state.user || getUserFromStorage();
+      },
+
+      // 소셜 로그인
+      setAuthSocialLogin: (data: SignInUser) => {
+        const { accessToken, user } = data;
+        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('user', JSON.stringify(user));
+
+        set({ isLoggedIn: true, user: user });
       },
 
       // 로그인 상태로 설정 (개별 훅에서 호출)
