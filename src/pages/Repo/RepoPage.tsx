@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react';
 import { useTabStore } from '@/stores/tabStore';
 import { useFileSectionStore } from '@/stores/fileSectionStore';
 import { useResizer } from '@/hooks/common/useResizer';
+import { useFileContentLoader } from '@/hooks/repo/useFileContentLoader';
 import styles from './RepoPage.module.scss';
 import TabBar from '@/components/organisms/TabBar/TabBar';
 import MonacoCollaborativeEditor from '@/components/organisms/CodeEditor/MonacoCollaborativeEditor';
@@ -31,6 +32,15 @@ export function RepoPage() {
     containerRef,
   });
 
+  // repoId를 숫자로 변환 (FileTree 컴포넌트에서 필요)
+  const repositoryId = repoId ? parseInt(repoId, 10) : 0;
+
+  // 파일 내용 자동 로드 훅
+  useFileContentLoader({
+    repositoryId,
+    repoId: repoId || '',
+  });
+
   // 키보드 단축키 추가 (Ctrl+B로 파일 섹션 토글)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -44,6 +54,7 @@ export function RepoPage() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [toggleVisibility]);
 
+  // URL 파일 경로 변경 처리
   useEffect(() => {
     if (filePath && repoId) {
       // 현재 열린 탭 중에서 해당 경로의 탭 찾기
@@ -53,7 +64,7 @@ export function RepoPage() {
         console.log('URL에서 기존 탭 활성화:', existingTab.name);
         activateTab(existingTab.id);
       }
-      // 존재하지 않는 파일이면 새로 열지 않고 무시
+      // 존재하지 않는 파일이면 파일트리에서 클릭했을 때 처리됨
     } else if (!filePath) {
       // URL에 파일 경로가 없으면 첫 번째 탭을 활성화
       const firstTab = openTabs[0];
@@ -63,9 +74,6 @@ export function RepoPage() {
       }
     }
   }, [filePath, repoId, openTabs, activateTab]);
-
-  // repoId를 숫자로 변환 (FileTree 컴포넌트에서 필요)
-  const repositoryId = repoId ? parseInt(repoId, 10) : 0;
 
   // 유효하지 않은 repoId 처리
   if (!repoId || isNaN(repositoryId)) {

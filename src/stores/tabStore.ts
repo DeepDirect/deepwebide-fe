@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import type { OpenTab } from '@/types/repo/repo.types';
-import { repoMockData } from '@/mocks/repoMockData';
 
 interface TabStore {
   openTabs: OpenTab[];
@@ -8,8 +7,11 @@ interface TabStore {
   addTab: (tab: OpenTab) => void;
   closeTab: (id: string) => void;
   activateTab: (id: string) => void;
-  openFileByPath: (repoId: string, filePath: string) => void;
+  openFileByPath: (repoId: string, filePath: string, fileName?: string) => void;
+  setTabContent: (tabId: string, content: string) => void;
+  setTabDirty: (tabId: string, isDirty: boolean) => void;
 }
+
 export const useTabStore = create<TabStore>((set, get) => ({
   openTabs: [],
 
@@ -57,7 +59,7 @@ export const useTabStore = create<TabStore>((set, get) => ({
     });
   },
 
-  openFileByPath: (repoId, filePath) => {
+  openFileByPath: (repoId, filePath, fileName) => {
     const state = get();
     const tabId = `${repoId}/${filePath}`;
 
@@ -72,25 +74,36 @@ export const useTabStore = create<TabStore>((set, get) => ({
         })),
       });
     } else {
-      // 새 탭 생성
-      const fileName = filePath.includes('/') ? filePath.split('/').pop() || 'untitled' : filePath;
-
-      const content =
-        (repoMockData.fileContents as Record<string, string>)[filePath] ||
-        `// ${filePath}\n// 파일 내용이 여기에 표시됩니다.`;
+      // 새 탭 생성 (파일 내용은 나중에 API로 가져옴)
+      const finalFileName =
+        fileName || (filePath.includes('/') ? filePath.split('/').pop() || 'untitled' : filePath);
 
       const newTab: OpenTab = {
         id: tabId,
-        name: fileName,
+        name: finalFileName,
         path: filePath,
         isActive: true,
         isDirty: false,
-        content,
+        content: '', // 초기에는 빈 문자열, API로 나중에 가져옴
       };
 
       set({
         openTabs: [...state.openTabs.map(t => ({ ...t, isActive: false })), newTab],
       });
     }
+  },
+
+  setTabContent: (tabId, content) => {
+    const state = get();
+    set({
+      openTabs: state.openTabs.map(tab => (tab.id === tabId ? { ...tab, content } : tab)),
+    });
+  },
+
+  setTabDirty: (tabId, isDirty) => {
+    const state = get();
+    set({
+      openTabs: state.openTabs.map(tab => (tab.id === tabId ? { ...tab, isDirty } : tab)),
+    });
   },
 }));

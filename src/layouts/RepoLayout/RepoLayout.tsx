@@ -7,13 +7,11 @@ import RepoHeader from '@/components/organisms/Header/RepoHeader/RepoHeader';
 import { Sidebar } from '@/components/organisms/Sidebar/RepoSidebar/RepoSidebar';
 import { useThemeStore } from '@/stores/themeStore';
 import { useFileSectionStore } from '@/stores/fileSectionStore';
-import { useMockRepoInitializer } from '@/hooks/common/useMockRepoInitializer';
 import Chat from '@/features/Chat/Chat';
 
 export function RepoLayout() {
   const [isChatOpen, setIsChatOpen] = useState(false);
 
-  useMockRepoInitializer();
   const { isDarkMode, enableRepoTheme, disableRepoTheme } = useThemeStore();
   const { isVisible: isFileSectionVisible } = useFileSectionStore();
 
