@@ -101,7 +101,7 @@ export interface CreateFileRequest {
 }
 
 export interface MoveFileRequest {
-  newParentId: number;
+  newParentId: number | null; // 루트 이동용
 }
 
 export interface RenameFileRequest {
