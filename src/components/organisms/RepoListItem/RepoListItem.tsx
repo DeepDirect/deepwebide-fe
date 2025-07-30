@@ -77,7 +77,9 @@ const RepoListItem: React.FC<RepositoryProps> = ({
   const {
     mutate: renameRepository,
     // isLoading: isRenaming,
-  } = useRepositoryRename(`/api/repositories/${info.repositoryId}`);
+  } = useRepositoryRename(`/api/repositories/${info.repositoryId}`, {
+    enabled: pageType !== MainPageType.SHARED_WITH_ME,
+  });
   const {
     mutate: shareRepositoryStatus,
     // isLoading: isRenaming,
@@ -90,6 +92,7 @@ const RepoListItem: React.FC<RepositoryProps> = ({
     onError: err => {
       console.error('공유 상태 변경 실패:', err);
     },
+    enabled: pageType !== MainPageType.SHARED_WITH_ME,
   });
   const {
     mutate: deleteRepository,
@@ -103,6 +106,7 @@ const RepoListItem: React.FC<RepositoryProps> = ({
     onError: error => {
       console.error('삭제 실패', error);
     },
+    enabled: pageType === MainPageType.PRIVATE_REPO,
   });
   const {
     mutate: repositoryExit,
@@ -115,12 +119,15 @@ const RepoListItem: React.FC<RepositoryProps> = ({
     onError: error => {
       console.error('나가기 실패', error);
     },
+    enabled: pageType === MainPageType.SHARED_WITH_ME,
   });
   const {
     data: entryCodeRes,
     isError: isEntryCodeError,
     error: entryCodeError,
-  } = useGetRepositoryEntrycode(`/api/repositories/${info.repositoryId}/entrycode`);
+  } = useGetRepositoryEntrycode(`/api/repositories/${info.repositoryId}/entrycode`, {
+    enabled: pageType === MainPageType.SHARED_BY_ME,
+  });
 
   useEffect(() => {
     if (isEntryCodeError) {
