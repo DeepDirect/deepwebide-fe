@@ -74,10 +74,6 @@ export interface FileTreeItemProps {
   onNewFolder?: (parentNode?: FileTreeNode) => void;
   onRename?: (node: FileTreeNode) => void;
   onDelete?: (node: FileTreeNode) => void;
-  onCopy?: (node: FileTreeNode) => void;
-  onCut?: (node: FileTreeNode) => void;
-  onPaste?: (parentNode?: FileTreeNode) => void;
-  canPaste?: boolean;
 
   // 내부 드래그앤드롭 props
   isDragging?: boolean;
