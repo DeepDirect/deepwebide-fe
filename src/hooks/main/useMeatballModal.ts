@@ -1,12 +1,6 @@
 import { useState, useRef } from 'react';
 import MainPageType from '@/constants/enums/MainPageType.enum';
-
-interface Position {
-  top?: number;
-  bottom?: number;
-  right?: number;
-  left?: number;
-}
+import type { Position } from '@/types/main/position.types';
 
 const MODAL_OFFSETS = {
   [MainPageType.PRIVATE_REPO]: -165,

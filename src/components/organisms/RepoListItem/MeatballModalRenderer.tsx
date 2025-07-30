@@ -3,12 +3,13 @@ import MainPageType from '@/constants/enums/MainPageType.enum';
 import PrivateRepoMeatballModal from '@/features/Modals/PrivateRepoMeatballModal/PrivateRepoMeatballModal';
 import SharedByMeRepoMeatballModal from '@/features/Modals/SharedByMeRepoMeatballModal/SharedByMeRepoMeatballModal';
 import SharedWithMeRepoMeatballModal from '@/features/Modals/SharedWithMeRepoMeatballModal/SharedWithMeRepoMeatballModal';
+import type { Position } from '@/types/main/position.types';
 
 interface MeatballModalRendererProps {
   pageType: MainPageType;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  position: Record<string, number>;
+  position: Position;
   shareLink: string;
   entryCode?: string;
   onShare: () => void;
