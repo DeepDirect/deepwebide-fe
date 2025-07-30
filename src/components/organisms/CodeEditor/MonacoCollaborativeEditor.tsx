@@ -86,6 +86,7 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
           onChange={handleEditorChange}
           onMount={handleEditorDidMount}
           options={editorOptions}
+          theme={isDarkMode ? 'vs-dark' : 'vs'}
           loading={
             <div className={styles.editorLoading}>
               <div className={styles.loadingSpinner} />
