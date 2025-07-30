@@ -3,6 +3,7 @@ import { useNavigate } from '@tanstack/react-router';
 
 import useGetRepository from '@/hooks/main/useGetRepository';
 import useRepositoryFavorite from '@/hooks/main/useRepositoryFavorite';
+import { useToast } from '@/hooks/common/useToast';
 
 import Toggle from '@/components/atoms/Toggle/Toggle';
 import Pagination from '@/components/molecules/Pagination/Pagination';
@@ -20,6 +21,7 @@ const getRepoURL: RepositoryQueryURL = '/api/repositories/shared';
 
 const SharedByMeRepoPage = () => {
   const navigate = useNavigate();
+  const toast = useToast();
   const [pagination, setPagination] = useState<Page>({
     maxVisiblePages: 5,
     page: null, // 1부터 시작
@@ -60,19 +62,18 @@ const SharedByMeRepoPage = () => {
 
   // 레포 좋아요
   const handleFavoriteClick = (id: number) => {
-    // TODO: 토스트 추가
     updateFavorite(id, {
-      onSuccess: data => {
+      onSuccess: () => {
         setRepositories(
           prev =>
             prev?.map(repo =>
-              repo.repositoryId === id ? { ...repo, isFavorite: data.data.isFavorite } : repo
+              repo.repositoryId === id ? { ...repo, isFavorite: !repo.isFavorite } : repo
             ) ?? null
         );
         repositoryRefetch();
       },
       onError: error => {
-        console.error('즐겨찾기 실패:', error.message);
+        toast.error(error.message);
       },
     });
   };
