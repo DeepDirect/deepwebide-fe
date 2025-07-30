@@ -49,6 +49,7 @@ interface AuthState {
   // 상태 업데이트 메서드 (개별 훅에서 호출)
   setLoggedIn: (user: UserInfo, accessToken: string) => void;
   setLoggedOut: () => void;
+  setAuthSocialLogin: (data: SignInUser) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
