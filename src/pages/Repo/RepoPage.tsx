@@ -1,6 +1,6 @@
 import { useParams, useSearch } from '@tanstack/react-router';
 import { useEffect, useRef } from 'react';
-import { useTabStoreHydrated } from '@/stores/tabStore';
+import { useTabStoreHydrated } from '@/hooks/repo/useTabStore.ts';
 import { useFileSectionStore } from '@/stores/fileSectionStore';
 import { useResizer } from '@/hooks/common/useResizer';
 import { useFileContentLoader } from '@/hooks/repo/useFileContentLoader';

@@ -1,32 +1,21 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { OpenTab } from '@/types/repo/repo.types';
-
-interface TabStore {
-  openTabs: OpenTab[];
-  _hasHydrated: boolean;
-  setOpenTabs: (tabs: OpenTab[]) => void;
-  addTab: (tab: OpenTab) => void;
-  closeTab: (id: string) => void;
-  activateTab: (id: string) => void;
-  openFileByPath: (repoId: string, filePath: string, fileName?: string) => void;
-  setTabContent: (tabId: string, content: string) => void;
-  setTabDirty: (tabId: string, isDirty: boolean) => void;
-  clearTabsForRepo: (repoId: string) => void;
-  keepOnlyCurrentRepoTabs: (repoId: string) => void;
-  setHasHydrated: (hasHydrated: boolean) => void;
-}
+import type { TabStore } from '@/types/repo/tabStore.types';
 
 export const useTabStore = create<TabStore>()(
   persist(
     (set, get) => ({
+      // 초기 상태
       openTabs: [],
       _hasHydrated: false,
 
+      // 하이드레이션
       setHasHydrated: (hasHydrated: boolean) => {
         set({ _hasHydrated: hasHydrated });
       },
 
+      // 기본 탭 관리
       setOpenTabs: (tabs: OpenTab[]) => {
         set({ openTabs: tabs });
       },
@@ -73,14 +62,13 @@ export const useTabStore = create<TabStore>()(
         });
       },
 
+      // 파일 관련
       openFileByPath: (repoId: string, filePath: string, fileName?: string) => {
         const state = get();
         const tabId = `${repoId}/${filePath}`;
-
         const existingTab = state.openTabs.find(tab => tab.id === tabId);
 
         if (existingTab) {
-          // 이미 있는 탭이면 활성화만
           set({
             openTabs: state.openTabs.map(tab => ({
               ...tab,
@@ -88,7 +76,6 @@ export const useTabStore = create<TabStore>()(
             })),
           });
         } else {
-          // 새 탭 생성 (파일 내용은 나중에 API로 가져옴)
           const finalFileName =
             fileName ||
             (filePath.includes('/') ? filePath.split('/').pop() || 'untitled' : filePath);
@@ -99,7 +86,7 @@ export const useTabStore = create<TabStore>()(
             path: filePath,
             isActive: true,
             isDirty: false,
-            content: '', // 초기에는 빈 문자열, API로 나중에 가져옴
+            content: '',
           };
 
           set({
@@ -122,6 +109,7 @@ export const useTabStore = create<TabStore>()(
         });
       },
 
+      // 레포지토리 관련
       clearTabsForRepo: (repoId: string) => {
         const state = get();
         const filteredTabs = state.openTabs.filter(tab => !tab.id.startsWith(`${repoId}/`));
@@ -133,7 +121,6 @@ export const useTabStore = create<TabStore>()(
         const currentRepoTabs = state.openTabs.filter(tab => tab.id.startsWith(`${repoId}/`));
 
         if (currentRepoTabs.length !== state.openTabs.length) {
-          // 활성 탭이 정리되었다면 현재 레포의 첫 번째 탭을 활성화
           if (currentRepoTabs.length > 0 && !currentRepoTabs.some(tab => tab.isActive)) {
             currentRepoTabs[0].isActive = true;
           }
@@ -155,12 +142,10 @@ export const useTabStore = create<TabStore>()(
         } else if (state) {
           console.log('탭 상태 복원 완료:', state.openTabs.length, '개 탭');
 
-          // 복원된 탭 중 활성 탭이 없으면 첫 번째를 활성화
           if (state.openTabs.length > 0 && !state.openTabs.some(tab => tab.isActive)) {
             state.openTabs[0].isActive = true;
           }
 
-          // 하이드레이션 완료 표시
           state.setHasHydrated(true);
         }
       },
@@ -171,32 +156,3 @@ export const useTabStore = create<TabStore>()(
     }
   )
 );
-
-// 하이드레이션 상태를 확인하는 커스텀 훅
-export const useTabStoreHydrated = () => {
-  const hasHydrated = useTabStore(state => state._hasHydrated);
-  const openTabs = useTabStore(state => state.openTabs);
-  const setOpenTabs = useTabStore(state => state.setOpenTabs);
-  const addTab = useTabStore(state => state.addTab);
-  const closeTab = useTabStore(state => state.closeTab);
-  const activateTab = useTabStore(state => state.activateTab);
-  const openFileByPath = useTabStore(state => state.openFileByPath);
-  const setTabContent = useTabStore(state => state.setTabContent);
-  const setTabDirty = useTabStore(state => state.setTabDirty);
-  const clearTabsForRepo = useTabStore(state => state.clearTabsForRepo);
-  const keepOnlyCurrentRepoTabs = useTabStore(state => state.keepOnlyCurrentRepoTabs);
-
-  return {
-    hasHydrated,
-    openTabs,
-    setOpenTabs,
-    addTab,
-    closeTab,
-    activateTab,
-    openFileByPath,
-    setTabContent,
-    setTabDirty,
-    clearTabsForRepo,
-    keepOnlyCurrentRepoTabs,
-  };
-};
