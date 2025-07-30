@@ -1,7 +1,8 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSearch } from '@tanstack/react-router';
 import { addLevelToTree, getExpandedFoldersForPath } from '../utils';
 import { useFileTreeQuery } from './useFileTreeApi';
+import { useYjsFileTree } from '@/hooks/repo/useYjsFileTree';
 import type { FileTreeNode } from '../types';
 
 interface UseFileTreeParams {
@@ -27,78 +28,92 @@ export const useFileTree = ({ repositoryId }: UseFileTreeParams): UseFileTreeRes
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [treeData, setTreeData] = useState<FileTreeNode[]>([]);
+  const [yjsError, setYjsError] = useState<Error | null>(null);
 
-  // API에서 데이터 가져오기
-  const { data: apiResponse, isLoading, error, refetch } = useFileTreeQuery(repositoryId);
+  // API (최초 1회만 사용 + 서버 동기화 유지)
+  const {
+    data: apiResponse,
+    isLoading: isApiLoading,
+    error: apiError,
+    refetch,
+  } = useFileTreeQuery(repositoryId);
 
-  // API 데이터를 FileTreeNode 형태로 변환
-  const treeData = useMemo(() => {
-    if (!apiResponse?.data || apiResponse.status !== 200) {
-      return [];
+  // Yjs 연결
+  const { yMap, provider } = useYjsFileTree(repositoryId);
+
+  // 1. YMap -> treeData 실시간 반영
+  useEffect(() => {
+    if (!yMap) return;
+    const syncTree = () => {
+      const nodes = Array.from(yMap.values()).map(v => v as unknown as FileTreeNode);
+      setTreeData(addLevelToTree(nodes));
+    };
+    syncTree();
+    yMap.observe(syncTree);
+    return () => yMap.unobserve(syncTree);
+  }, [yMap]);
+
+  // 2. API 변경 감지 시 YMap에 반영 (YMap이 비었거나, 최신 트리와 다를 때만)
+  useEffect(() => {
+    if (!yMap || !apiResponse) return;
+    // 이미 동기화된 경우 중복 set 방지
+    const apiIds = new Set((apiResponse || []).map((node: FileTreeNode) => String(node.fileId)));
+    const yMapIds = new Set(Array.from(yMap.keys()));
+    const isDifferent =
+      apiIds.size !== yMapIds.size || Array.from(apiIds).some(id => !yMapIds.has(id));
+    if (isDifferent || yMap.size === 0) {
+      yMap.clear();
+      (apiResponse || []).forEach((node: FileTreeNode) =>
+        yMap.set(String(node.fileId), JSON.parse(JSON.stringify(node)))
+      );
     }
-    return addLevelToTree(apiResponse.data);
-  }, [apiResponse]);
+  }, [yMap, apiResponse]);
 
-  // 기본 확장 폴더들을 찾는 함수
+  // 3. 기본 확장 폴더 계산
   const getDefaultExpandedFolders = useCallback((nodes: FileTreeNode[]): Set<string> => {
     const defaultExpanded = new Set<string>();
-
-    // src 폴더를 찾아서 기본 확장에 추가
     const srcFolder = nodes.find(
       node =>
         node.fileType === 'FOLDER' &&
         (node.fileName.toLowerCase() === 'src' || node.fileName.toLowerCase() === 'source')
     );
-
     if (srcFolder) {
       defaultExpanded.add(srcFolder.fileId.toString());
     } else {
-      // src 폴더가 없으면 첫 번째 레벨의 폴더들을 최대 2개까지 확장
       const firstLevelFolders = nodes.filter(node => node.fileType === 'FOLDER').slice(0, 2);
-
       firstLevelFolders.forEach(folder => {
         defaultExpanded.add(folder.fileId.toString());
       });
     }
-
     return defaultExpanded;
   }, []);
 
-  // 트리 데이터가 처음 로드되었을 때 기본 확장 설정
+  // 4. 트리 데이터가 처음 로드되었을 때 기본 확장 설정
   useEffect(() => {
     if (treeData.length > 0 && !isInitialized) {
       const defaultExpanded = getDefaultExpandedFolders(treeData);
-
-      setExpandedFolders(prev => {
-        // 기존 확장된 폴더들과 기본 확장 폴더들을 합치되,
-        // 기본 확장이 우선되도록 함
-        const combined = new Set([...prev, ...defaultExpanded]);
-        return combined;
-      });
-
+      setExpandedFolders(prev => new Set([...prev, ...defaultExpanded]));
       setIsInitialized(true);
     }
   }, [treeData, isInitialized, getDefaultExpandedFolders]);
 
-  // URL의 파일 경로가 변경되었을 때 처리
+  // 5. URL의 파일 경로가 변경되었을 때 처리
   useEffect(() => {
     if (currentFile && treeData.length > 0) {
-      // 현재 파일 경로에 맞춰 필요한 폴더들을 확장
       const foldersToExpand = getExpandedFoldersForPath(currentFile, treeData);
-
       setExpandedFolders(prev => {
         const newExpanded = new Set(prev);
         foldersToExpand.forEach(folderId => newExpanded.add(folderId));
         return newExpanded;
       });
-
       setSelectedFile(currentFile);
     } else if (!currentFile) {
       setSelectedFile(null);
     }
   }, [currentFile, treeData]);
 
-  // 트리 데이터가 변경되면 초기화 상태 리셋
+  // 6. 트리 데이터가 변경되면 초기화 상태 리셋
   useEffect(() => {
     if (treeData.length === 0) {
       setIsInitialized(false);
@@ -107,14 +122,28 @@ export const useFileTree = ({ repositoryId }: UseFileTreeParams): UseFileTreeRes
     }
   }, [treeData.length]);
 
+  // 7. Yjs 연결 에러 핸들러 (optional)
+  useEffect(() => {
+    if (!provider) return;
+    const onStatus = (event: { status: string }) => {
+      if (event.status !== 'connected') {
+        setYjsError(new Error('Yjs WebSocket 연결 실패'));
+      } else {
+        setYjsError(null);
+      }
+    };
+    provider.on('status', onStatus);
+    return () => provider.off('status', onStatus);
+  }, [provider]);
+
   return {
     treeData,
     expandedFolders,
     setExpandedFolders,
     selectedFile,
     setSelectedFile,
-    isLoading,
-    error,
+    isLoading: isApiLoading,
+    error: apiError || yjsError,
     refetch,
   };
 };
