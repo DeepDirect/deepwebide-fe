@@ -11,6 +11,7 @@ import type { FileTreeNode } from '../types';
 interface UseFileTreeOperationsParams {
   repositoryId: number;
   onSuccess?: () => void;
+  rootFolderId?: number;
 }
 
 interface UseFileTreeOperationsResult {
@@ -44,6 +45,7 @@ interface UseFileTreeOperationsResult {
 export const useFileTreeOperations = ({
   repositoryId,
   onSuccess,
+  rootFolderId,
 }: UseFileTreeOperationsParams): UseFileTreeOperationsResult => {
   // 모달 상태
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -84,10 +86,23 @@ export const useFileTreeOperations = ({
     if (!createModalType) return;
 
     try {
+      // parentId가 없으면 최상단 폴더 사용
+      let targetParentId = createModalParent?.fileId;
+
+      if (!targetParentId && rootFolderId) {
+        // 루트에 생성하려고 하면 최상단 폴더로 리다이렉트
+        targetParentId = rootFolderId;
+        console.log(`📂 루트 생성 → 최상단 폴더(${rootFolderId})로 리다이렉트`);
+      }
+
+      if (!targetParentId) {
+        throw new Error('파일을 생성할 폴더를 찾을 수 없습니다.');
+      }
+
       await createMutation.mutateAsync({
         fileName,
         fileType: createModalType,
-        parentId: createModalParent?.fileId,
+        parentId: targetParentId,
       });
 
       closeCreateModal();
@@ -163,6 +178,12 @@ export const useFileTreeOperations = ({
         );
       }
 
+      // 루트(null)로 이동하려는 경우 방지
+      if (newParentId === null) {
+        console.error('❌ 루트로 이동 불가 - 최상단 프로젝트 폴더 안에서만 이동 가능');
+        throw new Error('파일을 루트로 이동할 수 없습니다. 폴더 안으로만 이동 가능합니다.');
+      }
+
       // 같은 위치로 이동하려는 경우 체크
       if (sourceNode.parentId === newParentId) {
         console.log('⚠️ 같은 위치로 이동하려고 시도 - 이동 취소');
@@ -178,13 +199,12 @@ export const useFileTreeOperations = ({
         sourceFileId: sourceNode.fileId,
         currentParentId: sourceNode.parentId,
         newParentId,
-        isRootMove: newParentId === null,
         isValidMove: sourceNode.parentId !== newParentId,
       });
 
       await moveMutation.mutateAsync({
         fileId: sourceNode.fileId,
-        data: { newParentId }, // null은 루트를 의미
+        data: { newParentId },
       });
 
       console.log('✅ 파일 이동 완료');
@@ -204,6 +224,11 @@ export const useFileTreeOperations = ({
         repositoryId,
       });
 
+      // 루트에 업로드하려는 경우 방지
+      if (!targetPath) {
+        throw new Error('루트에는 파일을 업로드할 수 없습니다. 폴더 안으로 드래그해주세요.');
+      }
+
       // 현재 제한사항 알림
       const fileNames = files.map(f => f.name).join(', ');
       const proceed = window.confirm(
@@ -221,7 +246,7 @@ export const useFileTreeOperations = ({
       for (const file of files) {
         await uploadMutation.mutateAsync({
           file,
-          parentPath: targetPath || undefined,
+          parentPath: targetPath,
         });
       }
 

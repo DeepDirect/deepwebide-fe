@@ -60,6 +60,7 @@ const FileTree: React.FC<FileTreeProps> = ({ repoId, repositoryId, className = '
   } = useFileTreeOperations({
     repositoryId,
     onSuccess: refetch,
+    rootFolderId: treeData?.[0]?.fileId,
   });
 
   // 내부 드래그앤드롭 훅

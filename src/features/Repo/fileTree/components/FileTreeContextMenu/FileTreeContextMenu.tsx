@@ -46,7 +46,8 @@ const FileTreeContextMenu: React.FC<FileTreeContextMenuProps> = ({
                 <span className={styles.icon}>📁</span>새 폴더
               </ContextMenu.Item>
 
-              <ContextMenu.Separator className={styles.separator} />
+              {/* 루트가 아닐 때만 구분선 표시 */}
+              {node && <ContextMenu.Separator className={styles.separator} />}
             </>
           )}
 
