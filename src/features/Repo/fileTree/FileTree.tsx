@@ -10,6 +10,7 @@ import { useFileTreeActions } from './hooks/useFileTreeActions';
 import { useFileTreeOperations } from './hooks/useFileTreeOperations';
 import { useFileTreeDragDrop } from './hooks/useFileTreeDragDrop';
 import { useFileTreeExternalDrop } from './hooks/useFileTreeExternalDrop';
+import { useYjsFileTree } from '@/hooks/repo/useYjsFileTree';
 import styles from './FileTree.module.scss';
 import type { FileTreeProps, FileTreeNode } from './types';
 
@@ -24,6 +25,9 @@ const FileTree: React.FC<FileTreeProps> = ({ repoId, repositoryId, className = '
     error,
     refetch,
   } = useFileTree({ repositoryId });
+
+  // YJS 훅 추가
+  const { yMap } = useYjsFileTree(repositoryId);
 
   const { handleFileClick, handleFolderToggle } = useFileTreeActions({
     repoId,
@@ -94,6 +98,33 @@ const FileTree: React.FC<FileTreeProps> = ({ repoId, repositoryId, className = '
   } = useFileTreeExternalDrop({
     onFileUpload: uploadFiles, // 실제 API 업로드 함수 연결
   });
+
+  // YJS 파일트리 변경사항 실시간 동기화
+  useEffect(() => {
+    if (!yMap) return;
+
+    const handleYjsUpdate = () => {
+      // YJS에서 파일트리가 업데이트되면 React Query 캐시도 업데이트
+      const updatedFileTree = yMap.get('fileTree');
+      const lastUpdated = yMap.get('lastUpdated');
+
+      if (updatedFileTree && lastUpdated) {
+        console.log('YJS 파일트리 업데이트 감지:', updatedFileTree);
+        // React Query 데이터 갱신
+        refetch();
+      }
+    };
+
+    // YJS 변경사항 감지
+    yMap.observe(handleYjsUpdate);
+
+    // 초기 데이터 로드 시에도 확인
+    handleYjsUpdate();
+
+    return () => {
+      yMap.unobserve(handleYjsUpdate);
+    };
+  }, [yMap, refetch]);
 
   // 전역 드래그 이벤트 방지 (파일 자동 열림 완전 차단)
   useEffect(() => {
@@ -172,53 +203,67 @@ const FileTree: React.FC<FileTreeProps> = ({ repoId, repositoryId, className = '
     }
   };
 
-  // 렌더링 함수들
+  // 렌더링 함수들 (안전성 강화)
   const renderTreeNodes = (nodes: FileTreeNode[]) => {
-    return nodes.map(node => {
-      const isExpanded = expandedFolders.has(node.fileId.toString());
-      const isSelected = selectedFile === node.path;
+    // nodes 배열과 각 node의 유효성 검사
+    if (!nodes || !Array.isArray(nodes)) {
+      return null;
+    }
 
-      return (
-        <React.Fragment key={node.fileId}>
-          <FileTreeItem
-            node={node}
-            isExpanded={isExpanded}
-            isSelected={isSelected}
-            onFileClick={handleFileClick}
-            onFolderToggle={handleFolderToggle}
-            // 편집 관련
-            isEditing={editingNode === node.fileId.toString()}
-            onEditSave={(node: FileTreeNode, newName: string) => renameItem(node, newName)}
-            onEditCancel={() => stopEditing()}
-            // 컨텍스트 메뉴 액션
-            onNewFile={() => openCreateModal('FILE', node)}
-            onNewFolder={() => openCreateModal('FOLDER', node)}
-            onRename={() => startEditing(node.fileId.toString())}
-            onDelete={() => deleteItem(node)}
-            // 내부 드래그앤드롭
-            isDragging={isDragging(node.fileId.toString())}
-            isDropTarget={isDropTarget(node.fileId.toString())}
-            canDrop={canDrop(node, node)} // 함수 호출로 수정
-            onDragStart={(node, event) => handleDragStart(node, event)}
-            onDragEnd={handleDragEnd}
-            onDragOver={(node, event) => handleDragOver(node, event)}
-            onDragLeave={handleDragLeave}
-            onDrop={(node, event) => handleDrop(node, event)}
-            getDropPosition={getDropPosition}
-            // 외부 파일 드롭
-            isExternalDragOver={isExternalDragOver(node.fileId.toString())}
-            onExternalDragOver={(node, event) => handleNodeExternalDragOver(node, event)}
-            onExternalDragLeave={(node, event) => handleNodeExternalDragLeave(node, event)}
-            onExternalDrop={(node, event) => handleNodeExternalDrop(node, event)}
-          />
-          {node.children && isExpanded && (
-            <div className={styles.childrenContainer}>
-              {renderTreeNodes(node.children as FileTreeNode[])}
-            </div>
-          )}
-        </React.Fragment>
-      );
-    });
+    return nodes
+      .map(node => {
+        // node와 필수 속성들의 유효성 검사
+        if (!node || node.fileId === undefined || node.fileId === null) {
+          console.warn('Invalid node detected:', node);
+          return null;
+        }
+
+        const nodeId = node.fileId.toString();
+        const isExpanded = expandedFolders.has(nodeId);
+        const isSelected = selectedFile === node.path;
+
+        return (
+          <React.Fragment key={nodeId}>
+            <FileTreeItem
+              node={node}
+              isExpanded={isExpanded}
+              isSelected={isSelected}
+              onFileClick={handleFileClick}
+              onFolderToggle={handleFolderToggle}
+              // 편집 관련
+              isEditing={editingNode === nodeId}
+              onEditSave={(node: FileTreeNode, newName: string) => renameItem(node, newName)}
+              onEditCancel={() => stopEditing()}
+              // 컨텍스트 메뉴 액션
+              onNewFile={() => openCreateModal('FILE', node)}
+              onNewFolder={() => openCreateModal('FOLDER', node)}
+              onRename={() => startEditing(nodeId)}
+              onDelete={() => deleteItem(node)}
+              // 내부 드래그앤드롭
+              isDragging={isDragging(nodeId)}
+              isDropTarget={isDropTarget(nodeId)}
+              canDrop={canDrop(node, node)} // 함수 호출로 수정
+              onDragStart={(node, event) => handleDragStart(node, event)}
+              onDragEnd={handleDragEnd}
+              onDragOver={(node, event) => handleDragOver(node, event)}
+              onDragLeave={handleDragLeave}
+              onDrop={(node, event) => handleDrop(node, event)}
+              getDropPosition={getDropPosition}
+              // 외부 파일 드롭
+              isExternalDragOver={isExternalDragOver(nodeId)}
+              onExternalDragOver={(node, event) => handleNodeExternalDragOver(node, event)}
+              onExternalDragLeave={(node, event) => handleNodeExternalDragLeave(node, event)}
+              onExternalDrop={(node, event) => handleNodeExternalDrop(node, event)}
+            />
+            {node.children && isExpanded && Array.isArray(node.children) && (
+              <div className={styles.childrenContainer}>
+                {renderTreeNodes(node.children as FileTreeNode[])}
+              </div>
+            )}
+          </React.Fragment>
+        );
+      })
+      .filter(Boolean); // null 요소들 제거
   };
 
   // 로딩 상태
