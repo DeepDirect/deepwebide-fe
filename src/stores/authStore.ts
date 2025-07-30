@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { AuthState } from '@/types/authState.types';
 import { authApi } from '@/api/auth.api';
-import type { SignInRequest } from '@/api/auth.api';
+import type { SignInRequest, SignInUser } from '@/api/auth.api';
 
 // 앱 시작시 토큰 확인
 const checkInitialAuth = () => {
@@ -34,6 +34,14 @@ export const useAuthStore = create<AuthState>()(
           console.error('로그인 실패:', error);
           throw error;
         }
+      },
+
+      // 소셜 로그인
+      setAuthSocialLogin: (data: SignInUser) => {
+        const { accessToken, user } = data;
+        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('user', JSON.stringify(user));
+        set({ isLoggedIn: true });
       },
 
       // 로그아웃

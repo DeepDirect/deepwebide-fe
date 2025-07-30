@@ -20,6 +20,17 @@ export interface SignInResponse {
   };
 }
 
+export interface SignInUser {
+  accessToken: string;
+  user: {
+    id: number;
+    username: string;
+    email: string;
+    nickname: string;
+    profileImageUrl: string;
+  };
+}
+
 export interface SignOutResponse {
   status: number;
   message: string;
