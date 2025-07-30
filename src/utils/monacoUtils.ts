@@ -1,4 +1,4 @@
-import type { MonacoInstance } from '@/types/monaco.types';
+import type { MonacoInstance } from '@/types/repo/monaco.types';
 
 // Monaco Editor 옵션 설정
 export const getMonacoEditorOptions = (language: string, isDarkMode: boolean) => ({

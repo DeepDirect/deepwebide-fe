@@ -3,7 +3,7 @@ import type { UseMutationOptions } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
 
 import { apiClient } from '@/api/client';
-import type { KickedMemberURL } from '@/types/apiEndpoints.types';
+import type { KickedMemberURL } from '@/types/common/apiEndpoints.types';
 
 import type { ResponseDtoKickedMemberResponseType } from '@/schemas/repo.schema';
 

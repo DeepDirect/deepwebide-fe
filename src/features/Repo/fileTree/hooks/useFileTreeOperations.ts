@@ -1,260 +1,190 @@
-import { useState, useCallback } from 'react';
-import { useFileTreeClipboard } from './useFileTreeClipboard';
-import { createFileRequest, renameFileRequest, deleteFileRequest, moveFileRequest } from '../utils';
+import { useState, useRef } from 'react';
+import {
+  useCreateFileMutation,
+  useMoveFileMutation,
+  useRenameFileMutation,
+  useDeleteFileMutation,
+} from './useFileTreeApi';
 import type { FileTreeNode } from '../types';
 
-interface UseFileTreeOperationsProps {
-  repoId: string;
+interface UseFileTreeOperationsParams {
+  repositoryId: number;
+  onSuccess?: () => void;
 }
 
-interface UseFileTreeOperationsReturn {
+interface UseFileTreeOperationsResult {
   // 모달 상태
   createModalOpen: boolean;
-  createModalType: 'FILE' | 'FOLDER';
-  createModalParent: FileTreeNode | undefined;
-  editingNode: FileTreeNode | null;
+  createModalType: 'FILE' | 'FOLDER' | null;
+  createModalParent: FileTreeNode | null;
+  editingNode: string | null; // string으로 변경
 
   // 모달 제어
   openCreateModal: (type: 'FILE' | 'FOLDER', parent?: FileTreeNode) => void;
   closeCreateModal: () => void;
-  startEditing: (node: FileTreeNode) => void;
+  startEditing: (nodeId: string) => void; // string을 받도록 변경
   stopEditing: () => void;
 
   // CRUD 작업
-  createItem: (name: string, parentPath?: string) => Promise<void>;
+  createItem: (fileName: string) => Promise<void>;
   renameItem: (node: FileTreeNode, newName: string) => Promise<void>;
   deleteItem: (node: FileTreeNode) => Promise<void>;
-  moveItem: (
-    draggedNode: FileTreeNode,
-    targetNode: FileTreeNode,
-    position: 'inside' | 'before' | 'after'
-  ) => Promise<void>;
+  moveItem: (sourceNode: FileTreeNode, targetNode: FileTreeNode) => Promise<void>;
 
   // 클립보드 작업
-  clipboardItem: ReturnType<typeof useFileTreeClipboard>['clipboardItem'];
   canPaste: boolean;
   copyNode: (node: FileTreeNode) => void;
   cutNode: (node: FileTreeNode) => void;
   pasteNode: (targetNode?: FileTreeNode) => Promise<void>;
+
+  // 로딩 상태
+  isCreating: boolean;
+  isRenaming: boolean;
+  isDeleting: boolean;
+  isMoving: boolean;
 }
 
 export const useFileTreeOperations = ({
-  repoId,
-}: UseFileTreeOperationsProps): UseFileTreeOperationsReturn => {
+  repositoryId,
+  onSuccess,
+}: UseFileTreeOperationsParams): UseFileTreeOperationsResult => {
   // 모달 상태
   const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [createModalType, setCreateModalType] = useState<'FILE' | 'FOLDER'>('FILE');
-  const [createModalParent, setCreateModalParent] = useState<FileTreeNode | undefined>();
-  const [editingNode, setEditingNode] = useState<FileTreeNode | null>(null);
+  const [createModalType, setCreateModalType] = useState<'FILE' | 'FOLDER' | null>(null);
+  const [createModalParent, setCreateModalParent] = useState<FileTreeNode | null>(null);
+  const [editingNode, setEditingNode] = useState<string | null>(null); // string으로 변경
 
-  // 클립보드 붙여넣기 실제 구현
-  const handlePasteOperation = useCallback(
-    async (
-      sourceNode: FileTreeNode,
-      targetPath: string,
-      operation: 'copy' | 'cut'
-    ): Promise<void> => {
-      try {
-        console.log(`📋 ${operation === 'copy' ? '복사' : '이동'}:`, {
-          source: sourceNode.path,
-          target: targetPath,
-          repoId,
-        });
+  // 클립보드 상태
+  const clipboardRef = useRef<{
+    node: FileTreeNode;
+    operation: 'copy' | 'cut';
+  } | null>(null);
 
-        // API 요청 데이터 생성
-        const requestData = {
-          operation,
-          fileId: sourceNode.fileId,
-          targetPath,
-        };
+  // API Mutations
+  const createMutation = useCreateFileMutation(repositoryId);
+  const renameMutation = useRenameFileMutation(repositoryId);
+  const deleteMutation = useDeleteFileMutation(repositoryId);
+  const moveMutation = useMoveFileMutation(repositoryId);
 
-        console.log('📤 API 요청 데이터:', requestData);
-
-        // TODO: 실제 API 호출
-        // const response = await apiClient.post(`/api/repositories/${repoId}/files/${sourceNode.fileId}/${operation}`, requestData);
-
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        console.log(`✅ ${operation === 'copy' ? '복사' : '이동'} 완료`);
-      } catch (error) {
-        console.error(`❌ ${operation === 'copy' ? '복사' : '이동'} 실패:`, error);
-        throw error;
-      }
-    },
-    [repoId]
-  );
-
-  // 클립보드 훅
-  const {
-    clipboardItem,
-    canPaste,
-    copyNode,
-    cutNode,
-    pasteNode: clipboardPaste,
-  } = useFileTreeClipboard(handlePasteOperation);
-
-  // 모달 제어
-  const openCreateModal = useCallback((type: 'FILE' | 'FOLDER', parent?: FileTreeNode) => {
+  // 모달 제어 함수들
+  const openCreateModal = (type: 'FILE' | 'FOLDER', parent?: FileTreeNode) => {
     setCreateModalType(type);
-    setCreateModalParent(parent);
+    setCreateModalParent(parent || null);
     setCreateModalOpen(true);
-  }, []);
+  };
 
-  const closeCreateModal = useCallback(() => {
+  const closeCreateModal = () => {
     setCreateModalOpen(false);
-    setCreateModalParent(undefined);
-  }, []);
+    setCreateModalType(null);
+    setCreateModalParent(null);
+  };
 
-  const startEditing = useCallback((node: FileTreeNode) => {
-    setEditingNode(node);
-  }, []);
+  const startEditing = (nodeId: string) => {
+    setEditingNode(nodeId);
+  };
 
-  const stopEditing = useCallback(() => {
+  const stopEditing = () => {
     setEditingNode(null);
-  }, []);
+  };
 
-  // CRUD 작업들
-  const createItem = useCallback(
-    async (name: string, parentPath?: string) => {
-      try {
-        console.log(`🔨 ${createModalType} 생성:`, { name, parentPath, repoId });
+  // CRUD 작업 함수들
+  const createItem = async (fileName: string) => {
+    if (!createModalType) return;
 
-        // API 요청 데이터 생성
-        const requestData = createFileRequest(name, createModalType, createModalParent);
+    try {
+      await createMutation.mutateAsync({
+        fileName,
+        fileType: createModalType,
+        parentId: createModalParent?.fileId,
+      });
 
-        console.log('📤 API 요청 데이터:', requestData);
+      closeCreateModal();
+      onSuccess?.();
+    } catch (error) {
+      console.error('파일 생성 실패:', error);
+      throw error;
+    }
+  };
 
-        // TODO: 실제 API 호출
-        // const response = await apiClient.post(`/api/repositories/${repoId}/files`, requestData);
+  const renameItem = async (node: FileTreeNode, newName: string) => {
+    try {
+      await renameMutation.mutateAsync({
+        fileId: node.fileId,
+        data: { newFileName: newName },
+      });
 
-        // 임시로 성공 시뮬레이션
-        await new Promise(resolve => setTimeout(resolve, 500));
+      stopEditing();
+      onSuccess?.();
+    } catch (error) {
+      console.error('파일 이름 변경 실패:', error);
+      throw error;
+    }
+  };
 
-        console.log(`✅ ${createModalType} 생성 완료:`, name);
-        closeCreateModal();
-      } catch (error) {
-        console.error(`❌ ${createModalType} 생성 실패:`, error);
-        throw error;
+  const deleteItem = async (node: FileTreeNode) => {
+    try {
+      const confirmed = window.confirm(
+        `"${node.fileName}"을(를) 삭제하시겠습니까?${
+          node.fileType === 'FOLDER' ? '\n폴더와 하위 모든 파일이 삭제됩니다.' : ''
+        }`
+      );
+
+      if (!confirmed) return;
+
+      await deleteMutation.mutateAsync(node.fileId);
+      onSuccess?.();
+    } catch (error) {
+      console.error('파일 삭제 실패:', error);
+      throw error;
+    }
+  };
+
+  const moveItem = async (sourceNode: FileTreeNode, targetNode: FileTreeNode) => {
+    try {
+      // 타겟이 폴더인 경우 해당 폴더로 이동, 아니면 같은 레벨로 이동
+      const newParentId =
+        targetNode.fileType === 'FOLDER' ? targetNode.fileId : targetNode.parentId;
+
+      await moveMutation.mutateAsync({
+        fileId: sourceNode.fileId,
+        data: { newParentId: newParentId || 0 }, // null인 경우 루트로 이동
+      });
+
+      onSuccess?.();
+    } catch (error) {
+      console.error('파일 이동 실패:', error);
+      throw error;
+    }
+  };
+
+  // 클립보드 작업 함수들
+  const copyNode = (node: FileTreeNode) => {
+    clipboardRef.current = { node, operation: 'copy' };
+  };
+
+  const cutNode = (node: FileTreeNode) => {
+    clipboardRef.current = { node, operation: 'cut' };
+  };
+
+  const pasteNode = async (targetNode?: FileTreeNode) => {
+    if (!clipboardRef.current) return;
+
+    const { node: sourceNode, operation } = clipboardRef.current;
+
+    try {
+      if (operation === 'cut') {
+        // 잘라내기: 이동 작업
+        await moveItem(sourceNode, targetNode || sourceNode);
+        clipboardRef.current = null; // 잘라내기 후 클립보드 비우기
+      } else {
+        // 복사: 새로운 파일 생성 (TODO: 실제 복사 API 구현 필요)
+        console.log('복사 기능은 아직 구현되지 않았습니다.');
       }
-    },
-    [createModalType, createModalParent, repoId, closeCreateModal]
-  );
-
-  const renameItem = useCallback(
-    async (node: FileTreeNode, newName: string) => {
-      try {
-        console.log('📝 이름 변경:', { oldName: node.fileName, newName, path: node.path, repoId });
-
-        // API 요청 데이터 생성
-        const requestData = renameFileRequest(node, newName);
-
-        console.log('📤 API 요청 데이터:', requestData);
-
-        // TODO: 실제 API 호출
-        // const response = await apiClient.patch(`/api/repositories/${repoId}/files/${node.fileId}`, requestData);
-
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        console.log('✅ 이름 변경 완료:', newName);
-        stopEditing();
-      } catch (error) {
-        console.error('❌ 이름 변경 실패:', error);
-        throw error;
-      }
-    },
-    [repoId, stopEditing]
-  );
-
-  const deleteItem = useCallback(
-    async (node: FileTreeNode) => {
-      try {
-        console.log('🗑️ 삭제:', { name: node.fileName, path: node.path, repoId });
-
-        // API 요청 데이터 생성
-        const requestData = deleteFileRequest(node);
-
-        console.log('📤 API 요청 데이터:', requestData);
-
-        // TODO: 실제 API 호출
-        // const response = await apiClient.delete(`/api/repositories/${repoId}/files/${node.fileId}`);
-
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        console.log('✅ 삭제 완료:', node.fileName);
-      } catch (error) {
-        console.error('❌ 삭제 실패:', error);
-        throw error;
-      }
-    },
-    [repoId]
-  );
-
-  // 파일/폴더 이동 기능
-  const moveItem = useCallback(
-    async (
-      draggedNode: FileTreeNode,
-      targetNode: FileTreeNode,
-      position: 'inside' | 'before' | 'after'
-    ) => {
-      try {
-        console.log('📂 이동 시작:', {
-          source: draggedNode.path,
-          target: targetNode.path,
-          position,
-          repoId,
-        });
-
-        // 목적지 경로 계산
-        let destinationPath: string;
-
-        if (position === 'inside' && targetNode.fileType === 'FOLDER') {
-          // 폴더 내부로 이동
-          destinationPath = `${targetNode.path}/${draggedNode.fileName}`;
-        } else {
-          // 같은 레벨로 이동 (before/after)
-          const targetParentPath = targetNode.path.includes('/')
-            ? targetNode.path.split('/').slice(0, -1).join('/')
-            : '';
-          destinationPath = targetParentPath
-            ? `${targetParentPath}/${draggedNode.fileName}`
-            : draggedNode.fileName;
-        }
-
-        // 이미 같은 위치에 있는지 확인
-        if (draggedNode.path === destinationPath) {
-          console.log('⚠️ 같은 위치로 이동 시도, 무시됨');
-          return;
-        }
-
-        // API 요청 데이터 생성
-        const requestData = moveFileRequest(draggedNode, destinationPath);
-
-        console.log('📤 API 요청 데이터:', requestData);
-
-        // TODO: 실제 API 호출
-        // const response = await apiClient.patch(`/api/repositories/${repoId}/files/${draggedNode.fileId}/move`, requestData);
-
-        // 임시로 성공 시뮬레이션
-        await new Promise(resolve => setTimeout(resolve, 800));
-
-        console.log('✅ 이동 완료:', {
-          from: draggedNode.path,
-          to: destinationPath,
-        });
-      } catch (error) {
-        console.error('❌ 이동 실패:', error);
-        throw error;
-      }
-    },
-    [repoId]
-  );
-
-  const pasteNode = useCallback(
-    async (targetNode?: FileTreeNode) => {
-      await clipboardPaste(targetNode);
-    },
-    [clipboardPaste]
-  );
+    } catch (error) {
+      console.error('붙여넣기 실패:', error);
+      throw error;
+    }
+  };
 
   return {
     // 모달 상태
@@ -276,10 +206,15 @@ export const useFileTreeOperations = ({
     moveItem,
 
     // 클립보드 작업
-    clipboardItem,
-    canPaste,
+    canPaste: !!clipboardRef.current,
     copyNode,
     cutNode,
     pasteNode,
+
+    // 로딩 상태
+    isCreating: createMutation.isPending,
+    isRenaming: renameMutation.isPending,
+    isDeleting: deleteMutation.isPending,
+    isMoving: moveMutation.isPending,
   };
 };

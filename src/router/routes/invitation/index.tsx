@@ -1,7 +1,7 @@
 import { createRoute, redirect } from '@tanstack/react-router';
 import { rootRoute } from '@/router/root';
 import InvitationLinkPage from '@/pages/Auth/InvitationLinkPage/InvitationLinkPage';
-import type { AuthState } from '@/types/authState.types';
+import type { AuthState } from '@/types/auth/authState.types';
 
 export const invitationLinkRoute = createRoute({
   getParentRoute: () => rootRoute,

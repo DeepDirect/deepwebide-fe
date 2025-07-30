@@ -10,11 +10,11 @@ import MeatballIcon from '@/assets/icons/meatball.svg?react';
 
 import MainPageType from '@/constants/enums/MainPageType.enum';
 
-import useDeleteRepository from '@/hooks/useDeleteRepository';
-import useGetRepositoryEntrycode from '@/hooks/useGetRepositoryEntrycode';
-import useRepositoryExit from '@/hooks/useRepositoryExit';
-import useRepositoryRename from '@/hooks/useRepositoryRename';
-import useShareRepositoryStatus from '@/hooks/useShareRepositoryStatus';
+import useDeleteRepository from '@/hooks/main/useDeleteRepository';
+import useGetRepositoryEntrycode from '@/hooks/common/useGetRepositoryEntrycode';
+import useRepositoryExit from '@/hooks/common/useRepositoryExit';
+import useRepositoryRename from '@/hooks/common/useRepositoryRename';
+import useShareRepositoryStatus from '@/hooks/common/useShareRepositoryStatus';
 
 import CancelMyRepoShareAlertDialog from '@/features/AlertDialog/RepoOwner/CancelMyRepoShareAlertDialog';
 import DeleteRepoAlertDialog from '@/features/AlertDialog/common/DeleteRepoAlertDialog';

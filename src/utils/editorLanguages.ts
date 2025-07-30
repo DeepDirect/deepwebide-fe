@@ -1,4 +1,4 @@
-import type { RepoLanguageConfig } from '@/types/editor.types';
+import type { RepoLanguageConfig } from '@/types/repo/editor.types';
 
 export const SUPPORTED_LANGUAGES = {
   SPRING_BOOT: 'spring-boot',

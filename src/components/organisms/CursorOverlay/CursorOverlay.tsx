@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useCollaborationStore } from '@/stores/collaborationStore';
-import type { MonacoEditorInstance, Position, PixelPosition } from '@/types/yjs.types';
+import type { MonacoEditorInstance, Position, PixelPosition } from '@/types/repo/yjs.types';
 import styles from './CursorOverlay.module.scss';
 
 interface CursorOverlayProps {

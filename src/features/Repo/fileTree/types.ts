@@ -51,11 +51,8 @@ export type DropPosition = 'before' | 'inside' | 'after';
 
 // 컴포넌트 Props 타입
 export interface FileTreeProps {
-  data: FileTreeNode[];
-  onFileClick?: (node: FileTreeNode) => void;
-  onFolderToggle?: (node: FileTreeNode, isExpanded: boolean) => void;
-  expandedFolders?: Set<string>;
-  selectedFile?: string;
+  repoId: string;
+  repositoryId: number;
   className?: string;
 }
 
@@ -66,6 +63,21 @@ export interface FileTreeItemProps {
   onFileClick?: (node: FileTreeNode) => void;
   onFolderToggle?: (node: FileTreeNode) => void;
   className?: string;
+
+  // 편집 관련
+  isEditing?: boolean;
+  onEditSave?: (newName: string) => void;
+  onEditCancel?: () => void;
+
+  // 컨텍스트 메뉴 액션
+  onNewFile?: () => void;
+  onNewFolder?: () => void;
+  onRename?: () => void;
+  onDelete?: () => void;
+  onCopy?: () => void;
+  onCut?: () => void;
+  onPaste?: () => void;
+  canPaste?: boolean;
 
   // 내부 드래그앤드롭 props
   isDragging?: boolean;
@@ -83,4 +95,37 @@ export interface FileTreeItemProps {
   onExternalDragOver?: (node: FileTreeNode, event: React.DragEvent) => void;
   onExternalDragLeave?: (node: FileTreeNode, event: React.DragEvent) => void;
   onExternalDrop?: (node: FileTreeNode, event: React.DragEvent) => void;
+}
+
+// API 작업 요청 타입들
+export interface CreateFileRequest {
+  fileName: string;
+  fileType: 'FILE' | 'FOLDER';
+  parentId?: number;
+}
+
+export interface MoveFileRequest {
+  newParentId: number;
+}
+
+export interface RenameFileRequest {
+  newFileName: string;
+}
+
+// NOTE: 삭제는 요청 바디가 없고 URL 파라미터만 사용하므로 별도 타입 불필요
+// DELETE /api/repositories/{repositoryId}/files/{fileId}
+
+// API 작업 응답 타입들
+// 생성, 이동, 이름변경 시 응답 - 변경된 파일 정보를 반환
+export interface FileOperationResponse {
+  status: number;
+  message: string;
+  data: ApiFileNode | null;
+}
+
+// 삭제 시 응답 - 삭제된 파일 정보는 없고 성공 메시지만 반환
+export interface DeleteFileResponse {
+  status: number;
+  message: string;
+  data: null;
 }

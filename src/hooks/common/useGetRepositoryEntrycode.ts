@@ -6,7 +6,7 @@ import type { AxiosError } from 'axios';
 import { apiClient } from '@/api/client';
 
 import type { RepositoryEntrycodeApiResponse } from '@/schemas/repo.schema';
-import type { RepositoryEntryCodeURL } from '@/types/apiEndpoints.types';
+import type { RepositoryEntryCodeURL } from '@/types/common/apiEndpoints.types';
 
 const useGetRepositoryEntrycode = (
   url: RepositoryEntryCodeURL,

@@ -14,7 +14,7 @@ import MemberIcon from '@/assets/icons/member.svg?react';
 import { useParams, useRouter, useCanGoBack } from '@tanstack/react-router';
 
 import MainHeader from '@/components/organisms/Header/MainHeader/MainHeader';
-import useGetRepositorySettings from '@/hooks/useGetRepositorySettings';
+import useGetRepositorySettings from '@/hooks/settings/useGetRepositorySettings';
 import Loading from '@/components/molecules/Loading/Loading';
 import useRepoSettingsStore from '@/stores/repoSettingsStore';
 

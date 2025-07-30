@@ -28,7 +28,7 @@ const FileTreeContextMenu: React.FC<FileTreeContextMenuProps> = ({
   onPaste,
   canPaste = false,
 }) => {
-  const isFolder = node?.type === 'folder';
+  const isFolder = node?.fileType === 'FOLDER';
 
   return (
     <ContextMenu.Root>

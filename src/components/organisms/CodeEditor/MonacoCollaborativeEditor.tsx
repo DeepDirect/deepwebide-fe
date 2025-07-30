@@ -1,7 +1,7 @@
 import React from 'react';
 import { Editor } from '@monaco-editor/react';
-import { useYjsCollaboration } from '@/hooks/useYjsCollaboration';
-import { useMonacoEditor } from '@/hooks/useMonacoEditor';
+import { useYjsCollaboration } from '@/hooks/repo/useYjsCollaboration';
+import { useMonacoEditor } from '@/hooks/repo/useMonacoEditor';
 import { useEditorStore } from '@/stores/editorStore';
 import { useTabStore } from '@/stores/tabStore';
 import { useCollaborationStore } from '@/stores/collaborationStore';
@@ -49,7 +49,7 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
     onContentChange: updateContent,
     enableCollaboration,
   });
-  
+
   // Yjs 협업 훅
   const { isConnected, isLoading } = useYjsCollaboration({
     roomId,

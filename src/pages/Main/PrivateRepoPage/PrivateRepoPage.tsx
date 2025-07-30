@@ -3,9 +3,9 @@ import { useNavigate } from '@tanstack/react-router';
 
 import FileIcon from '@/assets/icons/file.svg?react';
 
-import useCreateRepository from '@/hooks/useCreateRepository';
-import useGetRepository from '@/hooks/useGetRepository';
-import useRepositoryFavorite from '@/hooks/useRepositoryFavorite';
+import useCreateRepository from '@/hooks/main/useCreateRepository';
+import useGetRepository from '@/hooks/main/useGetRepository';
+import useRepositoryFavorite from '@/hooks/main/useRepositoryFavorite';
 
 import Button from '@/components/atoms/Button/Button';
 import Toggle from '@/components/atoms/Toggle/Toggle';
@@ -18,8 +18,8 @@ import MainPageType from '@/constants/enums/MainPageType.enum';
 import type RepositoryType from '@/constants/enums/RepositoryType.enum';
 
 import type { RepositoryItem } from '@/schemas/repo.schema';
-import type { CreateRepoURL, RepositoryQueryURL } from '@/types/apiEndpoints.types';
-import type { Page } from '@/types/page.types';
+import type { CreateRepoURL, RepositoryQueryURL } from '@/types/common/apiEndpoints.types';
+import type { Page } from '@/types/common/page.types';
 
 import styles from './PrivateRepoPage.module.scss';
 

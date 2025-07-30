@@ -1,6 +1,6 @@
 import { redirect } from '@tanstack/react-router';
 import { entrycodeApi } from '@/api/entrycode.api';
-import type { AuthState } from '@/types/authState.types';
+import type { AuthState } from '@/types/auth/authState.types';
 
 /**
  * 레포지토리 접근 권한 체크 로직

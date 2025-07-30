@@ -10,7 +10,7 @@ import { isCurrentUserOwner } from '@/utils/isCurrentUserOwner';
 import AlertDialogComponent from '@/components/molecules/AlertDialog/AlertDialog';
 
 import React, { useMemo } from 'react';
-import useKickMemberRepository from '@/hooks/useKickMemberRepository';
+import useKickMemberRepository from '@/hooks/settings/useKickMemberRepository';
 import { useQueryClient } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import { useState } from 'react';
