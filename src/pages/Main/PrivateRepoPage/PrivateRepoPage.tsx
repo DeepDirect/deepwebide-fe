@@ -68,7 +68,7 @@ const PrivateRepoPage = () => {
   // 실패
   useEffect(() => {
     if (isError && error) {
-      toast.error('리스트를 불러오는데 실패했습니다.');
+      toast.error(error.message);
     }
   }, [isError, error]);
 
@@ -92,7 +92,7 @@ const PrivateRepoPage = () => {
         repositoryRefetch();
       },
       onError: error => {
-        console.error('즐겨찾기 실패:', error.message);
+        toast.error(error.message);
       },
     });
   };
@@ -125,7 +125,7 @@ const PrivateRepoPage = () => {
         repositoryRefetch();
       },
       onError: error => {
-        console.error('생성 실패!', error);
+        toast.error(error.message);
       },
     });
   };
