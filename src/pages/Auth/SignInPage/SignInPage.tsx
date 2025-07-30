@@ -1,14 +1,64 @@
 import SignInForm from '@/features/Auth/SignInForm/SignInForm';
 import { Link } from '@tanstack/react-router';
 import styles from './SignInPage.module.scss';
+import { useAuthStore } from '@/stores/authStore';
+import { useNavigate } from '@tanstack/react-router';
+import { useEffect } from 'react';
 
 const GITHUB_CLIENT_ID = import.meta.env.VITE_GITHUB_CLIENT_ID;
 const REDIRECT_URI = import.meta.env.VITE_GITHUB_REDIRECT_URI;
-const githubLoginUrl = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=user:email`;
+const GITHUB_LOGIN_URL = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=user:email`;
 
 export default function SignInPage() {
+  const navigate = useNavigate();
+  const { setAuthSocialLogin, isLoggedIn } = useAuthStore();
+
+  useEffect(() => {
+    if (isLoggedIn) navigate({ to: '/main' });
+  }, [isLoggedIn]);
+
   const handleClickGithubLogin = () => {
-    window.location.href = githubLoginUrl;
+    const width = 600;
+    const height = 700;
+    const left = window.screenX + (window.outerWidth - width) / 2;
+    const top = window.screenY + (window.outerHeight - height) / 2;
+
+    const popup = window.open(
+      GITHUB_LOGIN_URL,
+      'GithubLoginPopup',
+      `width=${width},height=${height},left=${left},top=${top},resizable=no,scrollbars=yes,status=no`
+    );
+
+    if (!popup) {
+      alert('팝업이 차단되었습니다. 브라우저 설정을 확인해주세요.');
+      return;
+    }
+
+    const handleMessage = (event: MessageEvent) => {
+      if (event.origin !== 'http://localhost:8080') return;
+
+      const { type, response } = event.data;
+      if (type === 'GITHUB_LOGIN_SUCCESS') {
+        setAuthSocialLogin(response);
+        popup?.close();
+
+        window.removeEventListener('message', handleMessage);
+      } else if (type === 'GITHUB_LOGIN_ERROR') {
+        alert('GitHub 로그인에 실패했습니다.');
+        popup?.close();
+        window.removeEventListener('message', handleMessage);
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+
+    // 팝업이 닫혔는지 확인 (사용자가 직접 닫은 경우)
+    const checkClosed = setInterval(() => {
+      if (popup.closed) {
+        clearInterval(checkClosed);
+        window.removeEventListener('message', handleMessage);
+      }
+    }, 1000);
   };
 
   return (
