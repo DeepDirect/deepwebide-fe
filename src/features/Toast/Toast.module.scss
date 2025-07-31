@@ -3,7 +3,6 @@
 
 // 변수 정의
 $toast-border-radius: 8px;
-$toast-shadow: $shadow-under;
 $toast-min-width: 320px;
 $toast-max-width: 400px;
 $toast-padding: 16px;
@@ -35,34 +34,37 @@ $animation-timing: cubic-bezier(0.16, 1, 0.3, 1);
   padding: $toast-padding;
   border-left: 4px solid $color-info;
   border-radius: $toast-border-radius;
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: $font-family-inter;
   background: $color-bg;
-  box-shadow: $toast-shadow;
+  box-shadow: $shadow-under;
 
-  &.default {
-    border-left: 4px solid $color-info;
-    background: $white-2;
+  // theme background
+  &.light {
+    background: $white-1;
+  }
+
+  &.dark {
+    background: $black-2;
   }
 
   // 타입별 스타일
+  &.default {
+    border-left-color: $gray-6;
+  }
+
   &.success {
-    background: color-mix(in srgb, $color-success 5%, white);
     border-left-color: $color-success;
   }
 
   &.error {
-    background: color-mix(in srgb, $color-error 5%, white);
     border-left-color: $color-error;
   }
 
   &.warning {
-    background: color-mix(in srgb, $color-warning 5%, white);
     border-left-color: $color-warning;
   }
 
   &.info {
-    background: color-mix(in srgb, $color-info 5%, white);
     border-left-color: $color-info;
   }
 
@@ -98,7 +100,14 @@ $animation-timing: cubic-bezier(0.16, 1, 0.3, 1);
   font-size: 14px;
   font-weight: 500;
   line-height: 1.4;
-  color: $color-text;
+
+  .light & {
+    color: $black-2;
+  }
+
+  .dark & {
+    color: $white-1;
+  }
 }
 
 // Close Button Container
