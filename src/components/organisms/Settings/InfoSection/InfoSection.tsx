@@ -14,22 +14,23 @@ import { useParams } from '@tanstack/react-router';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { isCurrentUserOwner } from '@/utils/isCurrentUserOwner';
+import { useToast } from '@/hooks/common/useToast';
 
 const InfoSection = () => {
   const repoId = useParams({ strict: false }).repoId;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const settingsData = useRepoSettingsStore(state => state.settingsData);
+  const toast = useToast();
 
   const queryClient = useQueryClient();
   const { mutate: renameRepository } = useRepositoryRename(`/api/repositories/${repoId}`, {
     onSuccess: () => {
-      // 서버 데이터 최신화: 쿼리 무효화
       queryClient.invalidateQueries({ queryKey: ['repository', 'settings', repoId] });
       setIsModalOpen(false);
+      toast.success('레포지토리 이름이 변경되었습니다.');
     },
-    onError: error => {
-      // TODO 에러 처리
-      console.error('Repository rename failed:', error);
+    onError: () => {
+      toast.error('레포지토리 이름 변경에 실패했습니다.');
     },
   });
 
