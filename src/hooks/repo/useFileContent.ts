@@ -5,9 +5,11 @@ interface FileContentResponse {
   status: number;
   message: string;
   data: {
+    fileId: number;
+    fileName: string;
+    path: string;
+    updatedAt: string;
     content: string;
-    encoding?: string;
-    size?: number;
   } | null;
 }
 

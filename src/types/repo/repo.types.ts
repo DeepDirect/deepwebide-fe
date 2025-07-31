@@ -16,4 +16,5 @@ export interface OpenTab {
   isActive: boolean;
   isDirty: boolean;
   content?: string;
+  fileId?: number;
 }

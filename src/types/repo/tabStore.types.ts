@@ -12,7 +12,7 @@ export interface TabStore {
   activateTab: (id: string) => void;
 
   // 파일 관련
-  openFileByPath: (repoId: string, filePath: string, fileName?: string) => void;
+  openFileByPath: (repoId: string, filePath: string, fileName?: string, fileId?: number) => void;
   setTabContent: (tabId: string, content: string) => void;
   setTabDirty: (tabId: string, isDirty: boolean) => void;
 

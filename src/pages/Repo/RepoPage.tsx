@@ -175,7 +175,8 @@ export function RepoPage() {
           <div className={styles.editorContainer}>
             <MonacoCollaborativeEditor
               repoId={repoId}
-              enableCollaboration={enableCollaboration}
+              repositoryId={repositoryId}
+              enableCollaboration={enableCollaboration} // 자동 설정으로 변경
               userId="current-user-id"
               userName="사용자명"
             />

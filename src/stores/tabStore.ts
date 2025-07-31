@@ -63,19 +63,32 @@ export const useTabStore = create<TabStore>()(
       },
 
       // 파일 관련
-      openFileByPath: (repoId: string, filePath: string, fileName?: string) => {
+      openFileByPath: (repoId: string, filePath: string, fileName?: string, fileId?: number) => {
         const state = get();
         const tabId = `${repoId}/${filePath}`;
         const existingTab = state.openTabs.find(tab => tab.id === tabId);
 
+        console.log('openFileByPath 호출:', {
+          repoId,
+          filePath,
+          fileName,
+          fileId,
+          tabId,
+          existingTab: !!existingTab,
+        });
+
         if (existingTab) {
+          // 기존 탭이 있으면 fileId 업데이트 (없었던 경우를 대비)
           set({
             openTabs: state.openTabs.map(tab => ({
               ...tab,
               isActive: tab.id === tabId,
+              fileId: tab.id === tabId && fileId ? fileId : tab.fileId, // fileId 업데이트
             })),
           });
+          console.log('기존 탭 활성화:', existingTab.name);
         } else {
+          // 새 탭 생성
           const finalFileName =
             fileName ||
             (filePath.includes('/') ? filePath.split('/').pop() || 'untitled' : filePath);
@@ -87,18 +100,69 @@ export const useTabStore = create<TabStore>()(
             isActive: true,
             isDirty: false,
             content: '',
+            fileId,
           };
 
           set({
             openTabs: [...state.openTabs.map(t => ({ ...t, isActive: false })), newTab],
+          });
+
+          console.log('새 탭 생성:', {
+            name: finalFileName,
+            tabId,
+            fileId,
           });
         }
       },
 
       setTabContent: (tabId: string, content: string) => {
         const state = get();
+        console.log('setTabContent 호출:', {
+          tabId,
+          contentLength: content.length,
+        });
+
         set({
-          openTabs: state.openTabs.map(tab => (tab.id === tabId ? { ...tab, content } : tab)),
+          openTabs: state.openTabs.map(tab => {
+            if (tab.id === tabId) {
+              // 파일에서 처음 로드하는 경우 isDirty를 false로 설정
+              // (에디터에서 변경하는 경우는 별도 처리)
+              const isInitialLoad = tab.content === '';
+
+              console.log('탭 내용 업데이트:', {
+                tabId,
+                name: tab.name,
+                isInitialLoad,
+                oldContentLength: tab.content?.length || 0,
+                newContentLength: content.length,
+              });
+
+              return {
+                ...tab,
+                content,
+                isDirty: isInitialLoad ? false : tab.isDirty, // 초기 로드시는 clean 상태
+              };
+            }
+            return tab;
+          }),
+        });
+      },
+
+      // 파일에서 처음 내용을 로드할 때 사용할 메서드
+      setTabContentFromFile: (tabId: string, content: string) => {
+        const state = get();
+        console.log('setTabContentFromFile 호출:', { tabId, contentLength: content.length });
+
+        set({
+          openTabs: state.openTabs.map(tab =>
+            tab.id === tabId
+              ? {
+                  ...tab,
+                  content,
+                  isDirty: false, // 파일에서 로드한 내용은 항상 clean 상태
+                }
+              : tab
+          ),
         });
       },
 

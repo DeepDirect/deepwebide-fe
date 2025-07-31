@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Editor } from '@monaco-editor/react';
 import { useYjsCollaboration } from '@/hooks/repo/useYjsCollaboration';
 import { useMonacoEditor } from '@/hooks/repo/useMonacoEditor';
@@ -15,6 +15,7 @@ import styles from './MonacoCollaborativeEditor.module.scss';
 
 interface MonacoCollaborativeEditorProps {
   repoId: string;
+  repositoryId: number;
   enableCollaboration?: boolean;
   userId?: string;
   userName?: string;
@@ -22,19 +23,54 @@ interface MonacoCollaborativeEditorProps {
 
 const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
   repoId,
+  repositoryId,
   enableCollaboration = true,
   userId = `user-${Date.now()}`,
   userName = 'Anonymous',
 }) => {
-  const { updateContent, saveContent } = useEditorStore();
-  const { openTabs } = useTabStore();
+  const { updateContent } = useEditorStore();
+  const { openTabs, setTabContent } = useTabStore();
   const { users } = useCollaborationStore();
-  const { isDarkMode } = useThemeStore();
+  const { isDarkMode, isInitialized } = useThemeStore();
 
   // 활성 탭 정보
   const activeTab = openTabs.find(tab => tab.isActive);
   const language = activeTab ? getLanguageFromFile(activeTab.name) : 'plaintext';
   const roomId = activeTab && enableCollaboration ? `${repoId}-${activeTab.path}` : '';
+
+  console.log('MonacoCollaborativeEditor 렌더:', {
+    repoId,
+    repositoryId,
+    activeTab: activeTab
+      ? {
+          id: activeTab.id,
+          name: activeTab.name,
+          isDirty: activeTab.isDirty,
+          contentLength: activeTab.content?.length || 0,
+        }
+      : null,
+    enableCollaboration,
+  });
+
+  // 에디터 내용 변경 핸들러
+  const handleContentChange = useCallback(
+    (content: string) => {
+      if (!activeTab) return;
+
+      console.log('에디터 내용 변경:', {
+        tabId: activeTab.id,
+        contentLength: content.length,
+        isDirty: activeTab.isDirty,
+      });
+
+      // 에디터 스토어 업데이트
+      updateContent(content);
+
+      // 탭 스토어 업데이트
+      setTabContent(activeTab.id, content);
+    },
+    [activeTab, updateContent, setTabContent]
+  );
 
   // Monaco Editor 훅
   const {
@@ -43,10 +79,11 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
     editorContainerRef,
     handleEditorDidMount,
     handleEditorChange,
+    isSaving,
   } = useMonacoEditor({
     language,
-    onSave: saveContent,
-    onContentChange: updateContent,
+    repositoryId, // repositoryId 전달
+    onContentChange: handleContentChange,
     enableCollaboration,
   });
 
@@ -59,6 +96,21 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
     enabled: enableCollaboration && Boolean(activeTab),
   });
 
+  // 에디터 변경 이벤트 핸들러
+  const onEditorChange = useCallback(
+    (value: string | undefined) => {
+      console.log('Monaco 에디터 onChange:', {
+        activeTabId: activeTab?.id,
+        valueLength: value?.length || 0,
+        enableCollaboration,
+      });
+
+      // activeTabId를 전달하여 저장 기능 활성화
+      handleEditorChange(value, activeTab?.id);
+    },
+    [handleEditorChange, activeTab?.id, enableCollaboration]
+  );
+
   // 활성 탭이 없는 경우 플레이스홀더 표시
   if (!activeTab) {
     return (
@@ -70,6 +122,17 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
     );
   }
 
+  if (!isInitialized) {
+    return (
+      <div className={styles.collaborativeEditor}>
+        <div className={styles.editorLoading}>
+          <div className={styles.loadingSpinner} />
+          <span>에디터 준비 중...</span>
+        </div>
+      </div>
+    );
+  }
+
   // Monaco Editor 옵션
   const editorOptions = getMonacoEditorOptions(language, isDarkMode);
 
@@ -78,12 +141,22 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
       {/* 협업 상태 표시 */}
       {enableCollaboration && isConnected && <CollaborationStatus userCount={users.length + 1} />}
 
+      {/* 저장 상태 표시 (협업 모드가 아닐 때만) */}
+      {!enableCollaboration && isSaving && (
+        <div className={styles.saveStatus}>
+          <div className={styles.savingIndicator}>
+            <span className={styles.savingSpinner} />
+            저장 중...
+          </div>
+        </div>
+      )}
+
       <div className={styles.editorContainer} ref={editorContainerRef}>
         <Editor
           height="100%"
           language={language}
           value={activeTab.content || ''}
-          onChange={handleEditorChange}
+          onChange={onEditorChange}
           onMount={handleEditorDidMount}
           options={editorOptions}
           theme={isDarkMode ? 'vs-dark' : 'vs'}
