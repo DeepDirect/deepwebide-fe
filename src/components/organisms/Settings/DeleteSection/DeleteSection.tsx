@@ -19,7 +19,7 @@ const DeleteSection: React.FC = () => {
         to: '/$repoId',
         params: { repoId },
       });
-      //   toast.success('레포지토리가 삭제되었습니다.');
+      toast.success('레포지토리가 삭제되었습니다.');
     },
     onError: () => {
       toast.error('레포지토리 삭제에 실패했습니다.');
