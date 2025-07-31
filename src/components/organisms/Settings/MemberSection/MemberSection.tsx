@@ -14,6 +14,7 @@ import useKickMemberRepository from '@/hooks/settings/useKickMemberRepository';
 import { useQueryClient } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import { useState } from 'react';
+import { useToast } from '@/hooks/common/useToast';
 
 const MemberSection = () => {
   const repoId: number = useParams({ strict: false }).repoId;
@@ -21,6 +22,7 @@ const MemberSection = () => {
   const members = useRepoSettingsStore(state => state.settingsData)?.members;
   const queryClient = useQueryClient();
   const [kickTargetId, setKickTargetId] = useState<number | null>(null);
+  const toast = useToast();
 
   const { mutate: kickMemberRepository } = useKickMemberRepository(
     `/api/repositories/${repoId}/kicked`,
@@ -28,19 +30,17 @@ const MemberSection = () => {
       onSuccess: () => {
         setIsOpen(false);
         queryClient.invalidateQueries({ queryKey: ['repository', 'settings', repoId] });
-        console.log('멤버 추방 성공');
-        // TODO - 토스트 예정
+        toast.success('멤버가 추방되었습니다.');
       },
-      onError: error => {
-        // TODO 삭제 실패 alert
-        console.error('멤버 추방 실패:', error);
+      onError: () => {
+        toast.error('멤버 추방에 실패했습니다.');
       },
     }
   );
 
   const handleKickMember = (memberId: number) => {
     kickMemberRepository(memberId);
-    console.log(`멤버 ${memberId} 추방 요청`);
+    toast.success('멤버가 추방되었습니다.');
     setIsOpen(false);
   };
 
