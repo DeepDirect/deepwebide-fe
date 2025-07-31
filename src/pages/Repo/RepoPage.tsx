@@ -4,13 +4,14 @@ import { useTabStoreHydrated } from '@/hooks/repo/useTabStore.ts';
 import { useFileSectionStore } from '@/stores/fileSectionStore';
 import { useResizer } from '@/hooks/common/useResizer';
 import { useFileContentLoader } from '@/hooks/repo/useFileContentLoader';
-import { useRepositoryInfo } from '@/hooks/repo/useRepositoryInfo'; // 추가
+import { useRepositoryInfo } from '@/hooks/repo/useRepositoryInfo';
 import Loading from '@/components/molecules/Loading/Loading';
 import styles from './RepoPage.module.scss';
 import TabBar from '@/components/organisms/TabBar/TabBar';
 import MonacoCollaborativeEditor from '@/components/organisms/CodeEditor/MonacoCollaborativeEditor';
 import CodeRunner from '@/features/CodeRunner/CodeRunner';
 import { FileTree } from '@/features/Repo/fileTree';
+import { SavePoint } from '@/features/Repo/savePoint';
 
 export function RepoPage() {
   const params = useParams({ strict: false });
@@ -19,7 +20,11 @@ export function RepoPage() {
   const filePath = search.file;
 
   const { openTabs, activateTab, hasHydrated, keepOnlyCurrentRepoTabs } = useTabStoreHydrated();
-  const { isVisible: isFileSectionVisible, toggleVisibility } = useFileSectionStore();
+  const {
+    isVisible: isFileSectionVisible,
+    activeSection,
+    toggleVisibility,
+  } = useFileSectionStore();
   const containerRef = useRef<HTMLDivElement>(null);
 
   // NOTE: 파일 섹션과 에디터 그룹 간의 수평 리사이저
@@ -37,13 +42,13 @@ export function RepoPage() {
   // repoId를 숫자로 변환 (FileTree 컴포넌트에서 필요)
   const repositoryId = repoId ? parseInt(repoId, 10) : 0;
 
-  // 저장소 정보 조회 - 추가된 부분
+  // 저장소 정보 조회
   const { data: repositoryInfo } = useRepositoryInfo({
     repositoryId: repoId || '',
     enabled: hasHydrated && !!repoId,
   });
 
-  // 협업 모드 자동 설정 - 추가된 부분
+  // 협업 모드 자동 설정
   const enableCollaboration = Boolean(repositoryInfo?.isShared);
 
   // 파일 내용 자동 로드 훅 (하이드레이션 완료 후에만)
@@ -61,18 +66,27 @@ export function RepoPage() {
     keepOnlyCurrentRepoTabs(repoId);
   }, [repoId, hasHydrated, keepOnlyCurrentRepoTabs]);
 
-  // 키보드 단축키 추가 (Ctrl+B로 파일 섹션 토글)
+  // 키보드 단축키 추가
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.key === 'b') {
         e.preventDefault();
-        toggleVisibility();
+        // Ctrl+B로 현재 활성 섹션 토글 (files가 기본)
+        const currentSection = activeSection || 'files';
+        if (isFileSectionVisible && activeSection === currentSection) {
+          toggleVisibility();
+        } else {
+          // 닫혀있거나 다른 섹션이면 files 섹션 열기
+          if (!isFileSectionVisible) {
+            toggleVisibility();
+          }
+        }
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [toggleVisibility]);
+  }, [toggleVisibility, isFileSectionVisible, activeSection]);
 
   // URL 파일 경로 변경 처리 (하이드레이션 완료 후에만)
   useEffect(() => {
@@ -97,6 +111,18 @@ export function RepoPage() {
     }
   }, [filePath, repoId, openTabs, activateTab, hasHydrated]);
 
+  // 사이드바 섹션에 따른 컴포넌트 렌더링
+  const renderSidebarContent = () => {
+    switch (activeSection) {
+      case 'files':
+        return <FileTree repoId={repoId} repositoryId={repositoryId} />;
+      case 'save':
+        return <SavePoint repoId={repoId || ''} />;
+      default:
+        return null;
+    }
+  };
+
   // 유효하지 않은 repoId 처리
   if (!repoId || isNaN(repositoryId)) {
     return (
@@ -119,11 +145,11 @@ export function RepoPage() {
         !isFileSectionVisible ? styles.hideFileSection : ''
       }`}
     >
-      {/* 파일 구조 섹션 - 조건부 렌더링 */}
+      {/* 사이드바 섹션 - 조건부 렌더링 */}
       {isFileSectionVisible && (
         <>
           <div className={styles.fileSection} style={{ width: fileSectionWidth }}>
-            <FileTree repoId={repoId} repositoryId={repositoryId} />
+            {renderSidebarContent()}
           </div>
 
           {/* 수평 리사이저 */}
@@ -149,7 +175,7 @@ export function RepoPage() {
           <div className={styles.editorContainer}>
             <MonacoCollaborativeEditor
               repoId={repoId}
-              enableCollaboration={enableCollaboration} // 자동 설정으로 변경
+              enableCollaboration={enableCollaboration}
               userId="current-user-id"
               userName="사용자명"
             />
