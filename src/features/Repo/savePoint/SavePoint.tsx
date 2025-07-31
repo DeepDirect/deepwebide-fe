@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { historyService } from './historyService';
 import { SaveModal } from './SaveModal';
+import AlertDialog from '@/components/molecules/AlertDialog/AlertDialog';
+import { useToastStore } from '@/stores/toastStore';
 import type { HistoryItem } from './types';
 import styles from './SavePoint.module.scss';
 
@@ -11,7 +13,17 @@ interface SavePointProps {
 
 export function SavePoint({ repoId }: SavePointProps) {
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+  const [restoreDialog, setRestoreDialog] = useState<{
+    isOpen: boolean;
+    historyId: number | null;
+    message: string;
+  }>({
+    isOpen: false,
+    historyId: null,
+    message: '',
+  });
   const queryClient = useQueryClient();
+  const { showToast } = useToastStore();
 
   // 히스토리 목록 조회
   const {
@@ -32,9 +44,11 @@ export function SavePoint({ repoId }: SavePointProps) {
     mutationFn: (message: string) => historyService.saveHistory(repoId, { message }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['histories', repoId] });
+      showToast({ message: '프로젝트가 성공적으로 저장되었습니다.', type: 'success' });
     },
     onError: err => {
       console.error('Save error:', err);
+      showToast({ message: '저장 중 오류가 발생했습니다.', type: 'error' });
     },
   });
 
@@ -43,10 +57,13 @@ export function SavePoint({ repoId }: SavePointProps) {
     mutationFn: (historyId: number) => historyService.restoreHistory(repoId, historyId),
     onSuccess: () => {
       console.log('History restored successfully');
-      // 복원 성공 시 필요한 추가 작업 (예: 파일 새로고침 등)
+      // 복원 성공 시 히스토리 목록 새로고침
+      queryClient.invalidateQueries({ queryKey: ['histories', repoId] });
+      showToast({ message: '히스토리가 성공적으로 복원되었습니다.', type: 'success' });
     },
     onError: err => {
       console.error('Restore error:', err);
+      showToast({ message: '복원 중 오류가 발생했습니다.', type: 'error' });
     },
   });
 
@@ -54,18 +71,28 @@ export function SavePoint({ repoId }: SavePointProps) {
     await saveMutation.mutateAsync(message);
   };
 
-  const handleRestore = async (historyId: number, message: string) => {
-    if (
-      window.confirm(`"${message}" 상태로 복원하시겠습니까?\n현재 작업 내용이 손실될 수 있습니다.`)
-    ) {
+  const handleRestoreClick = (historyId: number, message: string) => {
+    setRestoreDialog({
+      isOpen: true,
+      historyId,
+      message,
+    });
+  };
+
+  const handleRestoreConfirm = async () => {
+    if (restoreDialog.historyId) {
       try {
-        await restoreMutation.mutateAsync(historyId);
-        alert('복원이 완료되었습니다.');
+        await restoreMutation.mutateAsync(restoreDialog.historyId);
+        setRestoreDialog({ isOpen: false, historyId: null, message: '' });
       } catch (err) {
         console.error('Restore error:', err);
-        alert('복원 중 오류가 발생했습니다.');
+        // 에러는 뮤테이션의 onError에서 처리됨
       }
     }
+  };
+
+  const handleRestoreCancel = () => {
+    setRestoreDialog({ isOpen: false, historyId: null, message: '' });
   };
 
   const formatAbsoluteDate = (dateString: string) => {
@@ -98,7 +125,13 @@ export function SavePoint({ repoId }: SavePointProps) {
         ) : error ? (
           <div className={styles.error}>
             <p>히스토리 목록을 불러올 수 없습니다.</p>
-            <button className={styles.retryButton} onClick={() => refetch()}>
+            <button
+              className={styles.retryButton}
+              onClick={() => {
+                refetch();
+                showToast({ message: '히스토리 목록을 다시 불러오는 중...', type: 'info' });
+              }}
+            >
               다시 시도
             </button>
           </div>
@@ -122,11 +155,13 @@ export function SavePoint({ repoId }: SavePointProps) {
                 <div className={styles.historyActions}>
                   <button
                     className={styles.restoreButton}
-                    onClick={() => handleRestore(history.historyId, history.message)}
+                    onClick={() => handleRestoreClick(history.historyId, history.message)}
                     disabled={restoreMutation.isPending}
                     title="이 상태로 복원"
                   >
-                    {restoreMutation.isPending ? '복원 중...' : '복원'}
+                    {restoreMutation.isPending && restoreDialog.historyId === history.historyId
+                      ? '복원 중...'
+                      : '복원'}
                   </button>
                 </div>
               </div>
@@ -140,6 +175,17 @@ export function SavePoint({ repoId }: SavePointProps) {
         onOpenChange={setIsSaveModalOpen}
         onSave={handleSave}
         isLoading={saveMutation.isPending}
+      />
+
+      <AlertDialog
+        open={restoreDialog.isOpen}
+        onOpenChange={open => !open && handleRestoreCancel()}
+        title="히스토리 복원"
+        description={`"${restoreDialog.message}" 상태로 복원하시겠습니까?\n현재 작업 내용이 손실될 수 있습니다.`}
+        confirmText={restoreMutation.isPending ? '복원 중...' : '복원'}
+        cancelText="취소"
+        onConfirm={handleRestoreConfirm}
+        onCancel={handleRestoreCancel}
       />
     </div>
   );
