@@ -47,8 +47,17 @@ export const useThemeStore = create<ThemeState>((set, get) => ({
     // 로컬 스토리지에 저장 (처음 진입 시에도 저장)
     localStorage.setItem('repo-theme', JSON.stringify(isDarkMode));
 
-    set({ isDarkMode });
+    set({ isDarkMode, isInitialized: true });
     applyThemeToDOM(isDarkMode);
+
+    setTimeout(() => {
+      applyThemeToDOM(isDarkMode);
+      // 스토어 상태도 한번 더 확실히 설정
+      const currentState = get();
+      if (currentState.isDarkMode !== isDarkMode) {
+        set({ isDarkMode, isInitialized: true });
+      }
+    }, 0);
   },
 
   // repo 페이지 이탈 시
