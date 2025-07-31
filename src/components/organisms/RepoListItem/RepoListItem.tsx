@@ -120,26 +120,31 @@ const RepoListItem: React.FC<RepositoryProps> = ({
         onOpenChange={() => toggleModal('changeRepoName')}
         currentName={info.repositoryName}
         onConfirm={handleRename}
+        onCancel={() => toggleModal('changeRepoName')}
       />
       <DeleteRepoAlertDialog
         open={modals.deleteRepoAlert}
         onOpenChange={() => toggleModal('deleteRepoAlert')}
         onConfirm={actions.deleteRepo.mutate}
+        onCancel={() => toggleModal('deleteRepoAlert')}
       />
       <ShareMyRepoAlertDialog
         open={modals.shareMyRepoAlertDialog}
         onOpenChange={() => toggleModal('shareMyRepoAlertDialog')}
         onConfirm={actions.shareStatus.mutate}
+        onCancel={() => toggleModal('shareMyRepoAlertDialog')}
       />
       <CancelMyRepoShareAlertDialog
         open={modals.cancelMyRepoShareAlert}
         onOpenChange={() => toggleModal('cancelMyRepoShareAlert')}
         onConfirm={actions.shareStatus.mutate}
+        onCancel={() => toggleModal('cancelMyRepoShareAlert')}
       />
       <LeaveSharedRepoAlertDialog
         open={modals.leaveSharedRepoAlertDialog}
         onOpenChange={() => toggleModal('leaveSharedRepoAlertDialog')}
         onConfirm={actions.exit.mutate}
+        onCancel={() => toggleModal('leaveSharedRepoAlertDialog')}
       />
     </div>
   );
