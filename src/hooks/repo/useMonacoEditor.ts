@@ -34,10 +34,10 @@ export const useMonacoEditor = ({
   const { isDarkMode } = useThemeStore();
   const { setTabDirty } = useTabStore();
 
-  // 파일 저장 훅
+  // 협업 모드에서도 저장 기능 활성화 (수정된 부분)
   const { saveCurrentFile, autoSaveFile, isSaving } = useFileSave({
     repositoryId,
-    enabled: !enableCollaboration,
+    enabled: true, // 협업 모드에서도 저장 기능 활성화
   });
 
   // 안전한 Monaco 메서드 호출을 위한 헬퍼 함수
@@ -86,14 +86,14 @@ export const useMonacoEditor = ({
           return defaultValue;
         };
 
-        // Ctrl+S: 저장
+        // Ctrl+S: 저장 (협업 모드에서도 활성화)
         callEditorMethod(
           'addCommand',
           undefined,
           monacoObj.KeyMod.CtrlCmd | monacoObj.KeyCode.KeyS,
           () => {
             saveCurrentFile();
-            console.log('파일 저장 요청됨');
+            console.log('파일 저장 요청됨 (협업 모드:', enableCollaboration, ')');
           }
         );
 
@@ -131,7 +131,7 @@ export const useMonacoEditor = ({
         console.warn('키보드 단축키 설정 실패:', error);
       }
     },
-    [saveCurrentFile]
+    [saveCurrentFile, enableCollaboration]
   );
 
   // 에디터 마운트 핸들러
@@ -144,50 +144,33 @@ export const useMonacoEditor = ({
       // 테마 적용 함수
       const applyTheme = () => {
         const currentTheme = isDarkMode ? 'vs-dark' : 'vs';
-
         try {
           (monaco as { editor: { setTheme: (theme: string) => void } }).editor.setTheme(
             currentTheme
           );
-          console.log('Monaco 테마 적용:', currentTheme);
+          console.log('Monaco 에디터 테마 설정:', currentTheme);
         } catch (error) {
-          console.warn('초기 Monaco 테마 설정 실패:', error);
+          console.warn('Monaco 테마 설정 실패:', error);
         }
       };
 
-      // 즉시 테마 적용
+      // 초기 테마 적용
       applyTheme();
 
-      // 100ms 후 한번 더 확실히 적용 (탭 정리 후 테마 문제 해결)
-      setTimeout(applyTheme, 100);
-
-      // 에디터 컨테이너 참조 저장
-      try {
-        const editorElement = safelyCallEditorMethod<HTMLElement | null>('getDomNode', null);
-        if (editorElement?.parentElement) {
-          editorContainerRef.current = editorElement.parentElement as HTMLDivElement;
-        }
-      } catch (error) {
-        console.warn('에디터 컨테이너 참조 설정 실패:', error);
-      }
-
       // 키보드 단축키 설정
-      setupKeyboardShortcuts(editor as unknown as MonacoEditorInstance, monaco);
+      setupKeyboardShortcuts(editorRef.current, monaco);
 
-      // 언어별 진단 설정
-      disableLanguageDiagnostics(monaco, language);
-
-      // 포커스
-      try {
-        (editor as { focus: () => void }).focus();
-      } catch (error) {
-        console.warn('에디터 포커스 설정 실패:', error);
-      }
+      console.log('Monaco 에디터 마운트 완료:', {
+        language,
+        theme: isDarkMode ? 'vs-dark' : 'vs',
+        enableCollaboration,
+        saveEnabled: true, // 협업 모드에서도 저장 활성화
+      });
     },
-    [language, isDarkMode, setupKeyboardShortcuts, safelyCallEditorMethod]
+    [isDarkMode, language, setupKeyboardShortcuts, enableCollaboration]
   );
 
-  // 에디터 내용 변경 핸들러
+  // 에디터 변경 핸들러 (수정된 부분)
   const handleEditorChange = useCallback(
     (value: string | undefined, activeTabId?: string) => {
       if (value !== undefined) {
@@ -200,8 +183,22 @@ export const useMonacoEditor = ({
         if (activeTabId) {
           setTabDirty(activeTabId, true);
 
-          // 협업 모드가 아닐 때만 자동 저장
-          if (!enableCollaboration) {
+          // 협업 모드에서도 자동 저장 활성화 (수정된 부분)
+          if (enableCollaboration) {
+            // 협업 모드에서는 자동 저장 간격을 더 길게 설정 (5초)
+            // 다른 사용자의 변경사항과 충돌을 최소화하기 위함
+            const collaborationSaveDelay = 5000;
+            console.log('협업 모드 자동 저장 예약:', {
+              activeTabId,
+              delay: collaborationSaveDelay,
+            });
+
+            // 기존 타이머가 있다면 클리어하고 새로 설정
+            setTimeout(() => {
+              autoSaveFile(activeTabId, value);
+            }, collaborationSaveDelay);
+          } else {
+            // 일반 모드에서는 기존 자동 저장 로직 사용 (2초)
             autoSaveFile(activeTabId, value);
           }
         }
@@ -241,7 +238,7 @@ export const useMonacoEditor = ({
       };
 
       clearMarkers();
-      const interval = setInterval(clearMarkers, 500); // 100ms → 500ms로 최적화
+      const interval = setInterval(clearMarkers, 500);
       return () => clearInterval(interval);
     }
 

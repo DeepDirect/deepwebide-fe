@@ -29,8 +29,8 @@ export const useFileContentLoader = ({
     error,
   } = useFileContent({
     repositoryId,
-    filePath: activeTab?.path || '',
-    enabled: shouldLoadContent,
+    fileId: activeTab?.fileId || 0,
+    enabled: shouldLoadContent && !!activeTab?.fileId,
   });
 
   // 탭 전환 디버깅 로그
@@ -61,7 +61,7 @@ export const useFileContentLoader = ({
 
       setTabContent(tabId, content);
     }
-  }, [fileContentData, activeTab, shouldLoadContent, setTabContent]);
+  }, [fileContentData, activeTab?.id, shouldLoadContent, setTabContent]);
 
   // 에러 처리
   useEffect(() => {
@@ -77,7 +77,7 @@ export const useFileContentLoader = ({
 
       setTabContent(activeTab.id, errorMessage);
     }
-  }, [error, activeTab, shouldLoadContent, setTabContent]);
+  }, [error, activeTab?.id, shouldLoadContent, setTabContent]);
 
   return {
     isLoading: shouldLoadContent ? isLoading : false,

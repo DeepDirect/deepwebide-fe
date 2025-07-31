@@ -31,7 +31,7 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
   const { updateContent } = useEditorStore();
   const { openTabs, setTabContent } = useTabStore();
   const { users } = useCollaborationStore();
-  const { isDarkMode, isInitialized } = useThemeStore();
+  const { isDarkMode } = useThemeStore();
 
   // 활성 탭 정보
   const activeTab = openTabs.find(tab => tab.isActive);
@@ -72,7 +72,7 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
     [activeTab, updateContent, setTabContent]
   );
 
-  // Monaco Editor 훅
+  // Monaco Editor 훅 (협업 모드에서도 저장 기능 활성화)
   const {
     editorRef,
     monacoEditorRef,
@@ -82,7 +82,7 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
     isSaving,
   } = useMonacoEditor({
     language,
-    repositoryId, // repositoryId 전달
+    repositoryId,
     onContentChange: handleContentChange,
     enableCollaboration,
   });
@@ -105,7 +105,7 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
         enableCollaboration,
       });
 
-      // activeTabId를 전달하여 저장 기능 활성화
+      // activeTabId를 전달하여 저장 기능 활성화 (협업 모드에서도)
       handleEditorChange(value, activeTab?.id);
     },
     [handleEditorChange, activeTab?.id, enableCollaboration]
@@ -122,17 +122,6 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
     );
   }
 
-  if (!isInitialized) {
-    return (
-      <div className={styles.collaborativeEditor}>
-        <div className={styles.editorLoading}>
-          <div className={styles.loadingSpinner} />
-          <span>에디터 준비 중...</span>
-        </div>
-      </div>
-    );
-  }
-
   // Monaco Editor 옵션
   const editorOptions = getMonacoEditorOptions(language, isDarkMode);
 
@@ -141,8 +130,8 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
       {/* 협업 상태 표시 */}
       {enableCollaboration && isConnected && <CollaborationStatus userCount={users.length + 1} />}
 
-      {/* 저장 상태 표시 (협업 모드가 아닐 때만) */}
-      {!enableCollaboration && isSaving && (
+      {/* 저장 상태 표시 (협업 모드에서도 표시하도록 수정) */}
+      {isSaving && (
         <div className={styles.saveStatus}>
           <div className={styles.savingIndicator}>
             <span className={styles.savingSpinner} />

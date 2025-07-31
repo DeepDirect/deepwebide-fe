@@ -15,39 +15,35 @@ interface FileContentResponse {
 
 interface UseFileContentParams {
   repositoryId: number;
-  filePath: string;
+  fileId: number;
   enabled?: boolean;
 }
 
 // 파일 내용을 가져오는 훅 - API 연동 추가
-export const useFileContent = ({
-  repositoryId,
-  filePath,
-  enabled = true,
-}: UseFileContentParams) => {
+export const useFileContent = ({ repositoryId, fileId, enabled = true }: UseFileContentParams) => {
   return useQuery({
-    queryKey: ['fileContent', repositoryId, filePath],
+    queryKey: ['fileContent', repositoryId, fileId],
     queryFn: async (): Promise<FileContentResponse> => {
       console.log(`파일 내용 요청:`, {
         repositoryId,
-        filePath,
+        fileId,
         url: `/api/repositories/${repositoryId}/files/content`,
       });
 
       // 실제 API 호출
       const response = await apiClient.get<FileContentResponse>(
-        `/api/repositories/${repositoryId}/files/content?path=${encodeURIComponent(filePath)}`
+        `/api/repositories/${repositoryId}/files/${fileId}/content`
       );
 
       console.log(`파일 내용 응답:`, {
         status: response.status,
-        filePath,
+        fileId,
         contentLength: response.data?.data?.content?.length || 0,
       });
 
       return response.data;
     },
-    enabled: enabled && !!repositoryId && !!filePath,
+    enabled: enabled && !!repositoryId && !!fileId,
     staleTime: 1000 * 60 * 5, // 5분
     retry: (failureCount, error) => {
       // 404 에러는 재시도하지 않음 (파일이 존재하지 않음)
