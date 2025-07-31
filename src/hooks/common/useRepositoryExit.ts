@@ -6,7 +6,9 @@ import type { RepositoryExitURL } from '@/types/common/apiEndpoints.types';
 
 const useRepositoryExit = (
   url: RepositoryExitURL,
-  options?: Omit<UseMutationOptions<void, AxiosError, void>, 'mutationFn'>
+  options?: Omit<UseMutationOptions<void, AxiosError, void>, 'mutationFn'> & {
+    enabled?: boolean;
+  }
 ) => {
   return useMutation<void, AxiosError, void>({
     mutationFn: async () => {

@@ -65,7 +65,7 @@ export const UpdateRepositoryShareStatusResponseSchema = z.object({
   isShared: z.boolean(),
 });
 
-export const RepositoryEntrycodeDataSchema = z.object({
+export const RepositoryEntrycodeResponseSchema = z.object({
   repositoryId: z.number(),
   repositoryName: z.string(),
   ownerId: z.number(),
@@ -75,12 +75,6 @@ export const RepositoryEntrycodeDataSchema = z.object({
   createdAt: z.string(),
   updatedAt: z.string(),
   isShared: z.boolean(),
-});
-
-export const RepositoryEntrycodeResponseSchema = z.object({
-  status: z.number(),
-  message: z.string(),
-  data: RepositoryEntrycodeDataSchema,
 });
 
 export const RepositoryFavoriteResponseSchema = z.object({
@@ -147,7 +141,6 @@ export type UpdateRepositoryShareStatusResponse = z.infer<
   typeof UpdateRepositoryShareStatusResponseSchema
 >;
 
-export type RepositoryEntrycodeData = z.infer<typeof RepositoryEntrycodeDataSchema>;
 export type RepositoryEntrycodeResponse = z.infer<typeof RepositoryEntrycodeResponseSchema>;
 
 export type RepositoryFavoriteResponse = z.infer<typeof RepositoryFavoriteResponseSchema>;

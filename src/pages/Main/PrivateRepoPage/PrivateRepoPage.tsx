@@ -80,7 +80,6 @@ const PrivateRepoPage = () => {
 
   // 레포 좋아요
   const handleFavoriteClick = (id: number) => {
-    // TODO: 토스트 추가
     updateFavorite(id, {
       onSuccess: () => {
         setRepositories(
