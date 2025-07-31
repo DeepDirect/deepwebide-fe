@@ -1,6 +1,7 @@
 import { redirect } from '@tanstack/react-router';
 import { entrycodeApi } from '@/api/entrycode.api';
 import type { AuthState } from '@/types/auth/authState.types';
+import { useToastStore } from '@/stores/toastStore';
 
 /**
  * 레포지토리 접근 권한 체크 로직
@@ -8,8 +9,11 @@ import type { AuthState } from '@/types/auth/authState.types';
 export const checkRepositoryAccess = async (repoId: string, auth: AuthState) => {
   // 1. 로그인 체크
   if (!auth.isLoggedIn) {
-    // TODO - 토스트로 대체해야 함
-    alert('로그인이 필요한 기능입니다.');
+    useToastStore.getState().showToast({
+      message: '로그인이 필요한 기능입니다.',
+      type: 'warning',
+      duration: 5000,
+    });
     throw redirect({ to: '/sign-in' });
   }
 
@@ -18,7 +22,11 @@ export const checkRepositoryAccess = async (repoId: string, auth: AuthState) => 
   try {
     response = await entrycodeApi.getRepositoryAccessibility(repoId);
   } catch {
-    alert('존재하지 않는 레포지토리입니다.');
+    useToastStore.getState().showToast({
+      message: '접근할 수 없는 레포지토리입니다.',
+      type: 'error',
+      duration: 5000,
+    });
     throw redirect({ to: '/main' });
   }
 
@@ -27,15 +35,17 @@ export const checkRepositoryAccess = async (repoId: string, auth: AuthState) => 
     // 2-1. access: true
     // 2-1-a. 내 개인 레포지토리 (isShared: false)
     // 2-1-b. 내가 참여한 공유 레포지토리 (isShared: true)
-    // TODO - 토스트로 대체해야 함
-    // alert('레포지토리에 입장합니다.');
+    // 성공적인 접근 시에는 토스트를 표시하지 않음 (UX 향상)
   } else {
     // 2-2. access: false
     // 2-2-a. 타인의 개인 레포지토리인 경우 (isShared: false)
-    // TODO - 토스트로 대체해야 함
     const isShared = response.data.data.repository.isShared;
     if (!isShared) {
-      alert('해당 레포지토리는 공유 레포지토리가 아닙니다.');
+      useToastStore.getState().showToast({
+        message: '해당 레포지토리는 공유 레포지토리가 아닙니다.',
+        type: 'warning',
+        duration: 5000,
+      });
       throw redirect({
         to: '/main',
       });
