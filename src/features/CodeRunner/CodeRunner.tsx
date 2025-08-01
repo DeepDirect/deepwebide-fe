@@ -10,7 +10,7 @@ export interface CodeRunnerProps {
 
 interface CommandHistory {
   command: string;
-  output: string;
+  output: string | JSX.Element;
   timestamp: Date;
 }
 
@@ -43,12 +43,29 @@ export function CodeRunner(props: CodeRunnerProps) {
 
     codeRunnerExecute.mutate(undefined, {
       onSuccess: resp => {
+        let output: string | JSX.Element =
+          resp.status === 'SUCCESS' ? resp.output || resp.message : resp.error || resp.message;
+
+        // 포트가 있으면 링크 출력
+        if (resp.port) {
+          const url = `http://localhost:${resp.port}`;
+          output = (
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: '#53aaff', textDecoration: 'underline', cursor: 'pointer' }}
+            >
+              {url}
+            </a>
+          );
+        }
+
         setCommandHistory(prev => [
           ...prev.slice(0, -1),
           {
             command,
-            output:
-              resp.status === 'SUCCESS' ? resp.output || resp.message : resp.error || resp.message,
+            output,
             timestamp: new Date(),
           },
         ]);
@@ -72,7 +89,7 @@ export function CodeRunner(props: CodeRunnerProps) {
   };
 
   const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && currentCommand.trim()) {
+    if (e.key === 'Enter') {
       executeCommand(currentCommand.trim());
     }
   };
@@ -123,7 +140,12 @@ export function CodeRunner(props: CodeRunnerProps) {
               )}
               {item.output && (
                 <div className="code-runner__output-line">
-                  <span className="code-runner__output">{item.output}</span>
+                  {/* output이 JSX(링크)이면 그대로, 문자열이면 span으로 */}
+                  {typeof item.output === 'string' ? (
+                    <span className="code-runner__output">{item.output}</span>
+                  ) : (
+                    item.output
+                  )}
                 </div>
               )}
             </div>
