@@ -20,3 +20,18 @@ export const executeRepository = async (
   );
   return response.data.data;
 };
+
+export interface RepositoryStopResponse {
+  repositoryId: number;
+  stopped: boolean;
+  message: string;
+}
+
+export const stopRepository = async (
+  repositoryId: number | string
+): Promise<RepositoryStopResponse> => {
+  const response = await apiClient.delete<undefined, { data: RepositoryStopResponse }>(
+    `/api/repositories/${repositoryId}/stop`
+  );
+  return response.data.data;
+};
