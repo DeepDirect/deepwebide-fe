@@ -16,12 +16,14 @@ interface UserProfileProps {
   variant?: 'lightModeOnly' | 'darkModeSupport';
   showChatButton?: boolean;
   onChatButtonClick?: () => void;
+  isChatOpen?: boolean;
 }
 
 const UserProfile = ({
   variant = 'lightModeOnly',
   showChatButton = false,
   onChatButtonClick,
+  isChatOpen = false,
 }: UserProfileProps) => {
   const navigate = useNavigate();
   const { getUserInfo } = useAuthStore(); // 상태만 조회
@@ -56,7 +58,10 @@ const UserProfile = ({
   return (
     <div className={styles.profileArea}>
       {showChatButton && (
-        <button className={styles.chatButton} onClick={onChatButtonClick}>
+        <button
+          className={`${styles.chatButton} ${isChatOpen ? styles.active : ''}`}
+          onClick={onChatButtonClick}
+        >
           <MessageTextIcon className={styles.chatIcon} />
         </button>
       )}
