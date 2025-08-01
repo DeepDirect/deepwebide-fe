@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import type { KeyboardEvent } from 'react';
 import { useThemeStore } from '@/stores/themeStore';
+import { useCodeRunnerExecute } from '@/features/Repo/codeRunner/hooks/useCodeRunnerExecute';
 import './CodeRunner.scss';
 
 export interface CodeRunnerProps {
-  repoId?: string;
+  repoId?: number | string;
 }
 
 interface CommandHistory {
@@ -13,8 +14,7 @@ interface CommandHistory {
   timestamp: Date;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function CodeRunner(_props: CodeRunnerProps) {
+export function CodeRunner(props: CodeRunnerProps) {
   const [commandHistory, setCommandHistory] = useState<CommandHistory[]>([
     {
       command: '',
@@ -33,15 +33,42 @@ export function CodeRunner(_props: CodeRunnerProps) {
     initializeTheme();
   }, [initializeTheme]);
 
-  const executeCommand = (command: string) => {
-    const newHistory: CommandHistory = {
-      command,
-      output: `${command}`,
-      timestamp: new Date(),
-    };
+  // CodeRunner 실행 훅
+  const codeRunnerExecute = useCodeRunnerExecute(props.repoId);
 
-    setCommandHistory(prev => [...prev, newHistory]);
+  // 실행 함수 (비동기)
+  const executeCommand = (command: string) => {
+    setCommandHistory(prev => [...prev, { command, output: '실행 중...', timestamp: new Date() }]);
     setCurrentCommand('');
+
+    codeRunnerExecute.mutate(undefined, {
+      onSuccess: resp => {
+        setCommandHistory(prev => [
+          ...prev.slice(0, -1),
+          {
+            command,
+            output:
+              resp.status === 'SUCCESS' ? resp.output || resp.message : resp.error || resp.message,
+            timestamp: new Date(),
+          },
+        ]);
+      },
+      onError: (e: unknown) => {
+        let errorMessage = '실패';
+        if (typeof e === 'object' && e !== null) {
+          const err = e as { response?: { data?: { message?: string } }; message?: string };
+          errorMessage = err.response?.data?.message || err.message || '실패';
+        }
+        setCommandHistory(prev => [
+          ...prev.slice(0, -1),
+          {
+            command,
+            output: errorMessage,
+            timestamp: new Date(),
+          },
+        ]);
+      },
+    });
   };
 
   const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -66,9 +93,7 @@ export function CodeRunner(_props: CodeRunnerProps) {
           className="code-runner__control-button"
           aria-label="실행"
           onClick={() => {
-            if (currentCommand.trim()) {
-              executeCommand(currentCommand.trim());
-            }
+            executeCommand(currentCommand.trim());
           }}
         >
           <svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
