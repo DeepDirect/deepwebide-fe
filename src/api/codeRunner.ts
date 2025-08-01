@@ -15,8 +15,8 @@ export interface RepositoryExecuteResponse {
 export const executeRepository = async (
   repositoryId: number | string
 ): Promise<RepositoryExecuteResponse> => {
-  const response = await apiClient.post<undefined, RepositoryExecuteResponse>(
+  const response = await apiClient.post<undefined, { data: RepositoryExecuteResponse }>(
     `/api/repositories/${repositoryId}/execute`
   );
-  return response.data;
+  return response.data.data;
 };
