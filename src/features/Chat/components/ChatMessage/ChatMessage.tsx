@@ -18,32 +18,52 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isMyMessage }) => {
     });
   };
 
-  // TODO - 현재는 프로필 이미지에서 이니셜 추출, 추후 이미지로 변경 예정
-  const getInitials = (username: string) => {
-    return username.slice(0, 2);
-  };
-  // 아바타 색상 결정 (user_id 기반)
-  const getAvatarColor = (userId: string) => {
-    const colors = ['green', 'pink', 'yellow'];
-    const index = userId.charCodeAt(0) % colors.length;
-    return colors[index];
-  };
+  // 메시지 내용에서 코드 참조 파싱
+  const renderMessageContent = (content: string) => {
+    // [[Ref: 파일 경로]] 패턴
+    const refPattern = /\[\[Ref:\s*([^\]]+)\]\]/g;
+    const parts = [];
+    let lastIndex = 0;
+    let match;
 
-  // TODO - 메시지 내부에 코드 참조가 포함되어 있으면, 파일로 연결해주는 기능 구현 필요
+    while ((match = refPattern.exec(content)) !== null) {
+      // 참조 앞의 일반 텍스트 추가
+      if (match.index > lastIndex) {
+        parts.push(content.slice(lastIndex, match.index));
+      }
+
+      parts.push(
+        <span key={match.index} className="chat-message__reference">
+          [[Ref: {match[1]}]]
+        </span>
+      );
+
+      lastIndex = match.index + match[0].length;
+    }
+
+    if (lastIndex < content.length) {
+      parts.push(content.slice(lastIndex));
+    }
+
+    return parts.length > 0 ? parts : content;
+  };
 
   return (
     <div className={`chat-message ${isMyMessage ? 'chat-message--my' : 'chat-message--other'}`}>
       <div className="chat-message__bubble">
         {/* 사용자 아바타 */}
-        <div
-          className={`chat-message__avatar chat-message__avatar--${getAvatarColor(message.user_id)}`}
-        >
-          {getInitials(message.username)}
+        <div className="chat-message__avatar-container">
+          {/* 프로필 이미지 */}
+          <img
+            src={message.profile_image_url}
+            alt={`${message.username} 프로필`}
+            className="chat-message__avatar-image"
+          />
         </div>
         {/* 메시지 내용 */}
         <div className="chat-message__content">
           <div className="chat-message__user-name">{message.username}</div>
-          <div className="chat-message__text">{message.content}</div>
+          <div className="chat-message__text">{renderMessageContent(message.content)}</div>
         </div>
         {/* 시간 */}
         <div className="chat-message__time">{formatTime(message.created_at)}</div>
