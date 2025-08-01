@@ -35,3 +35,20 @@ export const stopRepository = async (
   );
   return response.data.data;
 };
+
+export interface RepositoryLogsResponse {
+  logs: string;
+  port: number | null;
+}
+
+export const getRepositoryLogs = async (
+  repositoryId: number | string,
+  lines = 50,
+  since = '5m'
+): Promise<RepositoryLogsResponse> => {
+  const response = await apiClient.get<{ data: RepositoryLogsResponse }>(
+    `/api/repositories/${repositoryId}/logs`,
+    { lines, since }
+  );
+  return response.data.data;
+};
