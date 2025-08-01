@@ -23,16 +23,17 @@
     ".prettierignore"
   ],
   "words": [
-    "eslint",
-    "stylelint",
-    "prettierrc",
-    "pnpm",
-    "vite",
-    "zustand",
-    "tanstack",
     "Avenir",
+    "eslint",
+    "filetree",
+    "pnpm",
+    "prettierrc",
     "Resizer",
+    "savepoint",
+    "stylelint",
+    "tanstack",
+    "vite",
     "wsconnected",
-    "filetree"
+    "zustand"
   ]
 }
