@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import type { KeyboardEvent } from 'react';
 import { useThemeStore } from '@/stores/themeStore';
 import { useCodeRunnerExecute } from '@/features/Repo/codeRunner/hooks/useCodeRunnerExecute';
+import { useCodeRunnerStop } from '@/features/Repo/codeRunner/hooks/useCodeRunnerStop';
 import './CodeRunner.scss';
 import type { JSX } from 'react/jsx-runtime';
 
@@ -37,6 +38,7 @@ export function CodeRunner(props: CodeRunnerProps) {
 
   // CodeRunner 실행 훅
   const codeRunnerExecute = useCodeRunnerExecute(props.repoId);
+  const codeRunnerStop = useCodeRunnerStop(props.repoId);
 
   // 실행 함수 (비동기)
   const executeCommand = (command: string) => {
@@ -90,6 +92,41 @@ export function CodeRunner(props: CodeRunnerProps) {
     });
   };
 
+  const handleStop = () => {
+    setCommandHistory(prev => [
+      ...prev,
+      { command: 'stop', output: '중지 중...', timestamp: new Date() },
+    ]);
+
+    codeRunnerStop.mutate(undefined, {
+      onSuccess: resp => {
+        setCommandHistory(prev => [
+          ...prev.slice(0, -1),
+          {
+            command: 'stop',
+            output: resp.message,
+            timestamp: new Date(),
+          },
+        ]);
+      },
+      onError: e => {
+        let errorMessage = '중지 실패';
+        if (typeof e === 'object' && e !== null) {
+          const err = e as { response?: { data?: { message?: string } }; message?: string };
+          errorMessage = err.response?.data?.message || err.message || '중지 실패';
+        }
+        setCommandHistory(prev => [
+          ...prev.slice(0, -1),
+          {
+            command: 'stop',
+            output: errorMessage,
+            timestamp: new Date(),
+          },
+        ]);
+      },
+    });
+  };
+
   const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       executeCommand(currentCommand.trim());
@@ -120,7 +157,7 @@ export function CodeRunner(props: CodeRunnerProps) {
           </svg>
         </button>
         {/* 정지 버튼 */}
-        <button className="code-runner__control-button" aria-label="정지">
+        <button className="code-runner__control-button" aria-label="정지" onClick={handleStop}>
           <svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <path d="M10 4H5v16h5V4zm9 0h-5v16h5V4z" fill="currentColor" />
           </svg>
