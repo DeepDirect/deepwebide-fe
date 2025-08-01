@@ -18,7 +18,7 @@ export function CodeRunner(props: CodeRunnerProps) {
   const [commandHistory, setCommandHistory] = useState<CommandHistory[]>([
     {
       command: '',
-      output: 'Hello Typescript!',
+      output: 'Hello DeepWebIDE!',
       timestamp: new Date(),
     },
   ]);
