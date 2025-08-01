@@ -18,6 +18,7 @@ import PasswordInput from '@/components/atoms/Input/PasswordInput';
 import { useQueryClient } from '@tanstack/react-query';
 import { isCurrentUserOwner } from '@/utils/isCurrentUserOwner';
 import { useRouter } from '@tanstack/react-router';
+import { useToast } from '@/hooks/common/useToast';
 
 type shareSectionProps = {
   onShareLinkCopy?: () => void;
@@ -33,6 +34,7 @@ const ShareSection = ({ onShareLinkCopy }: shareSectionProps) => {
   const [isNewEntrtycodeOpen, setIsNewEntrycodeOpen] = useState(false);
   const settingsData = useRepoSettingsStore(state => state.settingsData);
   const queryClient = useQueryClient();
+  const toast = useToast();
 
   const { mutate: shareRepositoryStatus } = useShareRepositoryStatus(`/api/repositories/${repoId}`);
   const { mutate: newEntrycode } = useRepositoryNewEntrycode(
@@ -53,8 +55,7 @@ const ShareSection = ({ onShareLinkCopy }: shareSectionProps) => {
     if (settingsData.shareLink) {
       navigator.clipboard.writeText(settingsData.shareLink);
     }
-    // TODO - Toast로 바꾸기
-    alert('링크가 클립보드에 복사되었습니다.');
+    toast.success('공유 링크가 클립보드에 복사되었습니다.');
     if (onShareLinkCopy) {
       onShareLinkCopy();
     }
@@ -62,14 +63,14 @@ const ShareSection = ({ onShareLinkCopy }: shareSectionProps) => {
 
   const handleEntryCodeCheck = () => {
     setIsEntrycodeVisible(true);
+    toast.success('입장 코드를 확인합니다.');
   };
 
   const handleEntryCodeCopy = () => {
     if (entrycodeData && entrycodeData.data.entryCode) {
       navigator.clipboard.writeText(entrycodeData.data.entryCode);
     }
-    // TODO - Toast로 바꾸기
-    alert('입장 코드가 클립보드에 복사되었습니다.');
+    toast.success('입장 코드가 클립보드에 복사되었습니다.');
   };
 
   // API 사용
@@ -78,30 +79,33 @@ const ShareSection = ({ onShareLinkCopy }: shareSectionProps) => {
     if (repoId) {
       newEntrycode();
       queryClient.invalidateQueries({ queryKey: ['repository', 'entrycode'] });
+      toast.success('입장 코드가 재발급되었습니다.');
     } else {
-      console.error('repository new entrycode failed: repoId is undefined');
+      toast.error('입장 코드 재발급에 실패했습니다.');
     }
   };
 
   const handleShareStatus = () => {
-    if (repoId) {
+    if (repoId && settingsData.isShared) {
       shareRepositoryStatus();
+      toast.success('공유 레포지토리를 개인 레포지토리로 전환합니다.');
+    } else if (repoId && !settingsData.isShared) {
+      shareRepositoryStatus();
+      toast.success('개인 레포지토리를 공유 레포지토리로 전환합니다.');
     } else {
-      console.error('repository delete failed: repoId is undefined');
+      toast.error('레포지토리 공유 모드를 변경할 수 없습니다.');
     }
   };
 
   const handleExitStatus = () => {
     if (repoId) {
       exitRepository();
-      alert('레포지토리를 떠납니다.');
+      toast.success('공유 레포지토리에서 퇴장합니다.');
       router.navigate({ to: '/main' });
     } else {
-      console.error('repository delete failed: repoId is undefined');
+      toast.error('공유 레포지토리에서 퇴장할 수 없습니다.');
     }
   };
-
-  // ============
 
   return (
     <section className={styles.shareSection} id="shareSection">
@@ -262,7 +266,7 @@ const ShareSection = ({ onShareLinkCopy }: shareSectionProps) => {
       />
       {/* 입장코드 재발급 Alert */}
       <AlertDialogComponent
-        open={isNewEntrtycodeOpen} // TODO: 입장코드 재발급 Alert 구현 필요
+        open={isNewEntrtycodeOpen}
         onOpenChange={setIsNewEntrycodeOpen}
         title="입장 코드를 재발급하시겠습니까?"
         confirmText="발급하기"

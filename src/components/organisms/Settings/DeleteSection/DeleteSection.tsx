@@ -1,28 +1,28 @@
 import styles from './DeleteSection.module.scss';
 import DeleteIcon from '@/assets/icons/trash.svg?react';
-import { useParams } from '@tanstack/react-router';
+import { useNavigate, useParams } from '@tanstack/react-router';
 import useDeleteRepository from '@/hooks/main/useDeleteRepository';
 import AlertDialogComponent from '@/components/molecules/AlertDialog/AlertDialog';
 import { useState } from 'react';
-// import { redirect } from '@tanstack/react-router';
+import { useToast } from '@/hooks/common/useToast';
 
 const DeleteSection: React.FC = () => {
   const { repoId } = useParams({ strict: false });
   const [isOpen, setIsOpen] = useState(false);
+  const navigator = useNavigate();
+  const toast = useToast();
 
   const { mutate: deleteRepository } = useDeleteRepository(`/api/repositories/${repoId}`, {
     onSuccess: () => {
-      // 성공적으로 삭제된 후의 로직
       setIsOpen(false);
-      // redirect({ to: '/main' });
-
-      // TODO - 토스트 예정
-      console.log('Repository deleted successfully');
+      navigator({
+        to: '/$repoId',
+        params: { repoId },
+      });
+      toast.success('레포지토리가 삭제되었습니다.');
     },
-    onError: error => {
-      // 에러 처리 로직
-      // TODO 삭제 실패 alert 하면 좋을 듯?
-      console.error('Error deleting repository:', error);
+    onError: () => {
+      toast.error('레포지토리 삭제에 실패했습니다.');
     },
   });
 
@@ -30,7 +30,7 @@ const DeleteSection: React.FC = () => {
     if (repoId) {
       deleteRepository();
     } else {
-      console.error('repository delete failed: repoId is undefined');
+      toast.error('레포지토리 삭제에 실패했습니다.');
     }
   };
 

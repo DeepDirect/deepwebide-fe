@@ -23,6 +23,12 @@ const InvitationLinkForm: React.FC<InvitationLinkFormProps> = ({
     }
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSubmit();
+    }
+  };
+
   return (
     <div className="invitation-form">
       <div className="invitation-form__container">
@@ -48,6 +54,7 @@ const InvitationLinkForm: React.FC<InvitationLinkFormProps> = ({
               placeholder="입장 코드를 입력하세요"
               value={invitationCode}
               onChange={e => setInvitationCode(e.target.value)}
+              onKeyPress={handleKeyPress}
               className="invitation-form__input"
             />
           </div>

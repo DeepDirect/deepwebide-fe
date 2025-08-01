@@ -17,21 +17,22 @@ import MainHeader from '@/components/organisms/Header/MainHeader/MainHeader';
 import useGetRepositorySettings from '@/hooks/settings/useGetRepositorySettings';
 import Loading from '@/components/molecules/Loading/Loading';
 import useRepoSettingsStore from '@/stores/repoSettingsStore';
+import { useToast } from '@/hooks/common/useToast';
 
 const SettingsPage: React.FC = () => {
   const { repoId } = useParams({ strict: false });
   const router = useRouter();
   const canGoBack = useCanGoBack();
+  const toast = useToast();
 
   const { data, isLoading, error } = useGetRepositorySettings(repoId);
 
-  // TODO - Error 처리
   useEffect(() => {
     if (error) {
-      alert('접근할 수 없는 페이지입니다.');
+      toast.error('접근할 수 없는 페이지입니다.');
       router.navigate({ to: '/main' });
     }
-  }, [error, router]);
+  }, [error, router, toast]);
 
   const settingsData = useRepoSettingsStore(state => state.settingsData);
   const setSettingsData = useRepoSettingsStore(state => state.setSettingsData);
