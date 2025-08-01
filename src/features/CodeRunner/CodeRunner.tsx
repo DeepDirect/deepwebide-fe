@@ -156,22 +156,11 @@ export function CodeRunner(props: CodeRunnerProps) {
       {
         command: 'logs',
         output: (
-          <div
-            style={{
-              fontFamily: 'Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
-              color: '#fff',
-              background: '#181a20',
-              fontSize: '1em',
-              lineHeight: 1.7,
-              padding: '16px',
-              borderRadius: 8,
-              overflow: 'auto',
-              whiteSpace: 'pre-wrap',
-              textAlign: 'left',
-            }}
-          >
+          <div className="code-runner__logs-block">
             {streamedLogLines.map((line, idx) => (
-              <div key={idx}>{typeof line === 'string' ? line.trimStart() : ''}</div>
+              <div key={idx} className="code-runner__logs-line">
+                {typeof line === 'string' ? line.trimStart() : ''}
+              </div>
             ))}
           </div>
         ),

@@ -149,3 +149,35 @@
     }
   }
 }
+
+.code-runner__logs-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 8px 0 0;
+  padding: 14px 18px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-family: $font-family-inter;
+  font-size: $font-size-xxsmall;
+  font-weight: $font-weight-regular;
+  line-height: 1.7;
+  text-align: left;
+  color: $gray-5;
+  background-color: $white-1;
+
+  .dark & {
+    color: $white-1;
+    background-color: $black-1;
+  }
+}
+
+.code-runner__logs-line {
+  text-align: left;
+  white-space: pre;
+  word-break: break-all;
+
+  .dark & {
+    color: $white-1;
+  }
+}
