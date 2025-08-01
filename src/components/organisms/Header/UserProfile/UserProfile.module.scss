@@ -25,11 +25,43 @@
   background: none;
   background-color: var(--header-chat-bg);
   box-shadow: $shadow;
+  transition: all 0.2s ease;
   cursor: pointer;
 
   // 900px 초과에서는 숨기기 (toggle이 있을 때)
   @media (width > 900px) {
     display: none;
+  }
+
+  &:hover {
+    color: $white-2;
+    background-color: $gray-5;
+
+    :global(.dark) & {
+      color: $gray-5;
+      background-color: $white-2;
+    }
+  }
+
+  // 활성화 상태
+  &.active {
+    color: $white-2;
+    background-color: $orange;
+
+    :global(.dark) & {
+      color: $white-2;
+      background-color: $orange;
+    }
+
+    &:hover {
+      color: $white-2;
+      background-color: $gray-5;
+
+      :global(.dark) & {
+        color: $gray-5;
+        background-color: $white-2;
+      }
+    }
   }
 }
 

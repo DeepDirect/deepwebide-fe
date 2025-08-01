@@ -36,7 +36,7 @@ export function RepoLayout() {
         [styles.RepoLayoutWithChatNoFileSection]: isChatOpen && !isFileSectionVisible,
       })}
     >
-      <RepoHeader onChatButtonClick={handleChatToggle} />
+      <RepoHeader onChatButtonClick={handleChatToggle} isChatOpen={isChatOpen} />
       <Sidebar />
 
       <main className="content-area">
