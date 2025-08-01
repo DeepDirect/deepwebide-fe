@@ -1,11 +1,63 @@
-import { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useParams } from '@tanstack/react-router';
+import { useGetSearchedChat } from '@/hooks/chat/useGetSearchedChat';
+import { type SearchMessagesData } from '@/schemas/chat.schema';
 import './ChatSearchBar.scss';
 
-const ChatSearchBar: React.FC = () => {
-  const [searchQuery, setSearchQuery] = useState('');
+interface ChatSearchBarProps {
+  onSearchResults?: (results: SearchMessagesData | null) => void;
+}
 
-  // TODO - 검색 로직 구현 필요
-  // 엔터를 눌렀을 때 검색
+const useDebounce = (value: string, delay: number) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+};
+
+const ChatSearchBar: React.FC<ChatSearchBarProps> = ({ onSearchResults }) => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const { repoId } = useParams({ strict: false });
+
+  const debouncedSearchQuery = useDebounce(searchQuery.trim(), 500);
+
+  const { data: searchResults } = useGetSearchedChat(repoId as string, debouncedSearchQuery, {
+    enabled: !!repoId,
+  });
+
+  useEffect(() => {
+    if (onSearchResults) {
+      if (debouncedSearchQuery.length >= 2) {
+        onSearchResults(searchResults?.data.data || null);
+      } else {
+        onSearchResults(null);
+      }
+    }
+  }, [searchResults, onSearchResults, debouncedSearchQuery]);
+
+  const handleSearch = useCallback(() => {
+    if (searchQuery.trim().length < 2) {
+      if (onSearchResults) {
+        onSearchResults(null);
+      }
+      return;
+    }
+  }, [searchQuery, onSearchResults]);
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
 
   return (
     <div className="chat-search-bar">
@@ -15,6 +67,8 @@ const ChatSearchBar: React.FC = () => {
           className="chat-search-bar__input"
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
+          onKeyPress={handleKeyPress}
+          placeholder="검색"
         />
         <svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
           <path
