@@ -1,0 +1,57 @@
+@use '@/styles/variables' as *;
+
+.pathArea {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 400px;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: $font-size-xsmall;
+  font-weight: normal;
+  color: var(--header-text);
+  background-color: var(--header-path-bg);
+
+  @media (width <= 1400px) {
+    width: 300px;
+    padding: 0.5rem 0.75rem;
+  }
+}
+
+.path {
+  flex: 1;
+  min-width: 0;
+  min-height: 1.2em;
+  margin-right: 0.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.iconButton {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  color: inherit;
+  background: none;
+  transition: opacity 0.2s ease;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    color: $orange;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+}

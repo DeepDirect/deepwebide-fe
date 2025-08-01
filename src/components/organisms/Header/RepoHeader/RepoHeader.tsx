@@ -5,7 +5,7 @@ import Logo from '@/components/atoms/Logo/Logo';
 import UserProfile from '@/components/organisms/Header/UserProfile/UserProfile';
 import Toggle from '@/components/atoms/Toggle/Toggle';
 import MessageTextIcon from '@/assets/icons/message-text.svg?react';
-import NoteMultipleIcon from '@/assets/icons/note-multiple.svg?react';
+import PathArea from '@/components/organisms/Header/PathArea/PathArea';
 import useGetRepositorySettings from '@/hooks/settings/useGetRepositorySettings';
 import useRepoSettingsStore from '@/stores/repoSettingsStore';
 
@@ -37,10 +37,7 @@ const RepoHeader = ({ onChatButtonClick, isChatOpen = false }: RepoHeaderProps) 
       </div>
 
       <div className={styles.center}>
-        <div className={styles.pathArea}>
-          <div className={styles.path}>project-name/section01/chapter01.ts</div>
-          <NoteMultipleIcon className={styles.icon} />
-        </div>
+        <PathArea />
 
         {isSharedRepo && (
           <button
