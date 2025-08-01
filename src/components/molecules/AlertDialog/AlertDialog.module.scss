@@ -18,6 +18,7 @@
   flex-direction: column;
   justify-content: space-between;
   width: 400px;
+  max-width: 90vw;
   padding: 1.5rem;
   border: 1px solid var(--alert-border);
   border-radius: $modal-border-radius;
@@ -28,6 +29,11 @@
 
   &:focus {
     outline: none;
+  }
+
+  @media (width <= 480px) {
+    width: 320px;
+    padding: 1.25rem;
   }
 }
 
@@ -42,6 +48,11 @@
   text-align: center;
   color: var(--alert-title-color);
   transition: color 0.2s ease;
+
+  @media (width <= 480px) {
+    margin: 0.75rem 0 0;
+    font-size: $font-size-xsmall;
+  }
 }
 
 .description {
@@ -50,10 +61,16 @@
   font-family: $font-family-primary;
   font-size: $font-size-xsmall;
   font-weight: $font-weight-regular;
-  line-height: $default-line-height;
+  line-height: 1.5;
   text-align: center;
+  white-space: pre-line; /* 개행 문자 지원 */
   color: var(--alert-description-color);
   transition: color 0.2s ease;
+
+  @media (width <= 480px) {
+    margin: 0.4rem 0 0;
+    font-size: 12px;
+  }
 }
 
 // 버튼 컨테이너
@@ -64,6 +81,12 @@
   gap: $modal-button-gap;
   margin-top: 2rem;
   margin-bottom: 1rem;
+
+  @media (width <= 480px) {
+    gap: 8px;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
 }
 
 .confirmButton {
@@ -71,12 +94,24 @@
   height: 39px;
   transition: all 0.2s ease;
 
-  &:hover {
+  &:hover:not(:disabled) {
     transform: translateY(-1px);
   }
 
-  &:active {
+  &:active:not(:disabled) {
     transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    transform: none;
+    cursor: not-allowed;
+  }
+
+  @media (width <= 480px) {
+    width: 80px;
+    height: 36px;
+    font-size: 12px;
   }
 }
 
@@ -88,13 +123,25 @@
   background-color: var(--alert-cancel-bg);
   transition: all 0.2s ease;
 
-  &:hover {
+  &:hover:not(:disabled) {
     background-color: var(--alert-cancel-hover);
     transform: translateY(-1px);
   }
 
-  &:active {
+  &:active:not(:disabled) {
     transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    transform: none;
+    cursor: not-allowed;
+  }
+
+  @media (width <= 480px) {
+    width: 80px;
+    height: 36px;
+    font-size: 12px;
   }
 }
 

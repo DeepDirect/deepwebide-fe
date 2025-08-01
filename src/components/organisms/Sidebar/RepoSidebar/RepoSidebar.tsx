@@ -9,7 +9,7 @@ import { Tooltip } from '@/components/atoms/Tooltip/Tooltip';
 import { useFileSectionStore } from '@/stores/fileSectionStore';
 
 export const Sidebar = () => {
-  const { isVisible, toggleVisibility } = useFileSectionStore();
+  const { isVisible, activeSection, toggleSection } = useFileSectionStore();
 
   return (
     <aside className={styles.sidebar}>
@@ -17,16 +17,21 @@ export const Sidebar = () => {
         <Tooltip label="Files">
           <button
             className={clsx(styles.icon, {
-              [styles.active]: isVisible,
+              [styles.active]: isVisible && activeSection === 'files',
             })}
-            onClick={toggleVisibility}
+            onClick={() => toggleSection('files')}
           >
             <FilesIcon className={styles.iconImage} />
           </button>
         </Tooltip>
 
-        <Tooltip label="Save">
-          <button className={styles.icon}>
+        <Tooltip label="Save Point">
+          <button
+            className={clsx(styles.icon, {
+              [styles.active]: isVisible && activeSection === 'save',
+            })}
+            onClick={() => toggleSection('save')}
+          >
             <SaveIcon className={styles.iconImage} />
           </button>
         </Tooltip>
