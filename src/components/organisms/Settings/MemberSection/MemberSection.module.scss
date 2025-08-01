@@ -1,0 +1,91 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+
+.infoSection {
+  font-family: $font-family-inter;
+  color: $black-1;
+  user-select: none;
+
+  @include mobile {
+    width: 100%;
+  }
+
+  .icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .nameIcon {
+    width: $font-size-xlarge;
+    height: $font-size-xlarge;
+  }
+
+  .sectionTitleWrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    height: 92px;
+    font-family: $font-family-silkscreen;
+
+    .sectionTitle {
+      font-size: $font-size-xlarge;
+    }
+  }
+
+  .grid {
+    display: grid;
+    align-items: center;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0 2rem;
+    width: 700px;
+    transition-duration: 0.5s;
+    grid-auto-rows: 78px;
+
+    @include mobile {
+      grid-template-columns: 1fr 1fr 0.5fr;
+      gap: 1rem;
+      width: 100%;
+      min-width: 0;
+      transition-duration: 0.5s;
+    }
+  }
+
+  .label {
+    font-family: $font-family-silkscreen;
+    font-size: $font-size-small;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  .member {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    font-size: $font-size-xsmall;
+    text-align: left;
+    white-space: nowrap;
+
+    .profile {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      -webkit-user-drag: none;
+    }
+
+    .nickname {
+      margin-left: 0.5rem;
+    }
+  }
+
+  .iconWrapper {
+    text-align: right;
+
+    .iconButton {
+      margin: 0;
+      padding: 0;
+      background: none;
+    }
+  }
+}

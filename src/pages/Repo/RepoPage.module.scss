@@ -1,0 +1,191 @@
+@use '@/styles/variables' as *;
+
+.repoPage {
+  display: flex;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+
+  &.horizontalResizing {
+    cursor: col-resize;
+    user-select: none;
+
+    * {
+      pointer-events: none;
+    }
+
+    .horizontalResizer {
+      background-color: var(--resizer-active-bg);
+    }
+  }
+}
+
+.fileSection {
+  position: relative;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  min-width: 0;
+  border-right: 1px solid var(--resizer-border);
+  overflow: hidden;
+  background-color: var(--file-section-bg);
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 1px;
+    height: 100%;
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      var(--resizer-shadow) 20%,
+      var(--resizer-shadow) 80%,
+      transparent 100%
+    );
+    pointer-events: none;
+  }
+}
+
+.resizer {
+  position: relative;
+  flex-shrink: 0;
+  background-color: var(--resizer-bg);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.horizontalResizer {
+  z-index: 10;
+  width: 6px;
+  cursor: col-resize;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 2px;
+    height: 20px;
+    border-right: 1px dotted var(--resizer-handle);
+    border-left: 1px dotted var(--resizer-handle);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    transform: translate(-50%, -50%);
+  }
+
+  &:hover {
+    background-color: var(--resizer-hover-bg);
+
+    &::before {
+      opacity: 1;
+    }
+  }
+
+  &:active {
+    background-color: var(--resizer-active-bg);
+
+    &::before {
+      border-color: var(--resizer-active-handle);
+      opacity: 1;
+    }
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -2px;
+    width: 10px;
+    height: 100%;
+    cursor: col-resize;
+  }
+}
+
+.editorGroup {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 1;
+  box-sizing: border-box;
+  min-width: 460px;
+  height: 100%;
+  overflow: hidden;
+
+  @media (width <= 1400px) {
+    min-width: 420px;
+  }
+
+  @media (width <= 1200px) {
+    min-width: 380px;
+  }
+}
+
+.editorSection {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  box-sizing: border-box;
+  min-height: 200px;
+  overflow: hidden;
+  background-color: var(--editor-bg);
+
+  @media screen and (height <= 600px) {
+    min-height: 150px;
+    border-bottom: none;
+  }
+}
+
+.tabBarContainer {
+  flex: 0 0 auto;
+  height: 40px;
+  overflow: hidden;
+}
+
+.editorContainer {
+  flex: 1;
+  min-height: 0;
+}
+
+.terminalSection {
+  flex: 0 0 273px;
+  box-sizing: border-box;
+  overflow: hidden;
+  background-color: #343a40;
+
+  @media screen and (height <= 700px) {
+    flex: 0 0 200px;
+  }
+
+  @media screen and (height <= 600px) {
+    flex: 0 0 150px;
+  }
+
+  @media screen and (height <= 500px) {
+    display: none;
+  }
+}
+
+@media screen and (width <= 769px) {
+  .fileSection {
+    display: none;
+  }
+
+  .horizontalResizer {
+    display: none;
+  }
+
+  .editorGroup {
+    width: 100% !important;
+    min-width: unset;
+  }
+
+  .editorSection {
+    flex: 1;
+    min-height: 200px;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  .terminalSection {
+    flex: 0 0 200px;
+  }
+}

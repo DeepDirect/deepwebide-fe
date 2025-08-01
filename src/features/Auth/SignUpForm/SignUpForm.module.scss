@@ -1,0 +1,25 @@
+@use '@/styles/variables.scss' as *;
+
+.form {
+  width: 100%;
+}
+
+.submitBtn {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.fieldWithButton {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+
+  input {
+    flex: 1;
+  }
+
+  button {
+    width: 10.6rem;
+    white-space: nowrap;
+  }
+}

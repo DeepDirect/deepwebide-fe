@@ -1,0 +1,14 @@
+@use '@/styles/variables' as *;
+
+.mainLayout {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: fit-content;
+  height: 100%;
+  padding-top: 56px;
+  background-color: $white-1;
+}

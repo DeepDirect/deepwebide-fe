@@ -1,0 +1,53 @@
+@use '@/styles/variables.scss' as *;
+
+.inner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 500px;
+  margin: auto;
+}
+
+.title {
+  font-size: $font-size-xxxlarge;
+  font-weight: $font-weight-bold;
+  color: $blue-3;
+}
+
+.text {
+  margin-bottom: 2rem;
+  font-size: $font-size-xsmall;
+  font-weight: $font-weight-bold;
+  color: $gray-6;
+}
+
+.links {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.link {
+  font-size: $font-size-xxsmall;
+  font-weight: $font-weight-bold;
+  text-decoration: none;
+  color: $gray-1;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+    color: $gray-1;
+  }
+}
+
+.linkWarning {
+  text-decoration: none;
+  color: $orange;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+    color: $orange;
+  }
+}

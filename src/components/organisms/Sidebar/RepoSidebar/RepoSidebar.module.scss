@@ -1,0 +1,86 @@
+@use '@/styles/variables' as vars;
+
+.sidebar {
+  z-index: 9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  width: 44px;
+  height: calc(100vh - 56px);
+  padding: 12px 0;
+  border-right: 1px solid vars.$gray-8;
+  background-color: vars.$gray-10;
+
+  :global(.dark) & {
+    border: none;
+    background-color: vars.$black-2;
+  }
+}
+
+.top,
+.bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 29px;
+  height: 29px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 5px;
+  color: vars.$gray-5;
+  background-color: vars.$white-2;
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  :global(.dark) & {
+    color: vars.$white-2;
+    background-color: vars.$gray-5;
+  }
+
+  &:hover {
+    color: vars.$white-2;
+    background-color: vars.$gray-5;
+
+    :global(.dark) & {
+      color: vars.$gray-5;
+      background-color: vars.$white-2;
+    }
+  }
+
+  // 활성화 상태 - 포인트 색상 적용
+  &.active {
+    color: vars.$white-2;
+    background-color: vars.$orange;
+
+    :global(.dark) & {
+      color: vars.$white-2;
+      background-color: vars.$orange;
+    }
+
+    // 활성화 상태에서도 호버 효과 유지
+    &:hover {
+      color: vars.$white-2;
+      background-color: vars.$gray-5;
+
+      :global(.dark) & {
+        color: vars.$gray-5;
+        background-color: vars.$white-2;
+      }
+    }
+  }
+
+  .iconImage {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+  }
+}

@@ -1,0 +1,200 @@
+@use '@/styles/variables' as *;
+
+// 오버레이 (배경)
+.overlay {
+  position: fixed;
+  z-index: $modal-overlay-z-index;
+  background: var(--alert-overlay-bg);
+  animation: fade-in $modal-transition-duration $modal-transition-easing;
+  inset: 0;
+}
+
+.content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: $modal-z-index;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 400px;
+  max-width: 90vw;
+  padding: 1.5rem;
+  border: 1px solid var(--alert-border);
+  border-radius: $modal-border-radius;
+  background: var(--alert-content-bg);
+  box-shadow: var(--alert-shadow);
+  animation: slide-in $modal-transition-duration $modal-transition-easing;
+  transform: translate(-50%, -50%);
+
+  &:focus {
+    outline: none;
+  }
+
+  @media (width <= 480px) {
+    width: 320px;
+    padding: 1.25rem;
+  }
+}
+
+// 제목
+.title {
+  margin: 1rem 0 0;
+  overflow-wrap: break-word;
+  font-family: $font-family-primary;
+  font-size: $font-size-small;
+  font-weight: $font-weight-medium;
+  line-height: $default-line-height;
+  text-align: center;
+  color: var(--alert-title-color);
+  transition: color 0.2s ease;
+
+  @media (width <= 480px) {
+    margin: 0.75rem 0 0;
+    font-size: $font-size-xsmall;
+  }
+}
+
+.description {
+  margin: 0.5rem 0 0;
+  overflow-wrap: break-word;
+  font-family: $font-family-primary;
+  font-size: $font-size-xsmall;
+  font-weight: $font-weight-regular;
+  line-height: 1.5;
+  text-align: center;
+  white-space: pre-line; /* 개행 문자 지원 */
+  color: var(--alert-description-color);
+  transition: color 0.2s ease;
+
+  @media (width <= 480px) {
+    margin: 0.4rem 0 0;
+    font-size: 12px;
+  }
+}
+
+// 버튼 컨테이너
+.buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $modal-button-gap;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+
+  @media (width <= 480px) {
+    gap: 8px;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+}
+
+.confirmButton {
+  width: 94px;
+  height: 39px;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    transform: none;
+    cursor: not-allowed;
+  }
+
+  @media (width <= 480px) {
+    width: 80px;
+    height: 36px;
+    font-size: 12px;
+  }
+}
+
+.cancelButton {
+  width: 94px;
+  height: 39px;
+  border: 1px solid var(--alert-cancel-border);
+  color: var(--alert-cancel-text);
+  background-color: var(--alert-cancel-bg);
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background-color: var(--alert-cancel-hover);
+    transform: translateY(-1px);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    transform: none;
+    cursor: not-allowed;
+  }
+
+  @media (width <= 480px) {
+    width: 80px;
+    height: 36px;
+    font-size: 12px;
+  }
+}
+
+// 다크모드/라이트모드 색상 변수
+:root {
+  // 라이트모드
+  --alert-overlay-bg: rgb(0 0 0 / 30%);
+  --alert-content-bg: #{$white-2};
+  --alert-border: #{$gray-8};
+  --alert-title-color: #{$black-1};
+  --alert-description-color: #{$gray-3};
+  --alert-cancel-bg: #{$gray-5};
+  --alert-cancel-text: #{$white-2};
+  --alert-cancel-border: #{$gray-5};
+  --alert-cancel-hover: #{$gray-4};
+  --alert-shadow:
+    0 10px 25px rgb(0 0 0 / 15%), 0 20px 48px rgb(0 0 0 / 15%), 0 0 0 1px rgb(0 0 0 / 5%);
+}
+
+:global(.dark) {
+  // 다크모드
+  --alert-overlay-bg: rgb(0 0 0 / 50%);
+  --alert-content-bg: #{$gray-2};
+  --alert-border: #{$gray-4};
+  --alert-title-color: #{$white-2};
+  --alert-description-color: #{$gray-7};
+  --alert-cancel-bg: #{$gray-5};
+  --alert-cancel-text: #{$white-2};
+  --alert-cancel-border: #{$gray-4};
+  --alert-cancel-hover: #{$gray-4};
+  --alert-shadow:
+    0 10px 25px rgb(0 0 0 / 25%), 0 20px 48px rgb(0 0 0 / 25%), 0 0 0 1px rgb(255 255 255 / 10%);
+}
+
+// 애니메이션
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}

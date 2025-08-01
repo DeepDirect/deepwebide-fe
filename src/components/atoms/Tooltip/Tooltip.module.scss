@@ -1,0 +1,19 @@
+@use '@/styles/variables' as vars;
+
+.tooltip {
+  z-index: 1001;
+  padding: 6px 10px;
+  border-radius: 5px;
+  font-family: vars.$font-family-inter;
+  font-size: vars.$font-size-xxsmall;
+  font-weight: vars.$font-weight-semi-bold;
+  white-space: nowrap;
+  color: vars.$black-1;
+  background-color: vars.$white-2;
+  box-shadow: 0 2px 10px rgb(0 0 0 / 8%);
+  user-select: none;
+}
+
+.arrow {
+  fill: vars.$white-2;
+}

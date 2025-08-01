@@ -1,0 +1,195 @@
+@use '@/styles/variables' as *;
+
+.overlay {
+  position: fixed;
+  z-index: $modal-overlay-z-index;
+  background: var(--modal-overlay-bg);
+  animation: fade-in $modal-transition-duration $modal-transition-easing;
+  inset: 0;
+}
+
+.content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: $modal-z-index;
+  width: auto;
+  max-width: $modal-max-width;
+  min-width: $modal-min-width;
+  max-height: 85vh;
+  padding: $modal-padding;
+  border: 1px solid var(--modal-border);
+  border-radius: $modal-border-radius;
+  background: var(--modal-content-bg);
+  box-shadow: var(--modal-shadow);
+  animation: slide-in $modal-transition-duration $modal-transition-easing;
+  transform: translate(-50%, -50%);
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.header {
+  margin-bottom: $modal-title-margin-bottom;
+  text-align: center;
+}
+
+.title {
+  margin: 0;
+  font-family: $font-family-primary;
+  font-size: $font-size-medium;
+  font-weight: $font-weight-bold;
+  line-height: $default-line-height;
+  color: var(--modal-title-color);
+  transition: color 0.2s ease;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  clip: rect(0, 0, 0, 0);
+}
+
+.body {
+  flex: 1;
+  width: 430px;
+  max-height: 60vh;
+  margin-bottom: $modal-content-margin-bottom;
+  overflow: auto;
+  overflow-wrap: break-word;
+  font-size: $font-size-xsmall;
+  font-weight: $font-weight-regular;
+  line-height: $default-line-height;
+  word-break: break-all;
+  color: var(--modal-content-color);
+  transition: color 0.2s ease;
+  scrollbar-color: var(--modal-scrollbar) transparent;
+
+  // Firefox 스크롤바
+  scrollbar-width: thin;
+
+  // 스크롤바 스타일링
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background: var(--modal-scrollbar);
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background: var(--modal-scrollbar-hover);
+    }
+  }
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $modal-button-gap;
+  margin-top: $modal-button-margin-top;
+}
+
+.confirmButton {
+  width: 94px;
+  height: 39px;
+  transition: all 0.2s ease;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+
+    &:hover {
+      transform: none;
+    }
+  }
+}
+
+.cancelButton {
+  width: 94px;
+  height: 39px;
+  border: 1px solid var(--modal-cancel-border);
+  color: var(--modal-cancel-text);
+  background-color: var(--modal-cancel-bg);
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: var(--modal-cancel-hover);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// 다크모드/라이트모드 색상 변수
+:root {
+  // 라이트모드
+  --modal-overlay-bg: rgb(0 0 0 / 30%);
+  --modal-content-bg: #{$white-2};
+  --modal-border: #{$gray-8};
+  --modal-title-color: #{$black-1};
+  --modal-content-color: #{$gray-3};
+  --modal-scrollbar: #{$gray-7};
+  --modal-scrollbar-hover: #{$gray-6};
+  --modal-cancel-bg: #{$gray-5};
+  --modal-cancel-text: #{$white-2};
+  --modal-cancel-border: #{$gray-5};
+  --modal-cancel-hover: #{$gray-4};
+  --modal-shadow:
+    0 10px 25px rgb(0 0 0 / 15%), 0 20px 48px rgb(0 0 0 / 15%), 0 0 0 1px rgb(0 0 0 / 5%);
+}
+
+:global(.dark) {
+  // 다크모드
+  --modal-overlay-bg: rgb(0 0 0 / 50%);
+  --modal-content-bg: #{$gray-2};
+  --modal-border: #{$gray-4};
+  --modal-title-color: #{$white-2};
+  --modal-content-color: #{$gray-7};
+  --modal-scrollbar: #{$gray-5};
+  --modal-scrollbar-hover: #{$gray-4};
+  --modal-cancel-bg: #{$gray-5};
+  --modal-cancel-text: #{$white-2};
+  --modal-cancel-border: #{$gray-4};
+  --modal-cancel-hover: #{$gray-4};
+  --modal-shadow:
+    0 10px 25px rgb(0 0 0 / 25%), 0 20px 48px rgb(0 0 0 / 25%), 0 0 0 1px rgb(255 255 255 / 10%);
+}
+
+// 애니메이션
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}

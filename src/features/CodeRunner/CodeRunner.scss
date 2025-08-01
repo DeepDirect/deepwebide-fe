@@ -1,0 +1,189 @@
+@use '@/styles/variables' as *;
+
+.code-runner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: calc(100% - 16px);
+  height: calc(100% - 16px);
+  margin: 8px;
+  border-radius: 10px;
+  font-family: $font-family-inter;
+  background-color: $white-1;
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.code-runner__controls {
+  position: absolute;
+  top: 17px;
+  right: 17px;
+  z-index: 1;
+  display: flex;
+  gap: 4px;
+}
+
+.code-runner__control-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+
+  &:first-child {
+    color: $orange;
+  }
+
+  &:last-child {
+    color: $blue-3;
+  }
+
+  &:hover {
+    opacity: 0.7;
+  }
+
+  svg {
+    width: 25px;
+    height: 25px;
+  }
+}
+
+.code-runner__content {
+  flex: 1;
+  padding: 26px 20px 20px;
+  border-radius: 10px;
+  overflow: auto;
+  background-color: $white-1;
+  transition: background-color 0.3s ease;
+
+  .dark & {
+    background-color: $black-1;
+  }
+}
+
+.code-runner__output-section {
+  margin: 0;
+}
+
+.code-runner__output-line {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+
+.code-runner__input-section {
+  .code-runner__input-line {
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+  }
+}
+
+.code-runner__prompt {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 12px;
+  color: $orange;
+}
+
+.code-runner__project-path {
+  position: relative;
+  display: inline-block;
+  min-width: 100px;
+  padding: 5px 35px 5px 15px;
+  font-size: $font-size-xxsmall;
+  font-weight: $font-weight-regular;
+  text-align: center;
+  color: $white-1;
+  background-color: $orange;
+  clip-path: polygon(0 0, calc(100% - 25px) 0, 100% 100%, 0 100%);
+}
+
+.code-runner__output {
+  font-size: $font-size-xxsmall;
+  font-weight: $font-weight-regular;
+  color: $gray-5;
+
+  .dark & {
+    color: $white-1;
+  }
+}
+
+.code-runner__command {
+  font-size: $font-size-xxsmall;
+  font-weight: $font-weight-regular;
+  color: $gray-5;
+
+  .dark & {
+    color: $white-1;
+  }
+}
+
+.code-runner__command-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: $font-size-xxsmall;
+  color: $gray-5;
+  background: transparent;
+
+  &::placeholder {
+    color: $gray-6;
+  }
+
+  &:focus {
+    outline: none;
+  }
+
+  .dark & {
+    color: $white-1;
+
+    &::placeholder {
+      color: $gray-8;
+    }
+  }
+}
+
+.code-runner__logs-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow-x: auto;
+  font-family: $font-family-inter;
+  font-size: $font-size-xxsmall;
+  font-weight: $font-weight-regular;
+  line-height: 1.7;
+  text-align: left;
+  color: $gray-5;
+  background-color: $white-1;
+
+  .dark & {
+    color: $white-1;
+    background-color: $black-1;
+  }
+}
+
+.code-runner__logs-line {
+  text-align: left;
+  white-space: pre;
+  word-break: break-all;
+
+  .dark & {
+    color: $white-1;
+  }
+}
+
+.code-runner__open-url-link {
+  font-family: $font-family-inter;
+  font-size: $font-size-xsmall;
+  font-weight: $font-weight-semi-bold;
+  text-decoration: underline;
+  color: $blue-1;
+  cursor: pointer;
+}

@@ -1,0 +1,59 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+
+.wrapper {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: fit-content;
+  height: 100%;
+  padding: 101px 67px 1rem 111px;
+  background-color: $white-1;
+
+  @include mobile {
+    padding: 3rem 1rem 1rem calc(1rem + 44px);
+  }
+
+  .topWrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+    min-width: 430px;
+
+    .title {
+      font-size: $font-size-xxlarge;
+      font-weight: bold;
+      text-align: left;
+    }
+
+    .buttonWrapper {
+      .repoButton {
+        margin-left: 12px;
+        padding: 8px 25px;
+        background-color: $orange;
+        box-shadow: $shadow-under;
+
+        .iconImage {
+          width: 24px;
+          height: 24px;
+          margin-right: 8px;
+        }
+      }
+    }
+  }
+
+  .repositoriesWrapper {
+    display: flex;
+    align-items: stretch;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    flex-flow: column nowrap;
+  }
+
+  .paginationWrapper {
+    margin-top: 2rem;
+    padding: 1rem 0;
+  }
+}

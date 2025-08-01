@@ -1,0 +1,42 @@
+@use '@/styles/variables' as *;
+
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 7;
+  width: 100vw;
+  height: 100vh;
+  background: transparent;
+}
+
+.content {
+  position: absolute;
+  z-index: 8;
+  width: max-content;
+  max-width: 480px;
+  min-width: 200px;
+  padding: 0.5rem 0;
+  border: 1px solid $gray-8;
+  border-radius: 10px;
+  background: $white-2;
+  box-shadow: $shadow-under;
+  animation: fade-in $modal-transition-duration $modal-transition-easing;
+
+  &:focus {
+    outline: none;
+  }
+}
+
+// 애니메이션
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

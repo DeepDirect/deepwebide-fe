@@ -1,0 +1,40 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "ignorePaths": [
+    "**/node_modules/**",
+    "**/.git/**",
+    "**/.gitignore/**",
+    "**/*.config.js",
+    "**/*.config.ts",
+    "**/.eslintrc.*",
+    "**/.prettierrc",
+    "**/.stylelintrc",
+    "**/package.json",
+    "**/package-lock.json",
+    "**/tsconfig.json",
+    "**/.husky/**",
+    "**/*.json",
+    "**/*.yaml",
+    "**/*.scss",
+    "vite.config.ts",
+    ".env",
+    ".env.example",
+    ".prettierignore"
+  ],
+  "words": [
+    "Avenir",
+    "eslint",
+    "filetree",
+    "partialize",
+    "pnpm",
+    "prettierrc",
+    "Resizer",
+    "savepoint",
+    "stylelint",
+    "tanstack",
+    "vite",
+    "wsconnected",
+    "zustand"
+  ]
+}

@@ -1,0 +1,85 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+
+.deleteSection {
+  color: $black-1;
+  user-select: none;
+
+  @include mobile {
+    width: 100%;
+  }
+
+  .icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .nameIcon {
+    width: $font-size-xlarge;
+    height: $font-size-xlarge;
+  }
+
+  .sectionTitleWrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: $font-size-xxsmall;
+    height: 92px;
+    font-family: $font-family-silkscreen;
+    color: $red;
+
+    .sectionTitle {
+      font-size: $font-size-xlarge;
+    }
+  }
+
+  .flex {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0 2rem;
+    width: 883px;
+    height: 92px;
+    font-family: $font-family-inter;
+    transition-duration: 0.5s;
+
+    @include mobile {
+      gap: 1rem;
+      width: 100%;
+      min-width: 0;
+      transition-duration: 0.5s;
+    }
+
+    .label {
+      font-family: $font-family-silkscreen;
+      font-size: $font-size-small;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    .buttonWrapper {
+      height: 3rem;
+
+      .deleteButton {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 25px;
+        border: 1px solid $red;
+        border-radius: 12px;
+        font-family: $font-family-inter;
+        font-size: $font-size-small;
+        color: $red;
+        background: none;
+
+        .buttonIcon {
+          width: 24px;
+          height: 24px;
+          margin-right: 10px;
+        }
+      }
+    }
+  }
+}

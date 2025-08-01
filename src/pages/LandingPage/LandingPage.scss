@@ -1,0 +1,207 @@
+@use '@/styles/variables' as *;
+
+.landing-page {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  font-family: $font-family-silkscreen;
+  background-color: $white-1;
+
+  // 기본 커서: GPS 아이콘
+  cursor:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M13 2v4h5v5h4v2h-4v5h-5v4h-2v-4H6v-5H2v-2h4V6h5V2h2zM8 8v8h8V8H8zm2 2h4v4h-4v-4z' fill='%23DC2626'/%3E%3C/svg%3E")
+      30 30,
+    pointer;
+
+  // Start 버튼을 누른 후 커서: 모래시계 아이콘
+  &.started {
+    cursor:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M18 2H6v6h2v2h2v4H8v2H6v6h12v-6h-2v-2h-2v-4h2V8h2V2zm-2 6h-2v2h-4V8H8V4h8v4zm-2 6v2h2v4H8v-4h2v-2h4z' fill='%232767A1'/%3E%3C/svg%3E")
+        30 30,
+      wait;
+  }
+}
+
+.title-section {
+  position: absolute;
+  top: 200px;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  text-align: center;
+  color: $orange;
+  transform: translateX(-50%);
+}
+
+.title-section .logo-image {
+  width: 450px;
+  height: auto;
+}
+
+.web-ide-title {
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  margin-right: auto;
+  margin-left: auto;
+  font-family: $font-family-silkscreen;
+  font-size: $font-size-xxlarge;
+  font-weight: $font-weight-regular;
+}
+
+.who-made-text {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  font-family: $font-family-silkscreen;
+  font-size: $font-size-small;
+  font-weight: $font-weight-regular;
+  color: $orange;
+}
+
+.hello-text {
+  position: absolute;
+  top: 391px;
+  left: 65%;
+  width: 144.57px;
+  height: 106.82px;
+  font-family: $font-family-inter;
+  font-size: $font-size-xxlarge;
+  font-weight: $font-weight-bold;
+  line-height: 1.21;
+  color: $blue-3;
+  opacity: 0;
+  transition:
+    opacity 2s cubic-bezier(0.25, 0.8, 0.25, 1),
+    transform 2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transform: translateY(40px) scale(0.95);
+  pointer-events: none;
+}
+
+.landing-page.started .hello-text {
+  opacity: 1;
+  transform: translateY(0) scale(1.08);
+  pointer-events: auto;
+}
+
+.logo-section {
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.logo {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.logo-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.glasses-image {
+  position: absolute;
+
+  // 피그마와 동일하게 안경 위치 조정
+  top: 14%;
+  left: 50%;
+  z-index: 2;
+  width: 144px;
+  height: 123px;
+  transition: transform 2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform: translateX(-50%);
+}
+
+.logo--started {
+  .glasses-image {
+    transform: translateX(-50%) translateY(-30px);
+  }
+}
+
+.start-button-container {
+  position: absolute;
+  top: 80%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.start-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 13px;
+  border: none;
+  border-bottom: 6px solid $orange;
+  font-family: $font-family-silkscreen;
+  font-size: 3rem;
+  font-weight: $font-weight-regular;
+  color: $orange;
+  background: transparent;
+  transition: all 0.4s ease;
+
+  &:hover:not(:disabled) {
+    background-color: rgb(255 101 0 / 10%);
+    transform: translateY(-2px);
+    cursor:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M13 2v4h5v5h4v2h-4v5h-5v4h-2v-4H6v-5H2v-2h4V6h5V2h2zM8 8v8h8V8H8zm2 2h4v4h-4v-4z' fill='%23DC2626'/%3E%3C/svg%3E")
+        30 30,
+      pointer;
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    color: $blue-3;
+    cursor:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M18 2H6v6h2v2h2v4H8v2H6v6h12v-6h-2v-2h-2v-4h2V8h2V2zm-2 6h-2v2h-4V8H8V4h8v4zm-2 6v2h2v4H8v-4h2v-2h4z' fill='%232767A1'/%3E%3C/svg%3E")
+        30 30,
+      wait;
+    border-bottom-color: $blue-3;
+  }
+}
+
+@media (width <= 768px) {
+  .title-section .logo-image {
+    top: 50%;
+    width: 300px;
+  }
+
+  .web-ide-title {
+    width: 140px;
+    font-size: $font-size-large;
+  }
+
+  .logo-section {
+    width: 152px;
+    height: 152px;
+  }
+
+  .start-button {
+    padding: 8px 10px;
+    font-size: 2rem;
+  }
+
+  .glasses-image {
+    top: 15%;
+    left: 50%;
+    z-index: 2;
+    width: 108px;
+    height: auto;
+    height: 92px;
+    transition: transform 2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transform: translateX(-50%);
+  }
+}

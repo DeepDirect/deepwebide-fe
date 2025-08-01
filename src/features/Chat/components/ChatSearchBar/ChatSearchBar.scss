@@ -1,0 +1,66 @@
+@use '@/styles/variables' as *;
+
+.chat-search-bar {
+  padding: 40px 30px 10px;
+}
+
+.chat-search-bar__area {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 40px;
+  border-radius: 10px;
+  background-color: $gray-10;
+  transition: background-color 0.3s ease;
+
+  &:focus-within {
+    background-color: $gray-9;
+  }
+
+  .dark & {
+    color: $white-2;
+    background-color: $gray-4;
+
+    &:focus-within {
+      background-color: $gray-5;
+    }
+  }
+}
+
+.chat-search-bar__input {
+  width: 100%;
+  height: 40px;
+  padding: 0 50px 0 20px;
+  border: none;
+  font-size: $font-size-xxsmall;
+  font-weight: $font-weight-bold;
+  color: $black-1;
+  background-color: transparent;
+
+  &::placeholder {
+    font-weight: $font-weight-medium;
+    color: $gray-5;
+  }
+
+  &:focus {
+    outline: none;
+  }
+
+  .dark & {
+    color: $white-2;
+  }
+}
+
+.chat-search-bar__area svg {
+  position: absolute;
+  right: 16px;
+  width: 16px;
+  height: 16px;
+  color: $black-1;
+  pointer-events: none; // 클릭 이벤트가 input으로 전달되도록... 아이콘 눌러서 검색할거면 빼야 함
+
+  .dark & {
+    color: $white-2;
+  }
+}

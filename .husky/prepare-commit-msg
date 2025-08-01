@@ -1,0 +1,37 @@
+#!/bin/sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# 커밋 메시지 파일 경로
+COMMIT_MESSAGE_FILE_PATH=$1
+
+# 파일 존재 확인
+if [ ! -f "$COMMIT_MESSAGE_FILE_PATH" ]; then
+  exit 0
+fi
+
+# 현재 브랜치명 가져오기
+BRANCH_NAME=$(git symbolic-ref --short HEAD 2>/dev/null || echo "")
+
+# 브랜치명에서 DP-숫자 패턴 추출
+if echo "$BRANCH_NAME" | grep -q "DP-[0-9]\+"; then
+  # DP-숫자 패턴 추출
+  JIRA_TICKET=$(echo "$BRANCH_NAME" | grep -o "DP-[0-9]\+" | head -1)
+  
+  # 기존 커밋 메시지 읽기
+  COMMIT_MESSAGE=$(cat "$COMMIT_MESSAGE_FILE_PATH")
+  
+  # 첫 번째 줄(제목)과 나머지(본문) 분리
+  TITLE=$(echo "$COMMIT_MESSAGE" | head -n 1)
+  BODY=$(echo "$COMMIT_MESSAGE" | tail -n +2)
+  
+  # 제목에 JIRA 번호 추가
+  NEW_TITLE="$TITLE / $JIRA_TICKET"
+  
+  # 본문이 있으면 제목과 본문을 합치고, 없으면 제목만
+  if [ -n "$BODY" ] && [ "$BODY" != "$TITLE" ]; then
+    echo "$NEW_TITLE
+$BODY" > "$COMMIT_MESSAGE_FILE_PATH"
+  else
+    echo "$NEW_TITLE" > "$COMMIT_MESSAGE_FILE_PATH"
+  fi
+fi

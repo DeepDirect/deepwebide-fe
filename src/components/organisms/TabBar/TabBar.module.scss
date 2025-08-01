@@ -1,0 +1,183 @@
+@use '@/styles/variables' as *;
+
+.tabBar {
+  display: flex;
+  height: 40px;
+  padding: 0;
+  overflow-x: auto;
+  white-space: nowrap;
+  background-color: var(--tab-bar-bg);
+
+  // 스크롤바 스타일링
+  &::-webkit-scrollbar {
+    height: 3px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--tab-bar-bg);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 3px;
+    background: var(--tab-scrollbar-thumb);
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--tab-scrollbar-thumb-hover);
+  }
+}
+
+.tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  max-width: 200px;
+  min-width: 120px;
+  padding: 0 16px;
+  border-right: 1px solid var(--tab-border);
+  font-size: $font-size-xxsmall;
+  font-weight: $font-weight-medium;
+  color: var(--tab-text);
+  background-color: var(--tab-bg);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  user-select: none;
+
+  &:hover {
+    color: var(--tab-text-hover);
+    background-color: var(--tab-bg-hover);
+  }
+
+  &:first-child {
+    border-left: none;
+  }
+}
+
+.active {
+  border-bottom: 2px solid var(--tab-active-line);
+  color: var(--tab-text-active);
+  background-color: var(--tab-bg-active);
+
+  &:hover {
+    color: var(--tab-text-active);
+    background-color: var(--tab-bg-active);
+  }
+}
+
+.tabContent {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.fileIcon {
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+
+  // 픽셀아트 아이콘의 선명함을 위해
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  image-rendering: crisp-edges;
+
+  :global(.dark) & {
+    filter: brightness(0) invert(1);
+  }
+}
+
+.tabName {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.closeBtn {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: none;
+  border-radius: 3px;
+  background: transparent;
+  opacity: 0.6;
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--tab-close-btn-bg);
+    opacity: 1;
+  }
+
+  img {
+    width: 10px;
+    height: 10px;
+
+    :global(.dark) & {
+      filter: brightness(0) invert(1);
+    }
+  }
+}
+
+.statusIndicator {
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+
+  &.saved {
+    background-color: $blue-3;
+    opacity: 0.8;
+  }
+
+  &.dirty {
+    background-color: $orange;
+    opacity: 1;
+    animation: pulse 2s infinite;
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.6;
+  }
+}
+
+// 반응형 디자인
+@media (width <= 768px) {
+  .tab {
+    max-width: 150px;
+    min-width: 100px;
+    padding: 0 12px;
+    font-size: 11px;
+  }
+
+  .closeBtn {
+    width: 16px;
+    height: 16px;
+
+    img {
+      width: 8px;
+      height: 8px;
+    }
+  }
+
+  .statusIndicator {
+    width: 5px;
+    height: 5px;
+  }
+}
