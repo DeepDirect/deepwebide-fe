@@ -41,7 +41,7 @@
   cursor: pointer;
 
   &:hover:not(:disabled) {
-    opacity: 0.7;
+    color: $orange;
   }
 
   &:disabled {

@@ -3,10 +3,12 @@ import { useParams } from '@tanstack/react-router';
 import styles from './PathArea.module.scss';
 import NoteMultipleIcon from '@/assets/icons/note-multiple.svg?react';
 import { useTabStore } from '@/stores/tabStore';
+import { useToastStore } from '@/stores/toastStore';
 
 const PathArea = () => {
   const { repoId } = useParams({ strict: false });
   const { openTabs } = useTabStore();
+  const { showToast } = useToastStore();
   const [currentPath, setCurrentPath] = useState('');
   const [displayPath, setDisplayPath] = useState('');
 
@@ -47,9 +49,26 @@ const PathArea = () => {
     if (currentPath) {
       try {
         await navigator.clipboard.writeText(currentPath);
+
+        // 성공 토스트 표시
+        showToast({
+          type: 'success',
+          message: '파일 경로가 클립보드에 복사되었습니다',
+          duration: 2000,
+          showCloseButton: true,
+        });
+
         console.log('경로가 클립보드에 복사되었습니다:', currentPath);
       } catch (error) {
         console.error('클립보드 복사 실패:', error);
+
+        // 실패 토스트 표시
+        showToast({
+          type: 'error',
+          message: '클립보드 복사에 실패했습니다',
+          duration: 3000,
+          showCloseButton: true,
+        });
       }
     }
   };
