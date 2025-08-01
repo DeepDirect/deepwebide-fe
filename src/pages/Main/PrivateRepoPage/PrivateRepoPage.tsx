@@ -70,7 +70,7 @@ const PrivateRepoPage = () => {
     if (isError && error) {
       toast.error(error.message);
     }
-  }, [isError, error]);
+  }, [isError, error, toast]);
 
   // 페이지
   const handlePageChange = (page: number) => {
@@ -80,6 +80,8 @@ const PrivateRepoPage = () => {
 
   // 레포 좋아요
   const handleFavoriteClick = (id: number) => {
+    const targetRepo = repositories?.find(repo => repo.repositoryId === id);
+
     updateFavorite(id, {
       onSuccess: () => {
         setRepositories(
@@ -89,6 +91,11 @@ const PrivateRepoPage = () => {
             ) ?? null
         );
         repositoryRefetch();
+
+        if (targetRepo) {
+          const action = targetRepo.isFavorite ? '즐겨찾기에서 제거' : '즐겨찾기에 추가';
+          toast.info(`개인 레포지토리 "${targetRepo.repositoryName}" 가 \n ${action}되었습니다.`);
+        }
       },
       onError: error => {
         toast.error(error.message);
