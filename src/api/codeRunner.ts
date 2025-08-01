@@ -44,7 +44,7 @@ export interface RepositoryLogsResponse {
 export const getRepositoryLogs = async (
   repositoryId: number | string,
   lines = 100,
-  since = '5m'
+  since = '10m'
 ): Promise<RepositoryLogsResponse> => {
   const response = await apiClient.get<{ data: RepositoryLogsResponse }>(
     `/api/repositories/${repositoryId}/logs`,

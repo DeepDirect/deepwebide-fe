@@ -98,7 +98,7 @@ export function CodeRunner(props: CodeRunnerProps) {
           // 기존 logs 출력 지우고 새로
           setTimeout(() => {
             executeCommand('logs');
-          }, 350);
+          }, 1000);
         }
       },
       onError: (e: unknown) => {
