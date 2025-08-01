@@ -31,6 +31,7 @@ const ChangeRepoNameModal: React.FC<ChangeRepoNameModalProps> = ({
     if (onCancel) {
       onCancel();
     }
+    onOpenChange(false);
   };
 
   const handleOpenChange = (open: boolean) => {
