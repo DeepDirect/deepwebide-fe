@@ -30,6 +30,10 @@ export function CodeRunner(props: CodeRunnerProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
+  // 실시간 로그 한 줄씩 누적용
+  const [isStreamingLogs, setIsStreamingLogs] = useState(false);
+  const [streamedLogLines, setStreamedLogLines] = useState<string[]>([]);
+
   // 다크 모드 초기화
   const { initializeTheme } = useThemeStore();
   useEffect(() => {
@@ -41,43 +45,20 @@ export function CodeRunner(props: CodeRunnerProps) {
   const codeRunnerStop = useCodeRunnerStop(props.repoId);
 
   // logs: enabled=false, refetch로 직접 요청!
-  const {
-    data: logsData,
-    refetch: refetchLogs,
-    isFetching: isFetchingLogs,
-  } = useCodeRunnerLogs(props.repoId);
+  const { data: logsData, refetch: refetchLogs } = useCodeRunnerLogs(props.repoId);
 
-  // logsData 변화 감지해 결과 터미널에 반영
-  useEffect(() => {
-    if (isFetchingLogs) return; // 로딩 중일 때는 출력 안 함
-    if (logsData) {
-      setCommandHistory(prev => [
-        ...prev.slice(0, -1), // 마지막 '로그 불러오는 중...' 제거
-        {
-          command: 'logs',
-          output: (
-            <pre style={{ whiteSpace: 'pre-wrap', fontSize: '0.95em', color: '#5ad' }}>
-              {logsData.logs}
-            </pre>
-          ),
-          timestamp: new Date(),
-        },
-      ]);
-    }
-  }, [logsData, isFetchingLogs]);
-
-  // 실행 함수 (비동기)
+  // logs 명령어 처리: refetchLogs() 호출, streaming 준비
   const executeCommand = (command: string) => {
     if (!command) return;
-
-    // logs 명령어: refetch로 직접 호출!
     if (command === 'logs') {
+      setStreamedLogLines([]);
       setCommandHistory(prev => [
         ...prev,
         { command, output: '로그 불러오는 중...', timestamp: new Date() },
       ]);
       setCurrentCommand('');
       refetchLogs();
+      setIsStreamingLogs(true);
       return;
     }
 
@@ -89,7 +70,6 @@ export function CodeRunner(props: CodeRunnerProps) {
         let output: string | JSX.Element =
           resp.status === 'SUCCESS' ? resp.output || resp.message : resp.error || resp.message;
 
-        // 포트가 있으면 링크 출력
         if (resp.port) {
           const url = `http://localhost:${resp.port}`;
           output = (
@@ -131,12 +111,72 @@ export function CodeRunner(props: CodeRunnerProps) {
     });
   };
 
+  // logsData가 오면 한 줄씩 streaming
+  useEffect(() => {
+    if (!isStreamingLogs || !logsData?.logs) return;
+
+    const lines = logsData.logs.split('\n');
+    let idx = 0;
+
+    // "로그 불러오는 중..." 제거
+    setCommandHistory(prev => prev.slice(0, -1));
+    setStreamedLogLines([]); // 초기화
+
+    const interval = setInterval(() => {
+      setStreamedLogLines(prev => {
+        // 안전하게 lines[idx]가 undefined일 경우 빈 문자열로 대체
+        const line = idx < lines.length && typeof lines[idx] === 'string' ? lines[idx] : '';
+        return [...prev, line];
+      });
+      idx++;
+      if (idx >= lines.length) {
+        clearInterval(interval);
+        setIsStreamingLogs(false);
+      }
+    }, 60);
+
+    return () => clearInterval(interval);
+  }, [isStreamingLogs, logsData]);
+
+  // streamedLogLines 변경 시 commandHistory logs에 누적 반영
+  useEffect(() => {
+    if (streamedLogLines.length === 0) return;
+
+    setCommandHistory(prev => [
+      // 기존 logs 명령 결과는 지움
+      ...prev.filter(item => item.command !== 'logs'),
+      {
+        command: 'logs',
+        output: (
+          <div
+            style={{
+              fontFamily: 'Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+              color: '#fff',
+              background: '#181a20',
+              fontSize: '1em',
+              lineHeight: 1.7,
+              padding: '16px',
+              borderRadius: 8,
+              overflow: 'auto',
+              whiteSpace: 'pre-wrap',
+              textAlign: 'left',
+            }}
+          >
+            {streamedLogLines.map((line, idx) => (
+              <div key={idx}>{typeof line === 'string' ? line.trimStart() : ''}</div>
+            ))}
+          </div>
+        ),
+        timestamp: new Date(),
+      },
+    ]);
+  }, [streamedLogLines]);
+
   const handleStop = () => {
     setCommandHistory(prev => [
       ...prev,
       { command: 'stop', output: '중지 중...', timestamp: new Date() },
     ]);
-
     codeRunnerStop.mutate(undefined, {
       onSuccess: resp => {
         setCommandHistory(prev => [
@@ -172,7 +212,6 @@ export function CodeRunner(props: CodeRunnerProps) {
     }
   };
 
-  // 새로운 내용이 추가될 때마다 스크롤을 맨 아래로 이동
   useEffect(() => {
     if (contentRef.current) {
       contentRef.current.scrollTop = contentRef.current.scrollHeight;
@@ -183,7 +222,6 @@ export function CodeRunner(props: CodeRunnerProps) {
     <div className="code-runner">
       {/* 제어 섹션 */}
       <div className="code-runner__controls">
-        {/* 실행 버튼 */}
         <button
           className="code-runner__control-button"
           aria-label="실행"
@@ -195,7 +233,6 @@ export function CodeRunner(props: CodeRunnerProps) {
             <path d="M10 20H8V4h2v2h2v3h2v2h2v2h-2v2h-2v3h-2v2z" fill="currentColor" />
           </svg>
         </button>
-        {/* 정지 버튼 */}
         <button className="code-runner__control-button" aria-label="정지" onClick={handleStop}>
           <svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <path d="M10 4H5v16h5V4zm9 0h-5v16h5V4z" fill="currentColor" />
@@ -220,7 +257,6 @@ export function CodeRunner(props: CodeRunnerProps) {
               )}
               {item.output && (
                 <div className="code-runner__output-line">
-                  {/* output이 JSX(링크)이면 그대로, 문자열이면 span으로 */}
                   {typeof item.output === 'string' ? (
                     <span className="code-runner__output">{item.output}</span>
                   ) : (
@@ -231,7 +267,6 @@ export function CodeRunner(props: CodeRunnerProps) {
             </div>
           ))}
         </div>
-
         <div className="code-runner__input-section">
           <div className="code-runner__input-line">
             <span className="code-runner__prompt">
