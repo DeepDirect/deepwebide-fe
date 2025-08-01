@@ -5,6 +5,7 @@ import { findPasswordSchema, type FindPasswordFormValues } from '@/schemas/auth.
 import Input from '@/components/atoms/Input/Input';
 import Button from '@/components/atoms/Button/Button';
 import FormField from '@/components/molecules/FormField/FormField';
+import { useToast } from '@/hooks/common/useToast';
 
 // 훅들과 URL 타입들 import
 import {
@@ -46,10 +47,12 @@ export default function FindPasswordForm() {
   const phone = watch('phoneNumber');
   const phoneCode = watch('phoneCode');
 
+  const toast = useToast();
+
   // URL을 파라미터로 전달하는 훅들 사용
   const findPasswordMutation = useFindPassword(findPasswordURL, {
     onError: () => {
-      alert('사용자 정보를 찾을 수 없습니다. 입력한 정보를 다시 확인해주세요.');
+      toast.error('사용자 정보를 찾을 수 없습니다. 입력한 정보를 다시 확인해주세요.');
     },
   });
 
@@ -57,11 +60,11 @@ export default function FindPasswordForm() {
     onSuccess: () => {
       setCodeSent(true);
       startTimer();
-      alert('인증번호가 발송되었습니다.');
+      toast.info('인증번호가 발송되었습니다.');
     },
     onError: error => {
       console.error('인증번호 발송 실패:', error);
-      alert(`인증번호 발송에 실패했습니다. (${error.response?.status || '알 수 없는 오류'})`);
+      toast.error(`인증번호 발송에 실패했습니다. (${error.response?.status || '알 수 없는 오류'})`);
     },
   });
 
@@ -69,13 +72,13 @@ export default function FindPasswordForm() {
     onSuccess: data => {
       if (data.data.verified) {
         setCodeVerified(true);
-        alert('휴대폰 인증이 완료되었습니다.');
+        toast.success('휴대폰 인증이 완료되었습니다.');
       } else {
-        alert('인증번호가 올바르지 않습니다.');
+        toast.error('인증번호가 올바르지 않습니다.');
       }
     },
     onError: () => {
-      alert('인증번호 확인에 실패했습니다.');
+      toast.error('인증번호 확인에 실패했습니다.');
     },
   });
 
@@ -96,7 +99,7 @@ export default function FindPasswordForm() {
   // 인증번호 발송
   const handleSendPhoneCode = () => {
     if (!phone || !username) {
-      alert('이름과 휴대폰 번호를 입력해주세요.');
+      toast.warning('이름과 휴대폰 번호를 입력해주세요.');
       return;
     }
 
@@ -113,7 +116,7 @@ export default function FindPasswordForm() {
   // 인증번호 확인
   const handleVerifyPhoneCode = () => {
     if (!phoneCode || !phone) {
-      alert('인증번호를 입력해주세요.');
+      toast.warning('인증번호를 입력해주세요.');
       return;
     }
 
@@ -130,7 +133,7 @@ export default function FindPasswordForm() {
   // 폼 제출 - 사용자 검증 API 호출
   const onSubmit = (data: FindPasswordFormValues) => {
     if (!codeVerified) {
-      alert('휴대폰 인증을 완료해주세요.');
+      toast.warning('휴대폰 인증을 완료해주세요.');
       return;
     }
 
