@@ -3,6 +3,7 @@ import type { KeyboardEvent } from 'react';
 import { useThemeStore } from '@/stores/themeStore';
 import { useCodeRunnerExecute } from '@/features/Repo/codeRunner/hooks/useCodeRunnerExecute';
 import { useCodeRunnerStop } from '@/features/Repo/codeRunner/hooks/useCodeRunnerStop';
+import { useCodeRunnerLogs } from '@/features/Repo/codeRunner/hooks/useCodeRunnerLogs';
 import './CodeRunner.scss';
 import type { JSX } from 'react/jsx-runtime';
 
@@ -31,17 +32,55 @@ export function CodeRunner(props: CodeRunnerProps) {
 
   // 다크 모드 초기화
   const { initializeTheme } = useThemeStore();
-
   useEffect(() => {
     initializeTheme();
   }, [initializeTheme]);
 
-  // CodeRunner 실행 훅
+  // 실행/중지 커스텀 훅
   const codeRunnerExecute = useCodeRunnerExecute(props.repoId);
   const codeRunnerStop = useCodeRunnerStop(props.repoId);
 
+  // logs: enabled=false, refetch로 직접 요청!
+  const {
+    data: logsData,
+    refetch: refetchLogs,
+    isFetching: isFetchingLogs,
+  } = useCodeRunnerLogs(props.repoId);
+
+  // logsData 변화 감지해 결과 터미널에 반영
+  useEffect(() => {
+    if (isFetchingLogs) return; // 로딩 중일 때는 출력 안 함
+    if (logsData) {
+      setCommandHistory(prev => [
+        ...prev.slice(0, -1), // 마지막 '로그 불러오는 중...' 제거
+        {
+          command: 'logs',
+          output: (
+            <pre style={{ whiteSpace: 'pre-wrap', fontSize: '0.95em', color: '#5ad' }}>
+              {logsData.logs}
+            </pre>
+          ),
+          timestamp: new Date(),
+        },
+      ]);
+    }
+  }, [logsData, isFetchingLogs]);
+
   // 실행 함수 (비동기)
   const executeCommand = (command: string) => {
+    if (!command) return;
+
+    // logs 명령어: refetch로 직접 호출!
+    if (command === 'logs') {
+      setCommandHistory(prev => [
+        ...prev,
+        { command, output: '로그 불러오는 중...', timestamp: new Date() },
+      ]);
+      setCurrentCommand('');
+      refetchLogs();
+      return;
+    }
+
     setCommandHistory(prev => [...prev, { command, output: '실행 중...', timestamp: new Date() }]);
     setCurrentCommand('');
 
