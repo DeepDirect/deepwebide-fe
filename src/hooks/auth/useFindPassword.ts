@@ -1,21 +1,25 @@
 import { useMutation, type UseMutationOptions } from '@tanstack/react-query';
-import type { AxiosError } from 'axios';
 import { useNavigate } from '@tanstack/react-router';
+import type { AxiosError } from 'axios';
+
+import { useToast } from '@/hooks/common/useToast';
 
 import { apiClient } from '@/api/client';
+
+import type {
+  SendPhoneCodeRequest,
+  SendPhoneCodeResponse,
+  VerifyPhoneCodeRequest,
+  VerifyPhoneCodeResponse,
+  VerifyUserRequest,
+  VerifyUserResponse,
+} from '@/schemas/auth.schema';
+
 import type {
   FindPasswordURL,
   PhoneSendCodeURL,
   PhoneVerifyCodeURL,
 } from '@/types/common/apiEndpoints.types';
-import type {
-  VerifyUserRequest,
-  VerifyUserResponse,
-  SendPhoneCodeRequest,
-  SendPhoneCodeResponse,
-  VerifyPhoneCodeRequest,
-  VerifyPhoneCodeResponse,
-} from '@/schemas/auth.schema';
 
 // 비밀번호 찾기
 export const useFindPassword = (
@@ -26,6 +30,7 @@ export const useFindPassword = (
   >
 ) => {
   const navigate = useNavigate();
+  const toast = useToast();
 
   return useMutation<VerifyUserResponse, AxiosError, VerifyUserRequest>({
     mutationFn: async (data: VerifyUserRequest) => {
@@ -43,7 +48,7 @@ export const useFindPassword = (
 
       if (!token) {
         console.error('reauthToken이 응답에 없습니다!');
-        alert('서버 응답에 인증 토큰이 없습니다. 다시 시도해주세요.');
+        toast.error('서버 응답에 인증 토큰이 없습니다. 다시 시도해주세요.');
         return;
       }
 
