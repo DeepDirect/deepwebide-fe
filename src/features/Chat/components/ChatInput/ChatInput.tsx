@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
+import { useParams } from '@tanstack/react-router';
+import { useGetCodePaths } from '@/hooks/chat/useGetCodePaths';
 import './ChatInput.scss';
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
   placeholder?: string;
-  helpText?: string;
 }
 
 const MAX_MESSAGE_LENGTH = 300;
@@ -12,28 +13,31 @@ const MAX_MESSAGE_LENGTH = 300;
 const ChatInput: React.FC<ChatInputProps> = ({
   onSendMessage,
   placeholder = '채팅 내용을 입력하세요',
-  helpText = '코드 참조 시 #을 입력 후 해당 파일의 위치를 작성해주세요',
 }) => {
   const [message, setMessage] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [selectedPath, setSelectedPath] = useState('');
+  const { repoId } = useParams({ strict: false });
+
+  const { data: codePathsData, isLoading, error } = useGetCodePaths(repoId as string);
 
   const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const input = e.target.value;
-    // 문자열의 실제 길이를 계산
-    const currentLength = [...input].length; // 스프레드 연산자를 사용하여 정확한 문자 수 계산
-
+    const currentLength = [...input].length;
     if (currentLength <= MAX_MESSAGE_LENGTH) {
       setMessage(input);
     }
   };
 
-  // TODO - 웹소켓을 통해 코드 전송하는 기능 구현 필요
-
-  // TODO - 코드 참조 기능 구현 필요
-
   const handleSend = () => {
     if (message.trim()) {
-      onSendMessage(message.trim());
+      // 선택된 파일 경로가 있으면 메시지에 포함
+      const messageToSend = selectedPath
+        ? `${message.trim()}\n\n📌 [[Ref: ${selectedPath}]]`
+        : message.trim();
+      onSendMessage(messageToSend);
       setMessage('');
+      setSelectedPath('');
     }
   };
 
@@ -42,6 +46,16 @@ const ChatInput: React.FC<ChatInputProps> = ({
       e.preventDefault();
       handleSend();
     }
+  };
+
+  const handleReferenceButtonClick = () => {
+    setShowDropdown(!showDropdown);
+  };
+
+  const handlePathSelect = (path: string) => {
+    setSelectedPath(path);
+    console.log('Selected path:', path);
+    setShowDropdown(false);
   };
 
   return (
@@ -63,8 +77,56 @@ const ChatInput: React.FC<ChatInputProps> = ({
         </div>
 
         <div className="chat-input__footer">
-          {/* 도움말 텍스트 */}
-          <span className="chat-input__help">{helpText}</span>
+          {/* 코드 참조 버튼 */}
+          <span className="chat-input__reference">
+            <button
+              className="chat-input__reference-button"
+              onClick={handleReferenceButtonClick}
+              disabled={isLoading}
+            >
+              <svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M7 5v14H5V3h14v18H9V7h6v10h-2V9h-2v10h6V5H7z" fill="currentColor" />
+              </svg>
+            </button>
+
+            {/* 드롭다운 */}
+            <div className="chat-input__reference-paths">
+              {showDropdown && (
+                <div className="chat-input__dropdown">
+                  {isLoading && <div className="chat-input__loading">로딩 중...</div>}
+                  {error && <div className="chat-input__error">경로를 불러올 수 없습니다.</div>}
+                  {codePathsData?.data.data.paths && codePathsData.data.data.paths.length > 0 ? (
+                    <select
+                      className="chat-input__path-select"
+                      value={selectedPath}
+                      onChange={e => handlePathSelect(e.target.value)}
+                      size={Math.min(codePathsData.data.data.paths.length, 5)}
+                    >
+                      <option value="">파일을 선택하세요</option>
+                      {codePathsData.data.data.paths.map((path: string, index: number) => (
+                        <option key={index} value={path}>
+                          {path}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    !isLoading && (
+                      <div className="chat-input__no-paths">참조할 수 있는 파일이 없습니다.</div>
+                    )
+                  )}
+                </div>
+              )}
+            </div>
+            {selectedPath && (
+              <div className="chat-input__selected-path">
+                <span className="chat-input__selected-path-text">{selectedPath}</span>
+                <button className="chat-input__remove-path" onClick={() => setSelectedPath('')}>
+                  ×
+                </button>
+              </div>
+            )}
+          </span>
+
           {/* 전송 버튼 */}
           <button
             className="chat-input__send-button"
