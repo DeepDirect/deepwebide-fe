@@ -25,18 +25,24 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
   repoId,
   repositoryId,
   enableCollaboration = true,
-  userId = `user-${Date.now()}`,
-  userName = 'Anonymous',
+  userId,
+  userName,
 }) => {
   const { updateContent } = useEditorStore();
   const { openTabs, setTabContent } = useTabStore();
-  const { users } = useCollaborationStore();
+  const { users, currentUser } = useCollaborationStore();
   const { isDarkMode } = useThemeStore();
 
   // 활성 탭 정보
   const activeTab = openTabs.find(tab => tab.isActive);
   const language = activeTab ? getLanguageFromFile(activeTab.name) : 'plaintext';
-  const roomId = activeTab && enableCollaboration ? `${repoId}-${activeTab.path}` : '';
+
+  // 룸 ID 패턴 수정: "repo-{repoId}-{filePath}" 형태
+  const roomId = activeTab && enableCollaboration ? `repo-${repoId}-${activeTab.path}` : '';
+
+  // 사용자 정보 설정 (현재 사용자 또는 기본값)
+  const finalUserId = userId || currentUser.id || `user-${Date.now()}`;
+  const finalUserName = userName || currentUser.name || 'Anonymous';
 
   console.log('MonacoCollaborativeEditor 렌더:', {
     repoId,
@@ -50,6 +56,8 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
         }
       : null,
     enableCollaboration,
+    roomId,
+    userCount: users.length,
   });
 
   // 에디터 내용 변경 핸들러
@@ -73,26 +81,20 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
   );
 
   // Monaco Editor 훅 (협업 모드에서도 저장 기능 활성화)
-  const {
-    editorRef,
-    monacoEditorRef,
-    editorContainerRef,
-    handleEditorDidMount,
-    handleEditorChange,
-    isSaving,
-  } = useMonacoEditor({
-    language,
-    repositoryId,
-    onContentChange: handleContentChange,
-    enableCollaboration,
-  });
+  const { editorRef, editorContainerRef, handleEditorDidMount, handleEditorChange, isSaving } =
+    useMonacoEditor({
+      language,
+      repositoryId,
+      onContentChange: handleContentChange,
+      enableCollaboration,
+    });
 
   // Yjs 협업 훅
-  const { isConnected, isLoading } = useYjsCollaboration({
+  const { isConnected, isLoading, error } = useYjsCollaboration({
     roomId,
     editor: editorRef.current,
-    userId,
-    userName,
+    userId: finalUserId,
+    userName: finalUserName,
     enabled: enableCollaboration && Boolean(activeTab),
   });
 
@@ -130,7 +132,15 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
       {/* 협업 상태 표시 */}
       {enableCollaboration && isConnected && <CollaborationStatus userCount={users.length + 1} />}
 
-      {/* 저장 상태 표시 (협업 모드에서도 표시하도록 수정) */}
+      {/* 에러 표시 */}
+      {enableCollaboration && error && (
+        <div className={styles.errorStatus}>
+          <span className={styles.errorIcon}>!</span>
+          {error}
+        </div>
+      )}
+
+      {/* 저장 상태 표시 (협업 모드에서도 표시) */}
       {isSaving && (
         <div className={styles.saveStatus}>
           <div className={styles.savingIndicator}>
@@ -141,29 +151,24 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
       )}
 
       <div className={styles.editorContainer} ref={editorContainerRef}>
-        <Editor
-          height="100%"
-          language={language}
-          value={activeTab.content || ''}
-          onChange={onEditorChange}
-          onMount={handleEditorDidMount}
-          options={editorOptions}
-          theme={isDarkMode ? 'vs-dark' : 'vs'}
-          loading={
-            <div className={styles.editorLoading}>
-              <div className={styles.loadingSpinner} />
-              <span>에디터 로딩 중...</span>
-            </div>
-          }
-        />
-
         {/* 커서 오버레이 */}
         {enableCollaboration && isConnected && (
           <CursorOverlay
             editorContainer={editorContainerRef.current}
-            monacoEditor={monacoEditorRef.current}
+            monacoEditor={editorRef.current}
           />
         )}
+
+        <Editor
+          height="100%"
+          language={language}
+          // 협업 모드에서는 value를 undefined로 설정하여 Yjs가 완전 제어
+          value={enableCollaboration ? undefined : activeTab.content || ''}
+          onChange={onEditorChange}
+          onMount={handleEditorDidMount}
+          options={editorOptions}
+          theme={isDarkMode ? 'vs-dark' : 'vs'}
+        />
       </div>
     </div>
   );
