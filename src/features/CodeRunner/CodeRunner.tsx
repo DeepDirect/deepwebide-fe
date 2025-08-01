@@ -44,7 +44,7 @@ export function CodeRunner(props: CodeRunnerProps) {
   const codeRunnerExecute = useCodeRunnerExecute(props.repoId);
   const codeRunnerStop = useCodeRunnerStop(props.repoId);
 
-  // logs: enabled=false, refetch로 직접 요청!
+  // logs: enabled=false, refetch로 직접 요청
   const { data: logsData, refetch: refetchLogs } = useCodeRunnerLogs(props.repoId);
 
   // logs 명령어 처리: refetchLogs() 호출, streaming 준비
@@ -92,6 +92,14 @@ export function CodeRunner(props: CodeRunnerProps) {
             timestamp: new Date(),
           },
         ]);
+
+        // ★★★ run 실행 후 자동 logs 호출
+        if (command === 'run' || command === '') {
+          // 기존 logs 출력 지우고 새로
+          setTimeout(() => {
+            executeCommand('logs');
+          }, 350);
+        }
       },
       onError: (e: unknown) => {
         let errorMessage = '실패';
@@ -226,7 +234,7 @@ export function CodeRunner(props: CodeRunnerProps) {
           className="code-runner__control-button"
           aria-label="실행"
           onClick={() => {
-            executeCommand(currentCommand.trim());
+            executeCommand(currentCommand.trim() || 'run');
           }}
         >
           <svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
