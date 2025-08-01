@@ -62,7 +62,15 @@ export function CodeRunner(_props: CodeRunnerProps) {
       {/* 제어 섹션 */}
       <div className="code-runner__controls">
         {/* 실행 버튼 */}
-        <button className="code-runner__control-button" aria-label="실행">
+        <button
+          className="code-runner__control-button"
+          aria-label="실행"
+          onClick={() => {
+            if (currentCommand.trim()) {
+              executeCommand(currentCommand.trim());
+            }
+          }}
+        >
           <svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <path d="M10 20H8V4h2v2h2v3h2v2h2v2h-2v2h-2v3h-2v2z" fill="currentColor" />
           </svg>
