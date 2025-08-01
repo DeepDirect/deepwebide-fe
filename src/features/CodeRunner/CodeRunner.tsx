@@ -6,6 +6,7 @@ import './CodeRunner.scss';
 
 export interface CodeRunnerProps {
   repoId?: number | string;
+  repositoryName?: string;
 }
 
 interface CommandHistory {
@@ -133,7 +134,9 @@ export function CodeRunner(props: CodeRunnerProps) {
               {item.command && (
                 <div className="code-runner__output-line">
                   <span className="code-runner__prompt">
-                    <span className="code-runner__project-path">my/project-name</span>
+                    <span className="code-runner__project-path">
+                      my/{props.repositoryName ?? 'project-name'}
+                    </span>
                   </span>
                   <span className="code-runner__command">{item.command}</span>
                 </div>
@@ -155,7 +158,9 @@ export function CodeRunner(props: CodeRunnerProps) {
         <div className="code-runner__input-section">
           <div className="code-runner__input-line">
             <span className="code-runner__prompt">
-              <span className="code-runner__project-path">my/project-name</span>
+              <span className="code-runner__project-path">
+                my/{props.repositoryName ?? 'project-name'}
+              </span>
             </span>
             <input
               ref={inputRef}
