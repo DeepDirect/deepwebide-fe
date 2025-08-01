@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import BaseModal from '@/components/organisms/Modals/BaseModal/BaseModal';
 import Input from '@/components/atoms/Input/Input';
 import { validateFileName, validateFolderName } from '@/schemas/fileTree.schema';
+import { useToast } from '@/hooks/common/useToast';
 import styles from './CreateFileModal.module.scss';
 import type { FileTreeNode } from '../../types';
 
@@ -27,6 +28,7 @@ const CreateFileModal: React.FC<CreateFileModalProps> = ({
   const [warning, setWarning] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const isInitializedRef = useRef(false);
+  const toast = useToast();
 
   const isFile = type === 'FILE';
   const title = isFile ? '새 파일 생성' : '새 폴더 생성';
@@ -98,6 +100,7 @@ const CreateFileModal: React.FC<CreateFileModalProps> = ({
     if (!trimmedName) {
       setError('이름을 입력해주세요.');
       setWarning('');
+      toast.error('이름을 입력해주세요.');
       return;
     }
 
@@ -106,13 +109,24 @@ const CreateFileModal: React.FC<CreateFileModalProps> = ({
     if (!validation.isValid && validation.error) {
       setError(validation.error);
       setWarning('');
+      toast.error(validation.error);
       return;
     }
 
     onConfirm(trimmedName, parentNode?.path);
+    toast.success(`${isFile ? '파일' : '폴더'}이 생성되었습니다.`);
     cleanupModal();
     onOpenChange(false);
-  }, [fileName, validateName, onConfirm, parentNode?.path, cleanupModal, onOpenChange]);
+  }, [
+    fileName,
+    validateName,
+    onConfirm,
+    parentNode?.path,
+    cleanupModal,
+    onOpenChange,
+    toast,
+    isFile,
+  ]);
 
   const handleCancel = useCallback(() => {
     cleanupModal();

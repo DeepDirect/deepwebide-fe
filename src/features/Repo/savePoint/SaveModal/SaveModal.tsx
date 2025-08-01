@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import BaseModal from '@/components/organisms/Modals/BaseModal/BaseModal';
-import { useToastStore } from '@/stores/toastStore';
+import { useToast } from '@/hooks/common/useToast';
 import styles from './SaveModal.module.scss';
 
 interface SaveModalProps {
@@ -13,12 +13,12 @@ interface SaveModalProps {
 export function SaveModal({ open, onOpenChange, onSave, isLoading = false }: SaveModalProps) {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const { showToast } = useToastStore();
+  const toast = useToast();
 
   const handleConfirm = async () => {
     if (!message.trim()) {
       setError('저장 메시지를 입력해주세요.');
-      showToast({ message: '저장 메시지를 입력해주세요.', type: 'warning' });
+      toast.warning('저장 메시지를 입력해주세요.');
       return;
     }
 
@@ -28,8 +28,6 @@ export function SaveModal({ open, onOpenChange, onSave, isLoading = false }: Sav
       setMessage('');
       onOpenChange(false);
     } catch (err: unknown) {
-      console.error('Save error:', err);
-
       // API 에러 메시지 처리
       let errorMessage = '저장 중 오류가 발생했습니다.';
 
@@ -43,7 +41,7 @@ export function SaveModal({ open, onOpenChange, onSave, isLoading = false }: Sav
       }
 
       setError(errorMessage);
-      showToast({ message: errorMessage, type: 'error' });
+      toast.error(errorMessage);
     }
   };
 
