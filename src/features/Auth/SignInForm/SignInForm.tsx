@@ -10,6 +10,7 @@ import styles from './SignInForm.module.scss';
 import { useNavigate } from '@tanstack/react-router';
 import { useAuthStore } from '@/stores/authStore';
 import { useEffect } from 'react';
+import { useToast } from '@/hooks/common/useToast';
 
 // 훅과 URL 타입 import
 import useSignIn from '@/hooks/auth/useSignIn';
@@ -30,12 +31,16 @@ export default function SignInForm() {
   });
 
   const navigate = useNavigate();
+  const toast = useToast();
   const { isLoggedIn } = useAuthStore();
 
   // URL을 파라미터로 전달
   const signInMutation = useSignIn(signInURL, {
-    onError: () => {
-      alert('로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.');
+    onError: error => {
+      const message = error.message
+        ? error.message
+        : '로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.';
+      toast.error(message);
     },
   });
 
