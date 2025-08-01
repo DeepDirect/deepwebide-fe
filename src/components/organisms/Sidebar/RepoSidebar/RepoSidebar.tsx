@@ -25,7 +25,7 @@ export const Sidebar = () => {
           </button>
         </Tooltip>
 
-        <Tooltip label="Save">
+        <Tooltip label="Save Point">
           <button
             className={clsx(styles.icon, {
               [styles.active]: isVisible && activeSection === 'save',

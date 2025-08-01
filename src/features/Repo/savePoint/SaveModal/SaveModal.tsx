@@ -76,7 +76,7 @@ export function SaveModal({ open, onOpenChange, onSave, isLoading = false }: Sav
     >
       <div className={styles.saveModalContent}>
         <div className={styles.description}>
-          현재 프로젝트 상태를 저장하고 히스토리를 생성합니다.
+          현재 프로젝트 상태를 저장하고 세이브 포인트를 생성합니다.
         </div>
 
         <div className={styles.inputGroup}>

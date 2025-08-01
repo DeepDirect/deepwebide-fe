@@ -34,8 +34,8 @@ export function RepoPage() {
     startResize: startHorizontalResize,
   } = useResizer({
     initialWidth: '300px',
-    minWidth: '200px',
-    maxWidth: '500px',
+    minWidth: '250px',
+    maxWidth: '700px',
     containerRef,
   });
 

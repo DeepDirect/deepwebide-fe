@@ -32,10 +32,10 @@ export function SavePoint({ repoId }: SavePointProps) {
   const handleSave = async (message: string) => {
     try {
       await saveMutation.mutateAsync({ message });
-      showToast({ message: '프로젝트가 성공적으로 저장되었습니다.', type: 'success' });
+      showToast({ message: '세이브 포인트가 성공적으로 저장되었습니다.', type: 'success' });
     } catch (err) {
       console.error('Save error:', err);
-      showToast({ message: '저장 중 오류가 발생했습니다.', type: 'error' });
+      showToast({ message: '세이브 포인트 저장 중 오류가 발생했습니다.', type: 'error' });
     }
   };
 
@@ -52,7 +52,7 @@ export function SavePoint({ repoId }: SavePointProps) {
       try {
         await restoreMutation.mutateAsync(restoreDialog.historyId);
         setRestoreDialog({ isOpen: false, historyId: null, message: '' });
-        showToast({ message: '히스토리가 성공적으로 복원되었습니다.', type: 'success' });
+        showToast({ message: '세이브 포인트가 성공적으로 복원되었습니다.', type: 'success' });
       } catch (err) {
         console.error('Restore error:', err);
         showToast({ message: '복원 중 오류가 발생했습니다.', type: 'error' });
@@ -78,7 +78,7 @@ export function SavePoint({ repoId }: SavePointProps) {
   return (
     <div className={styles.savePoint}>
       <div className={styles.header}>
-        <h3 className={styles.title}>프로젝트 히스토리</h3>
+        <h3 className={styles.title}>세이브 포인트 히스토리</h3>
         <button
           className={styles.saveButton}
           onClick={() => setIsSaveModalOpen(true)}
@@ -90,15 +90,18 @@ export function SavePoint({ repoId }: SavePointProps) {
 
       <div className={styles.content}>
         {isLoading ? (
-          <div className={styles.loading}>히스토리를 불러오는 중...</div>
+          <div className={styles.loading}>세이브 포인트 히스토리를 불러오는 중...</div>
         ) : error ? (
           <div className={styles.error}>
-            <p>히스토리 목록을 불러올 수 없습니다.</p>
+            <p>세이브 포인트 히스토리 목록을 불러올 수 없습니다.</p>
             <button
               className={styles.retryButton}
               onClick={() => {
                 refetch();
-                showToast({ message: '히스토리 목록을 다시 불러오는 중...', type: 'info' });
+                showToast({
+                  message: '세이브 포인트 히스토리 목록을 다시 불러오는 중...',
+                  type: 'info',
+                });
               }}
             >
               다시 시도
@@ -106,8 +109,8 @@ export function SavePoint({ repoId }: SavePointProps) {
           </div>
         ) : histories.length === 0 ? (
           <div className={styles.emptyState}>
-            <p>저장된 히스토리가 없습니다.</p>
-            <p>첫 번째 저장점을 만들어보세요!</p>
+            <p>저장된 세이브 포인트 히스토리가 없습니다.</p>
+            <p>첫 번째 세이브 포인트를 만들어보세요!</p>
           </div>
         ) : (
           <div className={styles.historyList}>
@@ -149,7 +152,7 @@ export function SavePoint({ repoId }: SavePointProps) {
       <AlertDialog
         open={restoreDialog.isOpen}
         onOpenChange={open => !open && handleRestoreCancel()}
-        title="히스토리 복원"
+        title="해당 세이브 포인트로 복원"
         description={`"${restoreDialog.message}" 상태로 복원하시겠습니까?\n현재 작업 내용이 손실될 수 있습니다.`}
         confirmText={restoreMutation.isPending ? '복원 중...' : '복원'}
         cancelText="취소"
