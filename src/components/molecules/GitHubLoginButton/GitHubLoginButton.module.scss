@@ -1,0 +1,33 @@
+@use '@/styles/variables' as *;
+
+.socialButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+  margin-bottom: 1rem;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 10px;
+  font-family: $font-family-inter;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.4;
+  white-space: nowrap;
+  color: #ffffff;
+  background: #24292f;
+  transition: all 0.2s ease-in-out;
+
+  .socialLoginIcon {
+    // margin-right: 1rem;
+    width: 24px;
+    height: 24px;
+    white-space: nowrap;
+    color: #ffffff;
+
+    .icon {
+      color: inherit;
+    }
+  }
+}
