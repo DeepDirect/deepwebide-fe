@@ -3,6 +3,7 @@ import type { KeyboardEvent } from 'react';
 import { useThemeStore } from '@/stores/themeStore';
 import { useCodeRunnerExecute } from '@/features/Repo/codeRunner/hooks/useCodeRunnerExecute';
 import './CodeRunner.scss';
+import type { JSX } from 'react/jsx-runtime';
 
 export interface CodeRunnerProps {
   repoId?: number | string;
