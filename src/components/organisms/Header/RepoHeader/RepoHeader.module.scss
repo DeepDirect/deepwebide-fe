@@ -85,7 +85,39 @@
   background: none;
   background-color: var(--header-chat-bg);
   box-shadow: $shadow;
+  transition: all 0.2s ease;
   cursor: pointer;
+
+  &:hover {
+    color: $white-2;
+    background-color: $gray-5;
+
+    :global(.dark) & {
+      color: $gray-5;
+      background-color: $white-2;
+    }
+  }
+
+  // 활성화 상태
+  &.active {
+    color: $white-2;
+    background-color: $orange;
+
+    :global(.dark) & {
+      color: $white-2;
+      background-color: $orange;
+    }
+
+    &:hover {
+      color: $white-2;
+      background-color: $gray-5;
+
+      :global(.dark) & {
+        color: $gray-5;
+        background-color: $white-2;
+      }
+    }
+  }
 }
 
 // 중앙의 채팅 버튼 (큰 화면에서만 표시)

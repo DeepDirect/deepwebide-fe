@@ -1,16 +1,33 @@
-import { Link } from '@tanstack/react-router';
+import { Link, useParams } from '@tanstack/react-router';
+import { useEffect } from 'react';
 import styles from './RepoHeader.module.scss';
 import Logo from '@/components/atoms/Logo/Logo';
 import UserProfile from '@/components/organisms/Header/UserProfile/UserProfile';
 import Toggle from '@/components/atoms/Toggle/Toggle';
 import MessageTextIcon from '@/assets/icons/message-text.svg?react';
 import NoteMultipleIcon from '@/assets/icons/note-multiple.svg?react';
+import useGetRepositorySettings from '@/hooks/settings/useGetRepositorySettings';
+import useRepoSettingsStore from '@/stores/repoSettingsStore';
 
 interface RepoHeaderProps {
   onChatButtonClick?: () => void;
+  isChatOpen?: boolean;
 }
 
-const RepoHeader = ({ onChatButtonClick }: RepoHeaderProps) => {
+const RepoHeader = ({ onChatButtonClick, isChatOpen = false }: RepoHeaderProps) => {
+  const { repoId } = useParams({ strict: false });
+  const { data } = useGetRepositorySettings(repoId);
+  const settingsData = useRepoSettingsStore(state => state.settingsData);
+  const setSettingsData = useRepoSettingsStore(state => state.setSettingsData);
+
+  useEffect(() => {
+    if (data && JSON.stringify(settingsData) !== JSON.stringify(data.data)) {
+      setSettingsData(data.data);
+    }
+  }, [data, setSettingsData, settingsData]);
+
+  const isSharedRepo = settingsData?.isShared || false;
+
   return (
     <header className={styles.header}>
       <div className={styles.left}>
@@ -25,12 +42,16 @@ const RepoHeader = ({ onChatButtonClick }: RepoHeaderProps) => {
           <NoteMultipleIcon className={styles.icon} />
         </div>
 
-        <button
-          className={`${styles.chatButton} ${styles.centerChatButton}`}
-          onClick={onChatButtonClick}
-        >
-          <MessageTextIcon className={styles.icon} />
-        </button>
+        {isSharedRepo && (
+          <button
+            className={`${styles.chatButton} ${styles.centerChatButton} ${
+              isChatOpen ? styles.active : ''
+            }`}
+            onClick={onChatButtonClick}
+          >
+            <MessageTextIcon className={styles.icon} />
+          </button>
+        )}
       </div>
 
       <div className={styles.right}>
@@ -38,17 +59,22 @@ const RepoHeader = ({ onChatButtonClick }: RepoHeaderProps) => {
           <Toggle variant="theme" />
         </div>
 
-        <button
-          className={`${styles.chatButton} ${styles.rightChatButton}`}
-          onClick={onChatButtonClick}
-        >
-          <MessageTextIcon className={styles.icon} />
-        </button>
+        {isSharedRepo && (
+          <button
+            className={`${styles.chatButton} ${styles.rightChatButton} ${
+              isChatOpen ? styles.active : ''
+            }`}
+            onClick={onChatButtonClick}
+          >
+            <MessageTextIcon className={styles.icon} />
+          </button>
+        )}
 
         <UserProfile
           variant="darkModeSupport"
-          showChatButton={true}
+          showChatButton={isSharedRepo}
           onChatButtonClick={onChatButtonClick}
+          isChatOpen={isChatOpen}
         />
       </div>
     </header>
