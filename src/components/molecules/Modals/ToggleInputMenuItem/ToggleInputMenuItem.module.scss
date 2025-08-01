@@ -146,8 +146,10 @@
 }
 
 .eyeIcon {
+  display: block;
   width: 16px;
   height: 16px;
+  margin: auto;
   opacity: 0.6;
   transition: opacity 0.2s ease;
 
