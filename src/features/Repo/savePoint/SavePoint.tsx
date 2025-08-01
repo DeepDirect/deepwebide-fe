@@ -1,10 +1,9 @@
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { historyService } from './historyService';
 import { SaveModal } from './SaveModal';
+import { useSavePoint } from './hooks/useSavePoint';
+import { useSaveHistoryMutation, useRestoreHistoryMutation } from './hooks/useSavePointApi';
 import AlertDialog from '@/components/molecules/AlertDialog/AlertDialog';
 import { useToastStore } from '@/stores/toastStore';
-import type { HistoryItem } from './types';
 import styles from './SavePoint.module.scss';
 
 interface SavePointProps {
@@ -22,53 +21,22 @@ export function SavePoint({ repoId }: SavePointProps) {
     historyId: null,
     message: '',
   });
-  const queryClient = useQueryClient();
+
   const { showToast } = useToastStore();
 
-  // 히스토리 목록 조회
-  const {
-    data: historiesResponse,
-    isLoading,
-    error,
-    refetch,
-  } = useQuery({
-    queryKey: ['histories', repoId],
-    queryFn: () => historyService.getHistories(repoId),
-    enabled: !!repoId,
-  });
-
-  const histories = historiesResponse?.data?.data || [];
-
-  // 저장 뮤테이션
-  const saveMutation = useMutation({
-    mutationFn: (message: string) => historyService.saveHistory(repoId, { message }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['histories', repoId] });
-      showToast({ message: '프로젝트가 성공적으로 저장되었습니다.', type: 'success' });
-    },
-    onError: err => {
-      console.error('Save error:', err);
-      showToast({ message: '저장 중 오류가 발생했습니다.', type: 'error' });
-    },
-  });
-
-  // 복원 뮤테이션
-  const restoreMutation = useMutation({
-    mutationFn: (historyId: number) => historyService.restoreHistory(repoId, historyId),
-    onSuccess: () => {
-      console.log('History restored successfully');
-      // 복원 성공 시 히스토리 목록 새로고침
-      queryClient.invalidateQueries({ queryKey: ['histories', repoId] });
-      showToast({ message: '히스토리가 성공적으로 복원되었습니다.', type: 'success' });
-    },
-    onError: err => {
-      console.error('Restore error:', err);
-      showToast({ message: '복원 중 오류가 발생했습니다.', type: 'error' });
-    },
-  });
+  // Yjs 동기화가 포함된 훅들 사용
+  const { histories, isLoading, error, refetch } = useSavePoint({ repositoryId: repoId });
+  const saveMutation = useSaveHistoryMutation(repoId);
+  const restoreMutation = useRestoreHistoryMutation(repoId);
 
   const handleSave = async (message: string) => {
-    await saveMutation.mutateAsync(message);
+    try {
+      await saveMutation.mutateAsync({ message });
+      showToast({ message: '프로젝트가 성공적으로 저장되었습니다.', type: 'success' });
+    } catch (err) {
+      console.error('Save error:', err);
+      showToast({ message: '저장 중 오류가 발생했습니다.', type: 'error' });
+    }
   };
 
   const handleRestoreClick = (historyId: number, message: string) => {
@@ -84,9 +52,10 @@ export function SavePoint({ repoId }: SavePointProps) {
       try {
         await restoreMutation.mutateAsync(restoreDialog.historyId);
         setRestoreDialog({ isOpen: false, historyId: null, message: '' });
+        showToast({ message: '히스토리가 성공적으로 복원되었습니다.', type: 'success' });
       } catch (err) {
         console.error('Restore error:', err);
-        // 에러는 뮤테이션의 onError에서 처리됨
+        showToast({ message: '복원 중 오류가 발생했습니다.', type: 'error' });
       }
     }
   };
@@ -142,7 +111,7 @@ export function SavePoint({ repoId }: SavePointProps) {
           </div>
         ) : (
           <div className={styles.historyList}>
-            {histories.map((history: HistoryItem) => (
+            {histories.map(history => (
               <div key={history.historyId} className={styles.historyItem}>
                 <div className={styles.historyInfo}>
                   <div className={styles.historyMessage}>{history.message}</div>
