@@ -1,19 +1,21 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { findIdSchema } from '@/schemas/auth.schema';
-import type { FindIdFormValues } from '@/schemas/auth.schema';
 
 import Input from '@/components/atoms/Input/Input';
 import Button from '@/components/atoms/Button/Button';
 import FormField from '@/components/molecules/FormField/FormField';
 
-// 훅들과 URL 타입들 import
+import { useToast } from '@/hooks/common/useToast';
 import {
   useFindId,
   useSendPhoneCodeForFindId,
   useVerifyPhoneCodeForFindId,
 } from '@/hooks/auth/useFindId';
+
+import { findIdSchema } from '@/schemas/auth.schema';
+import type { FindIdFormValues } from '@/schemas/auth.schema';
+
 import type {
   FindIdURL,
   PhoneSendCodeURL,
@@ -51,19 +53,21 @@ export default function FindIdForm() {
   // URL을 파라미터로 전달하는 훅들 사용
   const findIdMutation = useFindId(findIdURL, {
     onError: () => {
-      alert('일치하는 계정을 찾을 수 없습니다.');
+      toast.error('일치하는 계정을 찾을 수 없습니다.');
     },
   });
+
+  const toast = useToast();
 
   const sendPhoneCodeMutation = useSendPhoneCodeForFindId(phoneSendCodeURL, {
     onSuccess: () => {
       setCodeSent(true);
       startTimer();
-      alert('인증번호가 발송되었습니다.');
+      toast.info('인증번호가 발송되었습니다.');
     },
     onError: error => {
       console.error('인증번호 발송 실패:', error);
-      alert(`인증번호 발송에 실패했습니다. (${error.response?.status || '알 수 없는 오류'})`);
+      toast.error(`인증번호 발송에 실패했습니다. (${error.response?.status || '알 수 없는 오류'})`);
     },
   });
 
@@ -71,13 +75,13 @@ export default function FindIdForm() {
     onSuccess: data => {
       if (data.data.verified) {
         setCodeVerified(true);
-        alert('휴대폰 인증이 완료되었습니다.');
+        toast.success('휴대폰 인증이 완료되었습니다.');
       } else {
-        alert('인증번호가 올바르지 않습니다.');
+        toast.error('인증번호가 올바르지 않습니다.');
       }
     },
     onError: () => {
-      alert('인증번호 확인에 실패했습니다.');
+      toast.error('인증번호 확인에 실패했습니다.');
     },
   });
 
@@ -98,7 +102,7 @@ export default function FindIdForm() {
   // 인증번호 발송
   const handleSendPhoneCode = () => {
     if (!phone || !username) {
-      alert('이름과 휴대폰 번호를 입력해주세요.');
+      toast.warning('이름과 휴대폰 번호를 입력해주세요.');
       return;
     }
 
@@ -115,7 +119,7 @@ export default function FindIdForm() {
   // 인증번호 확인
   const handleVerifyPhoneCode = () => {
     if (!phoneCode || !phone) {
-      alert('인증번호를 입력해주세요.');
+      toast.warning('인증번호를 입력해주세요.');
       return;
     }
 
@@ -132,7 +136,7 @@ export default function FindIdForm() {
   // 폼 제출
   const onSubmit = (data: FindIdFormValues) => {
     if (!codeVerified) {
-      alert('휴대폰 인증을 완료해주세요.');
+      toast.warning('휴대폰 인증을 완료해주세요.');
       return;
     }
 
