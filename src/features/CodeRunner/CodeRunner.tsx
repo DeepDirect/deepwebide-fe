@@ -77,7 +77,7 @@ export function CodeRunner(props: CodeRunnerProps) {
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              style={{ color: '#53aaff', textDecoration: 'underline', cursor: 'pointer' }}
+              className="code-runner__open-url-link"
             >
               {url}
             </a>
