@@ -1,6 +1,7 @@
 import { useMutation, type UseMutationOptions } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
 import { useNavigate } from '@tanstack/react-router';
+import { useToast } from '@/hooks/common/useToast';
 
 import api from '@/api/api';
 import type { ChangePasswordURL } from '@/types/common/apiEndpoints.types';
@@ -15,6 +16,7 @@ const useChangePassword = (
   >
 ) => {
   const navigate = useNavigate();
+  const toast = useToast();
 
   return useMutation<ResetPasswordResponse, AxiosError, ResetPasswordRequest>({
     mutationFn: async (data: ResetPasswordRequest) => {
@@ -33,7 +35,7 @@ const useChangePassword = (
       return response.data;
     },
     onSuccess: (data, variables, context) => {
-      alert('비밀번호가 성공적으로 변경되었습니다.');
+      toast.success('비밀번호가 성공적으로 변경되었습니다.');
       navigate({ to: '/sign-in' });
       options?.onSuccess?.(data, variables, context);
     },

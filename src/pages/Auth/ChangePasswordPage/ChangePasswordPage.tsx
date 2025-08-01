@@ -1,14 +1,17 @@
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from '@tanstack/react-router';
-import { changePasswordSchema, type ChangePasswordFormValues } from '@/schemas/auth.schema';
-import PasswordInput from '@/components/atoms/Input/PasswordInput';
-import Button from '@/components/atoms/Button/Button';
-import FormField from '@/components/molecules/FormField/FormField';
-import { useEffect, useState } from 'react';
 
-// 훅과 URL 타입 import
+import Button from '@/components/atoms/Button/Button';
+import PasswordInput from '@/components/atoms/Input/PasswordInput';
+import FormField from '@/components/molecules/FormField/FormField';
+
 import useChangePassword from '@/hooks/auth/useChangePassword';
+import { useToast } from '@/hooks/common/useToast';
+
+import { changePasswordSchema, type ChangePasswordFormValues } from '@/schemas/auth.schema';
+
 import type { ChangePasswordURL } from '@/types/common/apiEndpoints.types';
 
 import styles from './ChangePasswordPage.module.scss';
@@ -19,6 +22,7 @@ const changePasswordURL: ChangePasswordURL = '/api/auth/password/reset';
 export default function ChangePasswordPage() {
   const navigate = useNavigate();
   const [reauthToken, setReauthToken] = useState<string | null>(null);
+  const toast = useToast();
 
   // localStorage에서 reauthToken 가져오기
   useEffect(() => {
@@ -32,7 +36,8 @@ export default function ChangePasswordPage() {
 
     if (!token) {
       console.error('localStorage에 reauthToken이 없습니다!');
-      alert('인증 토큰이 없습니다. 비밀번호 찾기부터 다시 시작해주세요.');
+
+      toast.error('인증 토큰이 없습니다. 비밀번호 찾기부터 다시 시작해주세요.');
       navigate({ to: '/find-password' });
       return;
     }
@@ -48,12 +53,12 @@ export default function ChangePasswordPage() {
       // 성공 시 localStorage에서 토큰 제거
       localStorage.removeItem('reauthToken');
       console.log('localStorage에서 reauthToken 제거 완료');
-      alert('비밀번호가 성공적으로 변경되었습니다.');
+
+      toast.success('비밀번호가 성공적으로 변경되었습니다.');
       navigate({ to: '/sign-in' });
     },
-    onError: error => {
-      console.error('비밀번호 변경 실패:', error);
-      alert('비밀번호 재설정에 실패했습니다. 다시 시도해주세요.');
+    onError: () => {
+      toast.error('비밀번호 재설정에 실패했습니다. 다시 시도해주세요.');
     },
   });
 
@@ -75,8 +80,7 @@ export default function ChangePasswordPage() {
     console.log('비밀번호 변경 폼 제출');
 
     if (!reauthToken) {
-      console.error('reauthToken이 없습니다!');
-      alert('인증 토큰이 없습니다. 처음부터 다시 시도해주세요.');
+      toast.error('인증 토큰이 없습니다. 처음부터 다시 시도해주세요.');
       return;
     }
 
