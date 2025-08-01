@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import clsx from 'clsx';
 import styles from './ToggleInputMenuItem.module.scss';
+import EyeIcon from '@/assets/icons/eye.svg?react';
+import EyeClosedIcon from '@/assets/icons/eye-closed.svg?react';
 
 export interface ToggleInputMenuItemProps {
   label: string;
@@ -129,11 +131,11 @@ const ToggleInputMenuItem: React.FC<ToggleInputMenuItemProps> = ({
             onClick={handlePasswordToggle}
             aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 보기'}
           >
-            <img
-              src={showPassword ? 'src/assets/icons/eye.svg' : 'src/assets/icons/eye-closed.svg'}
-              alt={showPassword ? '숨기기' : '보기'}
-              className={styles.eyeIcon}
-            />
+            {showPassword ? (
+              <EyeIcon className={styles.eyeIcon} />
+            ) : (
+              <EyeClosedIcon className={styles.eyeIcon} />
+            )}
           </button>
         )}
       </div>
