@@ -34,41 +34,6 @@ export const CurrentUserSchema = z.object({
   activeUserCount: z.number(),
 });
 
-// 읽은 메시지 오프셋
-export const LastReadOffsetSchema = z.object({
-  lastReadMessageId: z.number(),
-});
-
-// 메시지 검색
-export const SearchMessagesSchema = z.object({
-  keyword: z.string(),
-  totalElements: z.number(),
-  messages: z.array(
-    z.object({
-      messageId: z.number(),
-      senderId: z.number(),
-      senderNickname: z.string(),
-      senderProfileImageUrl: z.string(),
-      message: z.string(),
-      codeReference: z
-        .object({
-          referenceId: z.number(),
-          path: z.string(),
-        })
-        .nullable(),
-      isMine: z.boolean(),
-      sentAt: z.string(),
-    })
-  ),
-});
-
-// 메시지 검색 API 응답
-export const SearchMessagesResponseSchema = z.object({
-  status: z.number(),
-  message: z.string(),
-  data: SearchMessagesSchema,
-});
-
 // 코드 참조 파일 경로 조회
 export const CodeReferencePathsSchema = z.object({
   paths: z.array(z.string()),
@@ -110,11 +75,41 @@ export const SendMessageSchema = z.object({
   sentAt: z.string(),
 });
 
+// 메시지 검색
+export const SearchMessagesSchema = z.object({
+  keyword: z.string(),
+  totalElements: z.number(),
+  messages: z.array(
+    z.object({
+      messageId: z.number(),
+      senderId: z.number(),
+      senderNickname: z.string(),
+      senderProfileImageUrl: z.string(),
+      message: z.string(),
+      codeReference: z
+        .object({
+          referenceId: z.number(),
+          path: z.string(),
+        })
+        .nullable(),
+      sentAt: z.string(),
+      isMine: z.boolean(),
+    })
+  ),
+});
+
+// 메시지 검색 API 응답
+export const SearchMessagesResponseSchema = z.object({
+  status: z.number(),
+  message: z.string(),
+  data: SearchMessagesSchema,
+});
+
 // 타입 추론
 export type ChatMessage = z.infer<typeof ChatMessageSchema>;
 export type ChatMessagesData = z.infer<typeof ChatMessagesDataSchema>;
 export type ChatMessagesResponse = z.infer<typeof ChatMessagesResponseSchema>;
-export type SearchMessagesData = z.infer<typeof SearchMessagesSchema>;
-export type SearchMessagesResponse = z.infer<typeof SearchMessagesResponseSchema>;
 export type CodeReferencePathsResponse = z.infer<typeof CodeReferencePathsResponseSchema>;
 export type CodeReferencePaths = z.infer<typeof CodeReferencePathsSchema>;
+export type SearchMessagesData = z.infer<typeof SearchMessagesSchema>;
+export type SearchMessagesResponse = z.infer<typeof SearchMessagesResponseSchema>;
