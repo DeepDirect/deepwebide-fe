@@ -16,9 +16,10 @@ import {
 } from '@/features/Chat/types';
 
 import { useGetPreviousChat } from '@/hooks/chat/useGetPreviousChat';
-// import CurrentMembers from './components/CurrentMembers/CurrentMembers';
+import CurrentMembers from './components/CurrentMembers/CurrentMembers';
 import Loading from '@/components/molecules/Loading/Loading';
 import './Chat.scss';
+import type { SearchMessagesData } from '@/schemas/chat.schema';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -26,48 +27,104 @@ dayjs.locale('ko');
 
 interface ChattingProps {
   isConnected: boolean;
+  connectedCount: number;
   messages?: ChatReceivedMessage[] | [];
   send: (message: ChatSendMessage) => void;
 }
 
-// messages : 처음에 get으로 받아온거 + pros로 받아온거
-
-const Chat: React.FC<ChattingProps> = ({ isConnected, messages, send }) => {
+const Chat: React.FC<ChattingProps> = ({ isConnected, connectedCount, messages, send }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { repoId } = useParams({ strict: false });
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true);
   const [totalMessages, setTotalMessages] = useState<ChatReceivedMessage[]>([]);
   const prevMessagesRef = useRef<ChatReceivedMessage[]>([]);
+  const [searchResults, setSearchResults] = useState<SearchMessagesData | null>(null);
 
   // 현재 사용자 ID (메시지 비교용)
   const currentUserId = getCurrentUserId();
 
-  const { data: previousChatData, isLoading: isPreviousLoading } = useGetPreviousChat(
+  const {
+    data: previousChatData,
+    isLoading: isPreviousLoading,
+    refetch: refetchPreviousChat,
+  } = useGetPreviousChat(
     repoId,
     { size: 20 },
-    { enabled: isConnected && isInitialLoad && !!repoId }
+    { enabled: false } // 자동 호출 비활성화
   );
+
+  // SearchMessageData 타입을 ChatReceivedMessage로 변환
+  const searchMessages: ChatReceivedMessage[] = searchResults
+    ? searchResults.messages
+        .map(msg => ({
+          ...msg,
+          type: 'CHAT' as const,
+          repositoryId: repoId,
+          messageId: msg.messageId.toString(),
+        }))
+        .sort((a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime())
+    : [];
+
+  // 검색 결과 처리 함수
+  const handleSearchResults = (results: SearchMessagesData | null) => {
+    setSearchResults(results);
+  };
+
+  // 초기 로드 시에만 수동으로 데이터 페칭
+  useEffect(() => {
+    if (isConnected && isInitialLoad && repoId) {
+      console.log('🚀 [Chat] 초기 로드 - API 호출 시작');
+      refetchPreviousChat(); // Promise 결과는 사용하지 않음
+    }
+  }, [isConnected, isInitialLoad, repoId, refetchPreviousChat]);
 
   // 처음 렌더링 후 isInitialLoad를 false로 변경
   useEffect(() => {
-    if (previousChatData && isInitialLoad) {
+    // idle 상태이고 데이터가 있을 때만 실행
+    if (!isPreviousLoading && previousChatData && isInitialLoad) {
+      console.log('📦 [Chat] 이전 채팅 메시지 수신 완료:', previousChatData);
+
       // API 응답에서 실제 메시지 배열 추출 및 타입 변환
       const messages = previousChatData.data?.data?.messages || [];
       const formattedMessages: ChatReceivedMessage[] = messages
         .map(msg => ({
           ...msg,
           type: 'CHAT' as const,
-          repositoryId: parseInt(repoId),
+          repositoryId: repoId,
           messageId: msg.messageId.toString(),
         }))
         .sort((a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime());
+
       setTotalMessages(formattedMessages);
-      setIsInitialLoad(false); // 처음 로드 완료 후 false로 설정
+      setIsInitialLoad(false);
+
       requestAnimationFrame(() => {
         scrollToBottom();
       });
     }
-  }, [previousChatData, isInitialLoad, repoId]);
+  }, [previousChatData, isPreviousLoading, isInitialLoad, repoId]);
+
+  // useEffect(() => {
+  //   if (previousChatData && isInitialLoad) {
+  //     // API 응답에서 실제 메시지 배열 추출 및 타입 변환
+  //     const messages = previousChatData.data?.data?.messages || [];
+  //     const formattedMessages: ChatReceivedMessage[] = messages
+  //       .map(msg => ({
+  //         ...msg,
+  //         type: 'CHAT' as const,
+  //         repositoryId: repoId,
+  //         messageId: msg.messageId.toString(),
+  //       }))
+  //       .sort((a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime());
+  //     setTotalMessages(formattedMessages);
+
+  //     // 초기 로드 완료 표시
+  //     setIsInitialLoad(false);
+  //     requestAnimationFrame(() => {
+  //       scrollToBottom();
+  //     });
+  //   }
+  // }, [previousChatData, repoId, isInitialLoad]);
 
   // props messages가 변경될 때 추가된 메시지만 totalMessages에 추가
   useEffect(() => {
@@ -83,6 +140,9 @@ const Chat: React.FC<ChattingProps> = ({ isConnected, messages, send }) => {
 
       // 현재 messages를 이전 messages로 저장
       prevMessagesRef.current = messages;
+      requestAnimationFrame(() => {
+        scrollToBottom();
+      });
     }
   }, [messages]);
 
@@ -90,23 +150,23 @@ const Chat: React.FC<ChattingProps> = ({ isConnected, messages, send }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // 초기 로드 완료 후 플래그 설정
-  // useEffect(() => {
-  //   if (previousChatData && isInitialLoad) {
-  //     setIsInitialLoad(false);
-  //     // 초기 로드 완료 후 맨 아래로 스크롤
-  //     setTimeout(() => {
-  //       scrollToBottom();
-  //     }, 100);
-  //   }
-  // }, [previousChatData, isInitialLoad]);
+  useEffect(() => {
+    // 검색 모드가 아닐 때만 자동 스크롤
+    if (!searchResults) {
+      scrollToBottom();
+    }
+  }, [messages, searchResults]);
 
-  // 새로운 실시간 메시지가 올 때만 스크롤
-  // useEffect(() => {
-  //   if (!isInitialLoad && realtimeMessages.length > 0) {
-  //     scrollToBottom();
-  //   }
-  // }, [realtimeMessages.length, isInitialLoad]);
+  // 초기 로드 완료 후 플래그 설정
+  useEffect(() => {
+    if (previousChatData && isInitialLoad) {
+      setIsInitialLoad(false);
+      // 초기 로드 완료 후 맨 아래로 스크롤
+      setTimeout(() => {
+        scrollToBottom();
+      }, 100);
+    }
+  }, [previousChatData, isInitialLoad]);
 
   // 온라인 사용자 형식 변환
   // const onlineUsers = stompOnlineUsers.map(user => ({
@@ -143,23 +203,20 @@ const Chat: React.FC<ChattingProps> = ({ isConnected, messages, send }) => {
     return currentDate !== previousDate;
   };
 
+  // 표시할 메시지 목록 결정(검색 결과가 있으면 검색 메시지, 없으면 전체 메시지)
+  const displayMessages = searchResults ? searchMessages : totalMessages;
+
   return (
     <div className={'chat'}>
       <div className="chat__container">
         {/* 검색 바 */}
-        <ChatSearchBar />
+        <ChatSearchBar onSearchResults={handleSearchResults} />
 
         {/* 현재 접속중 인원 표시 */}
-        {/* <CurrentMembers onlineUsers={onlineUsers} /> */}
+        <CurrentMembers onlineCount={connectedCount} />
 
         {/* 로딩 중일 때 로딩 컴포넌트 표시 */}
         {!isConnected && isPreviousLoading && <Loading />}
-
-        {/* {!isConnected && (
-          <div style={{ padding: '8px', textAlign: 'center', color: '#ff6b6b', fontSize: '10px' }}>
-            ⚠️ 채팅 연결 끊김
-          </div>
-        )} */}
 
         {/* 채팅 메시지 목록 */}
         <div className="chat__messages">
@@ -169,7 +226,25 @@ const Chat: React.FC<ChattingProps> = ({ isConnected, messages, send }) => {
             </div>
           )} */}
 
-          {totalMessages?.map((message, index) => {
+          {displayMessages && displayMessages.length === 0 && !isPreviousLoading && (
+            <div style={{ padding: '10px', textAlign: 'center', color: '#999', fontSize: '12px' }}>
+              {searchResults ? '검색 결과가 없습니다.' : <Loading />}
+            </div>
+          )}
+
+          {displayMessages.map((message, index) => {
+            const shouldShowDate = shouldShowDateDivider(message, index);
+            const isMyMessage = String(message.senderId) === currentUserId;
+
+            return (
+              <React.Fragment key={`${message.senderId}-${message.sentAt}-${index}`}>
+                {shouldShowDate && <DateDivider date={formatDateToKorean(message.sentAt)} />}
+                <ChatMessageComponent message={message} isMyMessage={isMyMessage} />
+              </React.Fragment>
+            );
+          })}
+
+          {/* {totalMessages?.map((message, index) => {
             const shouldShowDate = shouldShowDateDivider(message, index);
             const isMyMessage = message.senderId.toString() === currentUserId;
 
@@ -179,7 +254,7 @@ const Chat: React.FC<ChattingProps> = ({ isConnected, messages, send }) => {
                 <ChatMessageComponent message={message} isMyMessage={isMyMessage} />
               </React.Fragment>
             );
-          })}
+          })} */}
           <div ref={messagesEndRef} />
         </div>
 
