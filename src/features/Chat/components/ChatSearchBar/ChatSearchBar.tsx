@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useParams } from '@tanstack/react-router';
 import { useGetSearchedChat } from '@/hooks/chat/useGetSearchedChat';
 import { type SearchMessagesData } from '@/schemas/chat.schema';
@@ -8,49 +8,35 @@ interface ChatSearchBarProps {
   onSearchResults?: (results: SearchMessagesData | null) => void;
 }
 
-const useDebounce = (value: string, delay: number) => {
-  const [debouncedValue, setDebouncedValue] = useState(value);
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [value, delay]);
-
-  return debouncedValue;
-};
-
 const ChatSearchBar: React.FC<ChatSearchBarProps> = ({ onSearchResults }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [triggerSearch, setTriggerSearch] = useState(false);
   const { repoId } = useParams({ strict: false });
 
-  const debouncedSearchQuery = useDebounce(searchQuery.trim(), 500);
-
-  const { data: searchResults } = useGetSearchedChat(repoId as string, debouncedSearchQuery, {
-    enabled: !!repoId,
+  const { data: searchResults } = useGetSearchedChat(repoId as string, searchQuery, {
+    enabled: !!repoId && triggerSearch,
   });
 
   useEffect(() => {
-    if (onSearchResults) {
-      if (debouncedSearchQuery.length >= 2) {
-        onSearchResults(searchResults?.data.data || null);
+    if (onSearchResults && triggerSearch) {
+      if (searchResults?.data.data) {
+        onSearchResults(searchResults.data.data);
       } else {
         onSearchResults(null);
       }
+      setTriggerSearch(false);
     }
-  }, [searchResults, onSearchResults, debouncedSearchQuery]);
+  }, [searchResults, onSearchResults, triggerSearch]);
 
   const handleSearch = useCallback(() => {
-    if (searchQuery.trim().length < 2) {
+    const trimmedQuery = searchQuery.trim();
+    if (trimmedQuery.length === 0) {
       if (onSearchResults) {
         onSearchResults(null);
       }
       return;
     }
+    setTriggerSearch(true);
   }, [searchQuery, onSearchResults]);
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
