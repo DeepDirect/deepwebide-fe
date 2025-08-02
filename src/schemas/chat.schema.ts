@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { ApiResponse } from '@/types/common/api';
 
 // 채팅방 입장시 메시지 조회
 export const ChatMessageSchema = z.object({
@@ -20,12 +21,6 @@ export const ChatMessageSchema = z.object({
 export const ChatMessagesDataSchema = z.object({
   hasMore: z.boolean(),
   messages: z.array(ChatMessageSchema),
-});
-
-export const ChatMessagesResponseSchema = z.object({
-  status: z.number(),
-  message: z.string(),
-  data: ChatMessagesDataSchema,
 });
 
 // 실시간 접속자 수
@@ -108,8 +103,8 @@ export const SearchMessagesResponseSchema = z.object({
 // 타입 추론
 export type ChatMessage = z.infer<typeof ChatMessageSchema>;
 export type ChatMessagesData = z.infer<typeof ChatMessagesDataSchema>;
-export type ChatMessagesResponse = z.infer<typeof ChatMessagesResponseSchema>;
 export type CodeReferencePathsResponse = z.infer<typeof CodeReferencePathsResponseSchema>;
 export type CodeReferencePaths = z.infer<typeof CodeReferencePathsSchema>;
 export type SearchMessagesData = z.infer<typeof SearchMessagesSchema>;
 export type SearchMessagesResponse = z.infer<typeof SearchMessagesResponseSchema>;
+export type ChatMessagesDataResponse = ApiResponse<ChatMessagesData>;
