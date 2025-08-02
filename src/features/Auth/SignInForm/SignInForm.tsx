@@ -37,10 +37,12 @@ export default function SignInForm() {
   // URL을 파라미터로 전달
   const signInMutation = useSignIn(signInURL, {
     onError: error => {
-      const message = error.response?.message // error.response 형태는 {status, message, data} 형태임
-        ? error.response?.message
-        : '로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.';
-      toast.error(message);
+      // error: AxiosError<unknown, any>
+      const message =
+        error.response?.data && (error.response.data as { message?: string }).message
+          ? (error.response.data as { message?: string }).message
+          : '로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.';
+      toast.error(message ?? '로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.');
     },
   });
 
