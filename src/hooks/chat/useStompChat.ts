@@ -1,17 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import SockJS from 'sockjs-client';
 import { Client, type IMessage } from '@stomp/stompjs';
-
-interface CodeReference {
-  path: string;
-}
-
-interface ChatMessage {
-  type: 'CHAT';
-  repositoryId: number;
-  message: string;
-  codeReference: CodeReference | null;
-}
+import { type ChatReceivedMessage, type ChatSendMessage } from '@/features/Chat/types';
 
 /**
  * Custom hook to manage STOMP WebSocket connections for chat functionality.
@@ -22,14 +12,14 @@ interface ChatMessage {
 
 const useStompChat = (url: string, repositoryId: number) => {
   const clientRef = useRef<Client | null>(null);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<ChatReceivedMessage[]>([]);
   const [isConnected, setIsConnected] = useState(false);
 
   const token = localStorage.getItem('accessToken');
   const params = new URLSearchParams();
 
   if (token) params.append('token', token);
-  params.append('repositoryId', String(repositoryId));
+  params.append('repositoryId', repositoryId.toString());
   const SOCKET_URL = `${url}?${params.toString()}`;
 
   useEffect(() => {
@@ -58,18 +48,18 @@ const useStompChat = (url: string, repositoryId: number) => {
         setIsConnected(true);
         console.log('✅ [STOMP] STOMP connected successfully');
 
-        client.subscribe(`topic/repositories/${repositoryId}/chat`, (message: IMessage) => {
+        client.subscribe(`/topic/repositories/${repositoryId}/chat`, (message: IMessage) => {
           console.log('📥 [RECEIVE-TOPIC] Message received:', message.body);
           console.log('📥 [RECEIVE-TOPIC] Headers:', message.headers);
           // const body: ChatMessage = JSON.parse(message.body);
           // setMessages(prev => [...prev, body]);
         });
 
-        client.subscribe(`sub/repositories/${repositoryId}/chat`, (message: IMessage) => {
+        client.subscribe(`/sub/repositories/${repositoryId}/chat`, (message: IMessage) => {
           console.log('📥 [RECEIVE-SUB] Message received:', message.body);
           console.log('📥 [RECEIVE-SUB] Headers:', message.headers);
           try {
-            const body: ChatMessage = JSON.parse(message.body);
+            const body: ChatReceivedMessage = JSON.parse(message.body);
             setMessages(prev => [...prev, body]);
             console.log('✅ [RECEIVE-SUB] Message processed and added to state');
           } catch (error) {
@@ -107,14 +97,14 @@ const useStompChat = (url: string, repositoryId: number) => {
   }, [SOCKET_URL, repositoryId]);
 
   const send = useCallback(
-    (message: ChatMessage) => {
+    (message: ChatSendMessage) => {
       console.log('📤 [STOMP-SEND] Starting to send message:', message);
       if (!clientRef.current || !isConnected) {
         console.warn('❌ [STOMP-SEND] Cannot send message, not connected');
         return;
       }
 
-      const destination = `app/repositories/${repositoryId}/chat/send`;
+      const destination = `/app/repositories/${repositoryId}/chat/send`;
       const body = JSON.stringify(message);
 
       console.log('📤 [STOMP-SEND] Publishing to destination:', destination);
@@ -132,7 +122,7 @@ const useStompChat = (url: string, repositoryId: number) => {
   return {
     isConnected,
     messages,
-    send: (message: ChatMessage) => {
+    send: (message: ChatSendMessage) => {
       console.log('🔥 [STOMP-WRAPPER] Send function wrapper called');
       return send(message);
     },
