@@ -15,6 +15,7 @@ export interface TabStore {
   setTabDirty: (tabId: string, isDirty: boolean) => void;
   setTabLoading: (tabId: string, isLoading: boolean) => void;
   clearTabsForRepo: (repoId: string) => void;
+  clearAllTabs: () => void;
   keepOnlyCurrentRepoTabs: (repoId: string) => void;
   updateTabFromFileTree: (fileId: number, fileName: string, path: string) => void;
   markTabAsDeleted: (fileId: number) => void;
