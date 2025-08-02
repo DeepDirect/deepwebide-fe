@@ -1,12 +1,15 @@
+// 수신용 코드 참조
 interface CodeReference {
   referenceId: number;
   path: string;
 }
 
+// 발신용 코드 참조
 export interface SendCodeReference {
   path: string;
 }
 
+// 수신용 채팅 메시지
 export interface ChatMessageInfo {
   repositoryId: number;
   messageId: string;
@@ -19,10 +22,12 @@ export interface ChatMessageInfo {
   sentAt: string;
 }
 
+// 수신용 채팅 메시지에 'CHAT' 추가
 export interface ChatReceivedMessage extends ChatMessageInfo {
   type: 'CHAT';
 }
 
+// 발신용 채팅 메시지
 export interface ChatSendMessage {
   type: 'CHAT';
   repositoryId: number;
@@ -30,23 +35,7 @@ export interface ChatSendMessage {
   codeReference: SendCodeReference | null;
 }
 
-export interface SearchedChatMessageElement {
-  messageId: string;
-  senderId: number;
-  senderNickname: string;
-  senderProfileImageUrl: string;
-  message: string;
-  codeReference: CodeReference | null;
-  isMine: boolean;
-  sentAt: string;
-}
-export interface SearchedChatMessage {
-  keyword: string;
-  totalElements: number;
-  messages: SearchedChatMessageElement[];
-}
-
-export type ChatReceivedMessageType = ChatReceivedMessage;
-export type ChatSendMessageType = ChatSendMessage;
-export type ChatMessageInfoType = ChatMessageInfo;
 export type SendCodeReferenceType = SendCodeReference;
+export type ChatReceivedMessageType = ChatReceivedMessage;
+export type ChatMessageInfoType = ChatMessageInfo;
+export type ChatSendMessageType = ChatSendMessage;
