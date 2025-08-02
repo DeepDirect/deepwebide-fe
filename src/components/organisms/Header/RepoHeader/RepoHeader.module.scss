@@ -47,6 +47,15 @@
   height: 18px;
 }
 
+.centerNewChatAlert,
+.rightNewChatAlert {
+  position: relative;
+  top: -5px;
+  left: -5px;
+  font-size: xx-small;
+  color: $red;
+}
+
 .chatButton {
   position: relative;
   display: flex;
@@ -96,15 +105,20 @@
 }
 
 // 중앙의 채팅 버튼 (큰 화면에서만 표시)
-.centerChatButton {
+.centerChatButtonContainer {
+  display: flex;
+  flex-direction: row;
+
   @media (width <= 1000px) {
     display: none;
   }
 }
 
 // 오른쪽 채팅 버튼 (중간 크기 화면에서만 표시)
-.rightChatButton {
+.rightChatButtonContainer {
+  display: flex;
   display: none;
+  flex-direction: row;
 
   // 1000px 이하에서 표시 (center가 사라질 때)
   @media (width <= 1000px) {

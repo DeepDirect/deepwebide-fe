@@ -14,16 +14,74 @@
   background-color: $gray-10;
   transition: background-color 0.3s ease;
 
-  //   &:focus-within {
-  //     background-color: $gray-9;
-  //   }
-
   .dark & {
     background-color: $gray-4;
+  }
+}
 
-    // &:focus-within {
-    //   background-color: $gray-5;
-    // }
+.chat-input__selected-path {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  font-size: $font-size-xxxsmall;
+  background-color: $gray-9;
+
+  .dark & {
+    background-color: $gray-3;
+    border-bottom-color: $gray-5;
+  }
+}
+
+.chat-input__selected-path-label {
+  font-weight: $font-weight-bold;
+  color: $gray-6;
+
+  .dark & {
+    color: $gray-7;
+  }
+}
+
+.chat-input__selected-path-text {
+  flex: 1;
+  overflow: hidden;
+  font-weight: $font-weight-medium;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: $gray-2;
+
+  .dark & {
+    color: $white-2;
+  }
+}
+
+.chat-input__remove-path {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 10px;
+  height: 10px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  font-size: $font-size-xxxsmall;
+  font-weight: $font-weight-regular;
+  color: $white-1;
+  background-color: $gray-7;
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    background-color: $gray-6;
+  }
+
+  .dark & {
+    color: $gray-1;
+    background-color: $gray-6;
+
+    &:hover {
+      background-color: $gray-7;
+    }
   }
 }
 
@@ -85,13 +143,137 @@
   }
 }
 
-.chat-input__help {
+.chat-input__reference {
+  position: relative;
+  display: flex;
+  flex-direction: row;
   font-size: $font-size-xxxsmall;
   font-weight: $font-weight-regular;
   color: $gray-2;
+  background: none;
 
   .dark & {
     color: $white-2;
+  }
+}
+
+.chat-input__reference-paths {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  z-index: 10;
+}
+
+.chat-input__dropdown {
+  max-width: 400px;
+  min-width: 300px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  background-color: $white-1;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+
+  .dark & {
+    background-color: $gray-2;
+    box-shadow: 0 4px 12px rgb(0 0 0 / 30%);
+  }
+}
+
+.chat-input__loading,
+.chat-input__error,
+.chat-input__no-paths {
+  padding: 12px 16px;
+  font-size: $font-size-xxxsmall;
+  text-align: center;
+}
+
+.chat-input__loading {
+  color: $gray-6;
+
+  .dark & {
+    color: $gray-7;
+  }
+}
+
+.chat-input__error {
+  color: $red;
+}
+
+.chat-input__no-paths {
+  color: $gray-5;
+
+  .dark & {
+    color: $gray-8;
+  }
+}
+
+.chat-input__path-select {
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: $font-size-xxxsmall;
+  color: $gray-2;
+  background-color: $white-1;
+  cursor: pointer;
+
+  &:focus {
+    outline: 2px solid $orange;
+    outline-offset: -2px;
+  }
+
+  option {
+    padding: 8px;
+    color: $gray-2;
+    background-color: $white-1;
+
+    &:hover {
+      background-color: $gray-10;
+    }
+  }
+
+  .dark & {
+    color: $white-2;
+    background-color: $gray-2;
+
+    option {
+      color: $white-2;
+      background-color: $gray-2;
+
+      &:hover {
+        background-color: $gray-3;
+      }
+    }
+  }
+}
+
+.chat-input__reference-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: none;
+
+  svg {
+    width: 19px;
+    height: 19px;
+    color: $orange;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+
+    svg {
+      color: $gray-5;
+    }
+  }
+
+  .dark & {
+    &:disabled {
+      svg {
+        color: $gray-8;
+      }
+    }
   }
 }
 
