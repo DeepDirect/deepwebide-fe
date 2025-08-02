@@ -156,7 +156,7 @@ export const useWebSocketChat = ({
       setIsLoading(true);
 
       const config = getWebSocketConfig();
-      const token = localStorage.getItem('accessToken');
+      const token = sessionStorage.getItem('accessToken');
 
       const wsUrl = buildWebSocketUrl(config.chatWsUrl, {
         roomId,
@@ -240,7 +240,7 @@ export const useWebSocketChat = ({
         data: newMessage,
         roomId,
         userId,
-        token: localStorage.getItem('accessToken') || undefined,
+        token: sessionStorage.getItem('accessToken') || undefined,
       });
     },
     [userId, userName, profileImageUrl, roomId, sendWebSocketMessage]

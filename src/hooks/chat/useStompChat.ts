@@ -16,7 +16,7 @@ const useStompChat = (url: string, repositoryId: number) => {
   const [connectedCount, setConnectedCount] = useState<number>(1);
   const [isConnected, setIsConnected] = useState(false);
 
-  const token = localStorage.getItem('accessToken');
+  const token = sessionStorage.getItem('accessToken');
   const params = new URLSearchParams();
 
   if (token) params.append('token', token);

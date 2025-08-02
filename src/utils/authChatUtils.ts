@@ -1,7 +1,7 @@
 // 로그인된 사용자 정보 가져오기
 export const getCurrentUser = () => {
   try {
-    const userStr = localStorage.getItem('user');
+    const userStr = sessionStorage.getItem('user');
     if (userStr) {
       return JSON.parse(userStr);
     }
