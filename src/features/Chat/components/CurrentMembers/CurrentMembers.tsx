@@ -1,31 +1,10 @@
 import './CurrentMember.scss';
 
-const CurrentMembers: React.FC = () => {
-  const members = [
-    {
-      user_id: '1',
-      username: '더운 개발자',
-      profile_image_url: 'https://example.com/profile/1.png',
-    },
-    {
-      user_id: '2',
-      username: '슬기로운 개발자',
-      profile_image_url: 'https://example.com/profile/2.png',
-    },
-    {
-      user_id: '3',
-      username: '쓰러진 개발자',
-      profile_image_url: 'https://example.com/profile/3.png',
-    },
-    {
-      user_id: '4',
-      username: '숨어있는 개발자',
-      profile_image_url: 'https://example.com/profile/4.png',
-    },
-  ];
+interface CurrentMembersProps {
+  onlineCount: number;
+}
 
-  // TODO - 호버시 온라인 멤버 리스트도 드롭다운으로 보여주는 기능으로 확장하고 싶습니다...!
-
+const CurrentMembers: React.FC<CurrentMembersProps> = ({ onlineCount }) => {
   return (
     <div>
       <div className="current-members">
@@ -37,7 +16,7 @@ const CurrentMembers: React.FC = () => {
             />
           </svg>
           {/* TODO - 웹소켓으로 현재 온라인 멤버 수 계산하는 로직 필요 */}
-          <div className="current-members__count">{String(members.length).padStart(2, '0')}</div>
+          <div className="current-members__count">{String(onlineCount).padStart(2, '0')}</div>
         </div>
       </div>
       <hr className="horizontal-line" />
