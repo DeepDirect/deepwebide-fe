@@ -1,11 +1,31 @@
-export interface ChatMessage {
-  user_id: string;
-  username: string;
-  profile_image_url: string;
-  content: string;
-  type: 'message';
-  created_at: string; // ISO 8601 형식
-  unreadNumber: number; // 추후 직접 계산하는 것으로 바뀔 예정!
+interface CodeReference {
+  referenceId: number;
+  path: string;
 }
 
-export type ChatItem = ChatMessage;
+export interface ChatMessageInfo {
+  repositoryId: number;
+  messageId: string;
+  senderId: number;
+  senderNickname: string;
+  senderProfileImageUrl: string;
+  message: string;
+  codeReference: CodeReference | null;
+  isMine: boolean;
+  sentAt: string;
+}
+
+export interface ChatReceivedMessage extends ChatMessageInfo {
+  type: 'CHAT';
+}
+
+export interface ChatSendMessage {
+  type: 'CHAT';
+  repositoryId: number;
+  message: string;
+  codeReference: CodeReference | null;
+}
+
+export type ChatReceivedMessageType = ChatReceivedMessage;
+export type ChatSendMessageType = ChatSendMessage;
+export type ChatMessageInfoType = ChatMessageInfo;
