@@ -83,6 +83,7 @@ const RepoHeader = ({
           showChatButton={isSharedRepo}
           onChatButtonClick={onChatButtonClick}
           isChatOpen={isChatOpen}
+          isNewChatMessage={isNewChatMessage}
         />
       </div>
     </header>
