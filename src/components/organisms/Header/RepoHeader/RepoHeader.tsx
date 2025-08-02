@@ -12,9 +12,14 @@ import useRepoSettingsStore from '@/stores/repoSettingsStore';
 interface RepoHeaderProps {
   onChatButtonClick?: () => void;
   isChatOpen?: boolean;
+  isNewChatMessage?: boolean;
 }
 
-const RepoHeader = ({ onChatButtonClick, isChatOpen = false }: RepoHeaderProps) => {
+const RepoHeader = ({
+  onChatButtonClick,
+  isChatOpen = false,
+  isNewChatMessage,
+}: RepoHeaderProps) => {
   const { repoId } = useParams({ strict: false });
   const { data } = useGetRepositorySettings(repoId);
   const settingsData = useRepoSettingsStore(state => state.settingsData);
@@ -40,14 +45,17 @@ const RepoHeader = ({ onChatButtonClick, isChatOpen = false }: RepoHeaderProps) 
         <PathArea />
 
         {isSharedRepo && (
-          <button
-            className={`${styles.chatButton} ${styles.centerChatButton} ${
-              isChatOpen ? styles.active : ''
-            }`}
-            onClick={onChatButtonClick}
-          >
-            <MessageTextIcon className={styles.icon} />
-          </button>
+          <div className={styles.centerChatButtonContainer}>
+            <button
+              className={`${styles.chatButton} ${styles.centerChatButton} ${
+                isChatOpen ? styles.active : ''
+              }`}
+              onClick={onChatButtonClick}
+            >
+              <MessageTextIcon className={styles.icon} />
+            </button>
+            {!isChatOpen && isNewChatMessage && <div className={styles.centerNewChatAlert}>●</div>}
+          </div>
         )}
       </div>
 
@@ -57,14 +65,17 @@ const RepoHeader = ({ onChatButtonClick, isChatOpen = false }: RepoHeaderProps) 
         </div>
 
         {isSharedRepo && (
-          <button
-            className={`${styles.chatButton} ${styles.rightChatButton} ${
-              isChatOpen ? styles.active : ''
-            }`}
-            onClick={onChatButtonClick}
-          >
-            <MessageTextIcon className={styles.icon} />
-          </button>
+          <div className={styles.rightChatButtonContainer}>
+            <button
+              className={`${styles.chatButton} ${styles.rightChatButton} ${
+                isChatOpen ? styles.active : ''
+              }`}
+              onClick={onChatButtonClick}
+            >
+              <MessageTextIcon className={styles.icon} />
+            </button>
+            {!isChatOpen && isNewChatMessage && <div className={styles.rightNewChatAlert}>●</div>}
+          </div>
         )}
 
         <UserProfile
