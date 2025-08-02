@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import clsx from 'clsx';
 import FileTreeItem from './components/FileTreeItem/FileTreeItem';
 import FileTreeContextMenu from './components/FileTreeContextMenu/FileTreeContextMenu';
@@ -11,6 +11,7 @@ import { useFileTreeOperations } from './hooks/useFileTreeOperations';
 import { useFileTreeDragDrop } from './hooks/useFileTreeDragDrop';
 import { useFileTreeExternalDrop } from './hooks/useFileTreeExternalDrop';
 import { useYjsFileTree } from '@/hooks/repo/useYjsFileTree';
+import { isValidNode, getNodeId, findNodeById, filterValidNodes, debugNode } from './helpers';
 import styles from './FileTree.module.scss';
 import type { FileTreeProps, FileTreeNode } from './types';
 
@@ -36,10 +37,9 @@ const FileTree: React.FC<ExtendedFileTreeProps> = ({
     refetch,
   } = useFileTree({ repositoryId: repositoryId || 0 });
 
-  // YJS 훅 (협업 모드에서만 활성화)
-  const { yMap } = useYjsFileTree(repositoryId || 0);
+  // YJS는 협업 모드에서만 활성화
+  const { yMap, needsRefresh, clearRefreshFlag } = useYjsFileTree(repositoryId || 0);
 
-  // enableCollaboration을 useFileTreeActions에 전달
   const { handleFileClick, handleFolderToggle } = useFileTreeActions({
     repoId,
     repositoryId,
@@ -47,6 +47,16 @@ const FileTree: React.FC<ExtendedFileTreeProps> = ({
     setSelectedFile,
     enableCollaboration,
   });
+
+  // 협업 모드별 성공 핸들러
+  const handleOperationSuccess = useCallback(() => {
+    if (enableCollaboration) {
+      console.log('협업 모드: YJS 브로드캐스트 완료, 자동 동기화 대기');
+    } else {
+      console.log('일반 모드: 직접 refetch 호출');
+      setTimeout(() => refetch(), 100);
+    }
+  }, [enableCollaboration, refetch]);
 
   const {
     // 모달 상태
@@ -76,7 +86,7 @@ const FileTree: React.FC<ExtendedFileTreeProps> = ({
     isUploading,
   } = useFileTreeOperations({
     repositoryId: repositoryId || 0,
-    onSuccess: refetch,
+    onSuccess: handleOperationSuccess,
     rootFolderId: treeData?.[0]?.fileId,
   });
 
@@ -110,37 +120,35 @@ const FileTree: React.FC<ExtendedFileTreeProps> = ({
     onFileUpload: uploadFiles,
   });
 
-  // YJS 파일트리 변경사항 실시간 동기화 (협업 모드에서만)
+  // YJS 파일트리 실시간 동기화
   useEffect(() => {
-    if (!enableCollaboration || !yMap) return;
+    if (!enableCollaboration || !yMap || !needsRefresh || !clearRefreshFlag) return;
 
-    const handleYjsUpdate = () => {
-      const updatedFileTree = yMap.get('fileTree');
-      const lastUpdated = yMap.get('lastUpdated');
-
-      if (updatedFileTree && lastUpdated) {
-        console.log('YJS 파일트리 업데이트 감지:', {
-          enableCollaboration,
-          updatedFileTree: !!updatedFileTree,
-          lastUpdated,
-        });
-
-        // React Query 데이터 갱신
+    const checkForUpdates = () => {
+      if (needsRefresh()) {
+        console.log('YJS 파일트리 업데이트 감지 - React Query 갱신');
         refetch();
+        clearRefreshFlag();
       }
     };
 
-    console.log('YJS 파일트리 변경사항 감지 시작');
+    const handleYjsUpdate = () => {
+      checkForUpdates();
+    };
+
+    console.log('YJS 파일트리 실시간 동기화 활성화');
     yMap.observe(handleYjsUpdate);
 
-    // 초기 데이터 로드 시에도 확인
-    handleYjsUpdate();
+    checkForUpdates();
+
+    const interval = setInterval(checkForUpdates, 1000);
 
     return () => {
-      console.log('YJS 파일트리 변경사항 감지 정리');
+      console.log('YJS 파일트리 실시간 동기화 정리');
       yMap.unobserve(handleYjsUpdate);
+      clearInterval(interval);
     };
-  }, [yMap, refetch, enableCollaboration]);
+  }, [yMap, refetch, enableCollaboration, needsRefresh, clearRefreshFlag]);
 
   // 협업 모드 상태 로깅
   useEffect(() => {
@@ -155,7 +163,7 @@ const FileTree: React.FC<ExtendedFileTreeProps> = ({
     });
   }, [repoId, repositoryId, enableCollaboration, treeData?.length, yMap, isLoading, error]);
 
-  // 전역 드래그 이벤트 방지 (파일 자동 열림 완전 차단)
+  // 전역 드래그 이벤트 방지
   useEffect(() => {
     const preventGlobalDrop = (e: DragEvent) => {
       if (!(e.target as HTMLElement)?.closest('[data-file-tree-container]')) {
@@ -184,13 +192,7 @@ const FileTree: React.FC<ExtendedFileTreeProps> = ({
   const renderCollaborationStatus = () => {
     if (!enableCollaboration) return null;
 
-    return (
-      <div className={styles.collaborationStatus}>
-        <span className={styles.collaborationIcon}>🤝</span>
-        <span className={styles.collaborationText}>실시간 협업 활성</span>
-        {yMap && <span className={styles.collaborationConnected}>✓</span>}
-      </div>
-    );
+    return <div className={styles.collaborationStatus}></div>;
   };
 
   // 로딩 상태
@@ -237,40 +239,46 @@ const FileTree: React.FC<ExtendedFileTreeProps> = ({
     );
   }
 
-  // node 객체를 찾는 헬퍼 함수
-  const findNodeById = (nodes: FileTreeNode[], nodeId: string): FileTreeNode | null => {
-    for (const node of nodes) {
-      if (node.fileId.toString() === nodeId) {
-        return node;
-      }
-      if (node.children) {
-        const found = findNodeById(node.children as FileTreeNode[], nodeId);
-        if (found) return found;
-      }
-    }
-    return null;
-  };
-
   // 외부 드래그 상태 확인 함수
   const isExternalDragActive = () => {
     return externalDropState.isDragOver;
   };
 
-  // 트리 렌더링 함수
+  // 트리 렌더링 함수 - 안전성 강화
   const renderTreeNodes = (nodes: FileTreeNode[], level = 0) => {
-    return nodes.map(node => {
+    // 유효한 노드들만 필터링
+    const validNodes = filterValidNodes(nodes);
+
+    if (validNodes.length === 0) {
+      console.warn('renderTreeNodes: 유효한 노드가 없음', nodes);
+      return null;
+    }
+
+    return validNodes.map(node => {
+      // 노드 유효성 재검사
+      if (!isValidNode(node)) {
+        debugNode(node, 'renderTreeNodes - 유효하지 않은 노드');
+        return null;
+      }
+
+      const nodeId = getNodeId(node);
+      if (!nodeId) {
+        debugNode(node, 'renderTreeNodes - nodeId 없음');
+        return null;
+      }
+
       // children을 미리 계산
       const childrenElements =
-        node.children && node.children.length > 0 && expandedFolders.has(node.fileId.toString())
+        node.children && node.children.length > 0 && expandedFolders.has(nodeId)
           ? renderTreeNodes(node.children as FileTreeNode[], level + 1)
           : null;
 
       return (
-        <React.Fragment key={node.fileId}>
+        <React.Fragment key={nodeId}>
           <FileTreeItem
             node={node}
             level={level}
-            isExpanded={expandedFolders.has(node.fileId.toString())}
+            isExpanded={expandedFolders.has(nodeId)}
             isSelected={selectedFile === node.path}
             // 파일/폴더 액션
             onFileClick={handleFileClick}
@@ -278,15 +286,15 @@ const FileTree: React.FC<ExtendedFileTreeProps> = ({
             // 컨텍스트 메뉴
             onNewFile={parentNode => openCreateModal('FILE', parentNode)}
             onNewFolder={parentNode => openCreateModal('FOLDER', parentNode)}
-            onRename={node => startEditing(node.fileId.toString())}
+            onRename={() => startEditing(nodeId)}
             onDelete={deleteItem}
             // 인라인 편집
-            isEditing={editingNode === node.fileId.toString()}
+            isEditing={editingNode === nodeId}
             onEditSave={(node, newName) => renameItem(node, newName)}
             onEditCancel={stopEditing}
             // 내부 드래그앤드롭
-            isDragging={isDragging(node.fileId.toString())}
-            isDropTarget={isDropTarget(node.fileId.toString())}
+            isDragging={isDragging(nodeId)}
+            isDropTarget={isDropTarget(nodeId)}
             canDrop={(() => {
               if (!dragDropState.draggedItem) return false;
               const draggedNode = findNodeById(treeData, dragDropState.draggedItem.id);
@@ -300,7 +308,7 @@ const FileTree: React.FC<ExtendedFileTreeProps> = ({
             getDropPosition={nodeId => getDropPosition(nodeId)}
             // 외부 파일 드롭
             isExternalDragOver={
-              externalDropState.dropTarget?.nodeId === node.fileId.toString() ||
+              externalDropState.dropTarget?.nodeId === nodeId ||
               (externalDropState.isDragOver && !externalDropState.dropTarget)
             }
             onExternalDragOver={(node, e) => handleNodeExternalDragOver(node, e)}
@@ -325,6 +333,9 @@ const FileTree: React.FC<ExtendedFileTreeProps> = ({
         onDragLeave={handleExternalDragLeave}
         onDrop={handleExternalDrop}
       >
+        {/* 협업 상태 표시 */}
+        {renderCollaborationStatus()}
+
         {/* 파일 트리 내용 */}
         <div className={styles.treeContent}>{renderTreeNodes(treeData)}</div>
 
@@ -387,6 +398,3 @@ const FileTree: React.FC<ExtendedFileTreeProps> = ({
 };
 
 export default FileTree;
-
-// 명시적 export도 추가
-export { FileTree };

@@ -68,8 +68,8 @@ export function useYjsFileTree(repositoryId: number) {
 
       const provider = new WebsocketProvider(wsUrl, roomName, doc, {
         connect: true,
-        maxBackoffTime: 30000, // 30초로 증가
-        resyncInterval: 30000, // 30초로 단축
+        maxBackoffTime: 30000,
+        resyncInterval: 30000,
       });
 
       connection = {
@@ -133,7 +133,7 @@ export function useYjsFileTree(repositoryId: number) {
       if (connection.activeUsers.size === 0) {
         connection.cleanupTimer = setTimeout(() => {
           cleanupFileTreeConnection(repositoryId);
-        }, 60000); // 60초로 연장
+        }, 60000);
         console.log(`FileTree cleanup timer 설정: repository-${repositoryId} (60초)`);
       }
 
@@ -146,6 +146,95 @@ export function useYjsFileTree(repositoryId: number) {
     };
   }, [repositoryId]);
 
+  // 파일트리 브로드캐스트 함수 - 서버 형식에 맞게 수정
+  const broadcastFileTreeUpdate = useCallback(
+    (action: 'create' | 'delete' | 'rename' | 'move' | 'upload', data: Record<string, unknown>) => {
+      if (!provider || !provider.ws || provider.ws.readyState !== WebSocket.OPEN) {
+        console.warn('YJS WebSocket 연결이 없어 파일트리 브로드캐스트 건너뜀');
+        return;
+      }
+
+      // 서버에서 처리할 수 있는 형식으로 메시지 구성
+      const message = {
+        type: 'fileTree',
+        action,
+        data: {
+          ...data,
+          repositoryId,
+        },
+        timestamp: Date.now(),
+        repositoryId,
+      };
+
+      try {
+        // WebSocket을 통해 서버로 메시지 전송
+        provider.ws.send(JSON.stringify(message));
+        console.log(`파일트리 브로드캐스트 전송:`, {
+          action,
+          repositoryId,
+          dataKeys: Object.keys(data),
+        });
+
+        // YJS Map에도 업데이트 정보 저장 (로컬 상태)
+        if (yMap) {
+          yMap.set('lastAction', { value: action });
+          yMap.set('lastUpdate', data);
+          yMap.set('lastTimestamp', { value: Date.now() });
+        }
+      } catch (error) {
+        console.error('파일트리 브로드캐스트 실패:', error);
+      }
+    },
+    [provider, yMap, repositoryId]
+  );
+
+  // 파일트리 메시지 수신 처리 개선
+  useEffect(() => {
+    if (!provider || !provider.ws) return;
+
+    const handleMessage = (event: MessageEvent) => {
+      try {
+        let message;
+
+        // 메시지가 이미 객체인지 문자열인지 확인
+        if (typeof event.data === 'string') {
+          message = JSON.parse(event.data);
+        } else {
+          // Yjs 바이너리 메시지는 무시
+          return;
+        }
+
+        // 파일트리 메시지만 처리
+        if (message.type === 'fileTree' && message.repositoryId === repositoryId) {
+          console.log(`파일트리 업데이트 수신:`, {
+            action: message.action,
+            timestamp: message.timestamp,
+            hasData: !!message.data,
+          });
+
+          // YJS Map에 수신된 업데이트 정보 저장
+          if (yMap) {
+            yMap.set('receivedAction', { value: message.action });
+            yMap.set('receivedData', message.data);
+            yMap.set('receivedTimestamp', { value: message.timestamp });
+            yMap.set('needsRefresh', { value: true }); // 새로고침 필요 플래그
+          }
+        }
+      } catch {
+        // JSON 파싱 실패는 정상 (Yjs 바이너리 메시지)
+        // console.debug('메시지 파싱 실패 (정상)');
+      }
+    };
+
+    provider.ws.addEventListener('message', handleMessage);
+
+    return () => {
+      if (provider.ws) {
+        provider.ws.removeEventListener('message', handleMessage);
+      }
+    };
+  }, [provider, yMap, repositoryId]);
+
   const updateFileTree = useCallback(
     (updates: Record<string, unknown>) => {
       if (!yMap) return;
@@ -156,7 +245,7 @@ export function useYjsFileTree(repositoryId: number) {
             yMap.set(key, value as Record<string, unknown>);
           }
         });
-        console.log(`FileTree 업데이트: repository-${repositoryId}`, updates);
+        console.log(`FileTree 업데이트: repository-${repositoryId}`, Object.keys(updates));
       } catch (error) {
         console.error(`FileTree 업데이트 실패: repository-${repositoryId}`, error);
       }
@@ -176,6 +265,19 @@ export function useYjsFileTree(repositoryId: number) {
     }
   }, [yMap, repositoryId]);
 
+  // 새로고침 필요 여부 확인
+  const needsRefresh = useCallback(() => {
+    if (!yMap) return false;
+    const refreshFlag = yMap.get('needsRefresh') as { value: boolean } | undefined;
+    return refreshFlag?.value === true;
+  }, [yMap]);
+
+  // 새로고침 플래그 초기화
+  const clearRefreshFlag = useCallback(() => {
+    if (!yMap) return;
+    yMap.set('needsRefresh', { value: false });
+  }, [yMap]);
+
   return {
     yDoc,
     provider,
@@ -183,6 +285,9 @@ export function useYjsFileTree(repositoryId: number) {
     connectionState,
     updateFileTree,
     getFileTreeData,
+    broadcastFileTreeUpdate,
+    needsRefresh,
+    clearRefreshFlag,
     isConnected: connectionState === 'connected',
     isConnecting: connectionState === 'connecting',
     isDisconnected: connectionState === 'disconnected',

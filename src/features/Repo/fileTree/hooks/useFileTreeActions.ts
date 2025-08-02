@@ -86,8 +86,8 @@ export const useFileTreeActions = ({
           const loadEndTime = performance.now();
           const loadDuration = loadEndTime - loadStartTime;
 
-          if (response.data?.status === 200 && response.data?.data !== null) {
-            const content = response.data.data.content || '';
+          if (response.data?.status === 200) {
+            const content = response.data.data?.content || '';
 
             console.log(`파일 내용 로드 완료: ${node.fileName}`, {
               contentLength: content.length,
@@ -99,18 +99,7 @@ export const useFileTreeActions = ({
             });
 
             // 5. 탭에 내용 설정 (파일에서 로드한 내용은 clean 상태)
-            console.log(`setTabContentFromFile 호출 시작:`, {
-              tabId,
-              contentLength: content.length,
-            });
-
             setTabContentFromFile(tabId, content);
-
-            console.log(`setTabContentFromFile 호출 완료:`, {
-              tabId,
-              contentLength: content.length,
-              timestamp: new Date().toISOString(),
-            });
 
             // 6. 협업 모드에서는 이 내용이 Yjs 초기화에 사용됨
             // (useYjsCollaboration에서 탭 내용을 읽어서 초기화)

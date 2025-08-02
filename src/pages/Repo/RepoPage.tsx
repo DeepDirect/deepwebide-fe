@@ -7,6 +7,7 @@ import { useRepositoryInfo } from '@/hooks/repo/useRepositoryInfo';
 import { useFileSave } from '@/hooks/repo/useFileSave';
 import { useCollaborationStore } from '@/stores/collaborationStore';
 import { useAuthStore } from '@/stores/authStore';
+import { useFileContentLoader } from '@/hooks/repo/useFileContentLoader';
 import Loading from '@/components/molecules/Loading/Loading';
 import styles from './RepoPage.module.scss';
 import TabBar from '@/components/organisms/TabBar/TabBar';
@@ -85,6 +86,13 @@ export function RepoPage() {
     activeTabPath: openTabs.find(tab => tab.isActive)?.path,
   });
 
+  useFileContentLoader({
+    repositoryId,
+    repoId: repoId || '',
+    enabled: hasHydrated && !!repoId,
+    enableCollaboration,
+  });
+
   // 사용자 정보 설정 (협업 모드용) - authStore nickname 우선 사용
   useEffect(() => {
     if (enableCollaboration && !currentUser.id) {
@@ -147,16 +155,20 @@ export function RepoPage() {
 
   // 활성 탭 변경 시 지속적 저장 관리
   const activeTab = openTabs.find(tab => tab.isActive);
+  const activeTabId = activeTab?.id;
+  const activeTabFileId = activeTab?.fileId;
+  const activeTabName = activeTab?.name;
+
   useEffect(() => {
-    if (activeTab && activeTab.fileId) {
+    if (activeTabId && activeTabFileId) {
       console.log('활성 탭 변경 - 저장 시스템 업데이트:', {
-        tabId: activeTab.id,
-        fileName: activeTab.name,
+        tabId: activeTabId,
+        fileName: activeTabName,
         enableCollaboration,
-        hasFileId: !!activeTab.fileId,
+        hasFileId: !!activeTabFileId,
       });
 
-      enableContinuousSave(activeTab.id);
+      enableContinuousSave(activeTabId);
 
       return () => {
         disableContinuousSave();
@@ -166,8 +178,9 @@ export function RepoPage() {
       disableContinuousSave();
     }
   }, [
-    activeTab?.id,
-    activeTab?.fileId,
+    activeTabId,
+    activeTabFileId,
+    activeTabName,
     enableCollaboration,
     enableContinuousSave,
     disableContinuousSave,
@@ -190,7 +203,14 @@ export function RepoPage() {
     if (!enableCollaboration) {
       clearUsers();
     }
-  }, [repoId, hasHydrated, keepOnlyCurrentRepoTabs, enableCollaboration, clearUsers]);
+  }, [
+    repoId,
+    hasHydrated,
+    openTabs.length,
+    keepOnlyCurrentRepoTabs,
+    enableCollaboration,
+    clearUsers,
+  ]);
 
   // 키보드 단축키 추가
   useEffect(() => {
