@@ -31,8 +31,6 @@ const GitHubLoginButton = () => {
     }
 
     const handleMessage = (event: MessageEvent) => {
-      if (event.origin !== 'http://localhost:8080') return;
-
       const { type, response } = event.data;
       if (type === 'GITHUB_LOGIN_SUCCESS') {
         setAuthSocialLogin(response);
