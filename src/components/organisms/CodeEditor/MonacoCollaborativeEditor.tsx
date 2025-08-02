@@ -179,20 +179,34 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
     editorRef,
   ]);
 
-  // 에디터 변경 이벤트 핸들러
+  // 에디터 변경 이벤트 핸들러 - 로딩 상태 확인 추가
   const onEditorChange = useCallback(
     (value: string | undefined) => {
-      console.log('Monaco onChange 이벤트:', {
-        valueLength: value?.length || 0,
-        tabId: activeTab?.id,
-        enableCollaboration,
-        isConnected,
-      });
+      // 탭이 로딩 중이면 무시
+      if (activeTab?.isLoading) {
+        console.log('탭 로딩 중 - onChange 무시:', { tabId: activeTab.id });
+        return;
+      }
 
-      // activeTabId를 전달하여 저장 기능 활성화
-      handleEditorChange(value, activeTab?.id);
+      if (value !== undefined && activeTab && value !== (activeTab.content || '')) {
+        // 빈 내용으로 변경하는 경우 매우 신중하게 처리
+        if (value === '' && (activeTab.content || '').length > 0) {
+          console.warn('빈 내용으로 변경 시도 - 검증 필요:', {
+            tabId: activeTab.id,
+            previousLength: activeTab.content?.length || 0,
+          });
+        }
+
+        console.log('실제 내용 변경 감지:', {
+          valueLength: value?.length || 0,
+          tabId: activeTab?.id,
+          previousLength: activeTab.content?.length || 0,
+        });
+
+        handleEditorChange(value, activeTab?.id);
+      }
     },
-    [handleEditorChange, activeTab?.id, enableCollaboration, isConnected]
+    [handleEditorChange, activeTab?.id, activeTab?.content, activeTab?.isLoading]
   );
 
   // 협업 모드 상태 로깅
@@ -206,6 +220,7 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
         roomId,
         isConnected,
         contentLength: activeTab.content?.length || 0,
+        isLoading: activeTab.isLoading,
       });
     }
   }, [activeTab?.id, enableCollaboration, shouldUseCollaboration, roomId, isConnected, activeTab]);
@@ -224,38 +239,13 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
   // Monaco Editor 옵션
   const editorOptions = getMonacoEditorOptions(language, isDarkMode);
 
-  // 에디터 value 결정 로직 개선 - 내용 사라짐 방지
-  const getEditorValue = () => {
-    if (enableCollaboration) {
-      // 협업 모드: 연결 완료되고 Yjs가 초기화될 때까지 탭 내용 유지
-      if (isConnected && isLoading) {
-        // 연결되었지만 아직 초기화 중이면 탭 내용 표시
-        return activeTab.content || '';
-      } else if (isConnected && !isLoading) {
-        // 연결되고 초기화 완료되면 Yjs에 제어권 위임
-        return undefined;
-      } else {
-        // 연결 전에는 탭 내용 표시
-        return activeTab.content || '';
-      }
-    } else {
-      // 일반 모드: 항상 탭 내용 표시
-      return activeTab.content || '';
-    }
-  };
-
   return (
     <div className={styles.collaborativeEditor}>
       {/* 협업 상태 표시 */}
       {enableCollaboration && (
         <div className={styles.collaborationHeader}>
           {isConnected && <CollaborationStatus userCount={users.length + 1} />}
-          {isLoading && (
-            <div className={styles.connectionStatus}>
-              <span className={styles.loadingSpinner} />
-              협업 모드 연결 중...
-            </div>
-          )}
+          {isLoading && <div className={styles.connectionStatus}>협업 모드 연결 중...</div>}
         </div>
       )}
 
@@ -293,13 +283,14 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
         <Editor
           height="100%"
           language={language}
-          value={getEditorValue()}
+          key={activeTab.id}
+          value={activeTab.content || ''}
           onChange={onEditorChange}
           onMount={handleEditorDidMount}
           options={{
             ...editorOptions,
-            // 협업 모드에서는 읽기 전용 설정을 조정
-            readOnly: enableCollaboration && isLoading,
+            // 협업 모드에서는 읽기 전용 설정을 조정, 로딩 중에도 읽기 전용
+            readOnly: (enableCollaboration && isLoading) || activeTab.isLoading,
           }}
           theme={isDarkMode ? 'vs-dark' : 'vs'}
         />

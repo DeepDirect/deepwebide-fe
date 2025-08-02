@@ -93,6 +93,7 @@ export const useTabStore = create<TabStore>()(
               ...tab,
               isActive: tab.id === tabId,
               fileId: tab.id === tabId && fileId ? fileId : tab.fileId,
+              isLoading: tab.id === tabId ? true : tab.isLoading, // 로딩 상태 설정
             })),
           });
           console.log('기존 탭 활성화 및 fileId 업데이트:', existingTab.name);
@@ -110,6 +111,7 @@ export const useTabStore = create<TabStore>()(
             isDirty: false,
             content: '', // 초기에는 빈 내용으로 시작
             fileId,
+            isLoading: true, // 새 탭은 로딩 상태로 시작
           };
 
           set({
@@ -120,6 +122,7 @@ export const useTabStore = create<TabStore>()(
             name: finalFileName,
             tabId,
             fileId,
+            isLoading: true,
           });
         }
       },
@@ -159,7 +162,7 @@ export const useTabStore = create<TabStore>()(
         });
       },
 
-      //파일에서 처음 내용을 로드할 때 사용할 메서드 (항상 clean 상태)
+      // 파일에서 처음 내용을 로드할 때 사용할 메서드 (항상 clean 상태)
       setTabContentFromFile: (tabId: string, content: string) => {
         const state = get();
         console.log('setTabContentFromFile 호출:', {
@@ -175,6 +178,7 @@ export const useTabStore = create<TabStore>()(
                   ...tab,
                   content,
                   isDirty: false, // 파일에서 로드한 내용은 항상 clean 상태
+                  isLoading: false, // 로딩 완료
                 }
               : tab
           ),
@@ -195,6 +199,25 @@ export const useTabStore = create<TabStore>()(
 
           set({
             openTabs: state.openTabs.map(tab => (tab.id === tabId ? { ...tab, isDirty } : tab)),
+          });
+        }
+      },
+
+      // 탭 로딩 상태 설정
+      setTabLoading: (tabId: string, isLoading: boolean) => {
+        const state = get();
+        const targetTab = state.openTabs.find(tab => tab.id === tabId);
+
+        if (targetTab && targetTab.isLoading !== isLoading) {
+          console.log('탭 로딩 상태 변경:', {
+            tabId,
+            name: targetTab.name,
+            oldLoading: targetTab.isLoading,
+            newLoading: isLoading,
+          });
+
+          set({
+            openTabs: state.openTabs.map(tab => (tab.id === tabId ? { ...tab, isLoading } : tab)),
           });
         }
       },
@@ -290,6 +313,7 @@ export const useTabStore = create<TabStore>()(
             state.openTabs = state.openTabs.map((tab, index) => ({
               ...tab,
               isActive: index === 0,
+              isLoading: false, // 복원 시 로딩 상태 초기화
             }));
 
             if (state.openTabs.length > 0) {
@@ -308,6 +332,8 @@ export const useTabStore = create<TabStore>()(
           ...tab,
           // 저장할 때는 dirty 상태를 false로 리셋 (새로고침 시 clean 상태로 시작)
           isDirty: false,
+          // 로딩 상태도 false로 리셋
+          isLoading: false,
           // 내용이 너무 크면 저장하지 않음 (성능 최적화)
           content: (tab.content?.length || 0) > 100000 ? '' : tab.content,
         })),

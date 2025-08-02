@@ -14,8 +14,9 @@ export interface TabStore {
   // 파일 관련
   openFileByPath: (repoId: string, filePath: string, fileName?: string, fileId?: number) => void;
   setTabContent: (tabId: string, content: string) => void;
-  setTabContentFromFile: (tabId: string, content: string) => void; // 새로 추가
+  setTabContentFromFile: (tabId: string, content: string) => void;
   setTabDirty: (tabId: string, isDirty: boolean) => void;
+  setTabLoading: (tabId: string, isLoading: boolean) => void; // 새로 추가
 
   // 레포지토리 관련
   clearTabsForRepo: (repoId: string) => void;

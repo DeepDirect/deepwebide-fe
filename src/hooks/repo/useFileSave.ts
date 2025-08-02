@@ -100,6 +100,15 @@ export const useFileSave = ({
 
     const currentContent = currentTab.content || '';
 
+    // 빈 내용은 저장하지 않음 (파일 내용 손실 방지)
+    if (!currentContent || currentContent.trim() === '') {
+      console.log('지속적 저장 건너뜀 - 빈 내용:', {
+        tabId: currentTabId,
+        contentLength: currentContent.length,
+      });
+      return;
+    }
+
     // 내용이 변경되었는지 확인
     if (currentContent !== lastContentRef.current) {
       console.log('지속적 저장 실행:', {
@@ -196,7 +205,7 @@ export const useFileSave = ({
     }
   }, [enabled, saveFileMutation, collaborationMode]);
 
-  // 자동 저장 - 협업 모드에서 지연 시간 조정
+  // 자동 저장 - 빈 내용 저장 방지 추가
   const autoSaveFile = useCallback(
     (tabId: string, content: string) => {
       if (!enabled) return;
@@ -205,6 +214,15 @@ export const useFileSave = ({
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
         saveTimeoutRef.current = null;
+      }
+
+      // 빈 내용은 저장하지 않음 (파일 내용 손실 방지)
+      if (!content || content.trim() === '') {
+        console.log('자동 저장 건너뜀 - 빈 내용:', {
+          tabId,
+          contentLength: content.length,
+        });
+        return;
       }
 
       // 협업 모드에서는 더 긴 지연 시간 (Yjs 동기화와 충돌 방지)
@@ -221,7 +239,13 @@ export const useFileSave = ({
         const { openTabs } = tabStoreRef.current;
         const currentTab = openTabs.find(tab => tab.id === tabId);
 
-        if (currentTab?.isDirty && currentTab.fileId) {
+        // 추가 검증: 탭 내용이 유효한지 확인
+        if (
+          currentTab?.isDirty &&
+          currentTab.fileId &&
+          currentTab.content &&
+          currentTab.content.trim() !== ''
+        ) {
           console.log('자동 저장 실행:', {
             tabId,
             fileId: currentTab.fileId,
@@ -232,6 +256,14 @@ export const useFileSave = ({
           saveFileMutation.mutate({
             fileId: currentTab.fileId,
             content,
+          });
+        } else {
+          console.log('자동 저장 건너뜀 - 조건 불충족:', {
+            tabId,
+            isDirty: currentTab?.isDirty,
+            hasFileId: !!currentTab?.fileId,
+            hasContent: !!currentTab?.content,
+            contentLength: currentTab?.content?.length || 0,
           });
         }
 
