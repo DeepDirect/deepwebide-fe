@@ -13,7 +13,7 @@ import { type ChatReceivedMessage, type ChatSendMessage } from '@/features/Chat/
 const useStompChat = (url: string, repositoryId: number) => {
   const clientRef = useRef<Client | null>(null);
   const [messages, setMessages] = useState<ChatReceivedMessage[]>([]);
-  const [connectedCount, setConnectedCount] = useState<number>(0);
+  const [connectedCount, setConnectedCount] = useState<number>(1);
   const [isConnected, setIsConnected] = useState(false);
 
   const token = localStorage.getItem('accessToken');
@@ -56,7 +56,7 @@ const useStompChat = (url: string, repositoryId: number) => {
           if (parsedMessage['type'] === 'USER_JOINED') {
             setConnectedCount(prevCount => prevCount + 1);
           } else if (parsedMessage['type'] === 'USER_LEFT') {
-            setConnectedCount(prevCount => Math.max(prevCount - 1, 0));
+            setConnectedCount(prevCount => Math.max(prevCount - 1, 1));
           }
         });
 
