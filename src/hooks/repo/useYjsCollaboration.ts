@@ -6,13 +6,10 @@ import { useCollaborationStore, generateUserColor } from '@/stores/collaboration
 import type {
   YjsCollaborationConfig,
   YjsCollaborationReturn,
-  YjsDocument,
-  YjsProvider,
   MonacoBindingType,
   Disposable,
 } from '@/types/repo/yjs.types';
 
-// Awareness state 타입 정의
 interface AwarenessState {
   user?: {
     id: string;
@@ -31,9 +28,41 @@ interface AwarenessState {
   };
 }
 
-// WebSocket URL 설정
+interface ConnectionData {
+  doc: Y.Doc;
+  provider: WebsocketProvider;
+  yText: Y.Text;
+  activeUsers: Set<string>;
+  isContentInitialized: boolean;
+  cleanupTimer?: NodeJS.Timeout;
+}
+
+const connections = new Map<string, ConnectionData>();
+
 const getWebSocketUrl = (): string => {
   return import.meta.env.VITE_YJS_WEBSOCKET_URL || 'ws://localhost:1234';
+};
+
+const cleanupConnection = (roomId: string) => {
+  const connection = connections.get(roomId);
+  if (!connection) return;
+
+  console.log(`연결 정리 시작: ${roomId}`);
+
+  try {
+    if (connection.cleanupTimer) {
+      clearTimeout(connection.cleanupTimer);
+    }
+
+    connection.provider.disconnect();
+    connection.provider.destroy();
+    connection.doc.destroy();
+    connections.delete(roomId);
+
+    console.log(`연결 정리 완료: ${roomId}`);
+  } catch (error) {
+    console.error(`연결 정리 실패: ${roomId}`, error);
+  }
 };
 
 export const useYjsCollaboration = ({
@@ -43,121 +72,67 @@ export const useYjsCollaboration = ({
   userName,
   enabled = true,
 }: YjsCollaborationConfig): YjsCollaborationReturn => {
-  // State
   const [error, setError] = useState<string | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
 
-  // Refs
-  const yjsDocRef = useRef<YjsDocument | null>(null);
-  const providerRef = useRef<YjsProvider | null>(null);
   const bindingRef = useRef<MonacoBindingType | null>(null);
   const cursorDisposableRef = useRef<Disposable | null>(null);
+  const currentUserIdRef = useRef<string>('');
   const isInitializedRef = useRef(false);
   const cleanupInProgressRef = useRef(false);
+  const initialContentRef = useRef<string>('');
 
-  // Store actions
-  const { setConnectionStatus, addUser, joinRoom, leaveRoom, setCurrentUser } =
+  const { setConnectionStatus, addUser, joinRoom, leaveRoom, setCurrentUser, clearUsers } =
     useCollaborationStore();
 
-  // 정리 함수
   const cleanup = useCallback(() => {
     if (cleanupInProgressRef.current) return;
     cleanupInProgressRef.current = true;
 
-    console.log('Yjs 연결 정리 중...');
-
     try {
-      // 커서 이벤트 리스너 정리
       if (cursorDisposableRef.current) {
         cursorDisposableRef.current.dispose();
         cursorDisposableRef.current = null;
       }
 
-      // Monaco 바인딩 정리
       if (bindingRef.current) {
         bindingRef.current.destroy();
         bindingRef.current = null;
       }
 
-      // WebSocket Provider 정리
-      if (providerRef.current) {
-        providerRef.current.disconnect();
-        providerRef.current.destroy();
-        providerRef.current = null;
+      const connection = connections.get(roomId);
+      if (connection && currentUserIdRef.current) {
+        connection.activeUsers.delete(currentUserIdRef.current);
+
+        if (connection.activeUsers.size === 0) {
+          if (connection.cleanupTimer) {
+            clearTimeout(connection.cleanupTimer);
+          }
+
+          connection.cleanupTimer = setTimeout(() => {
+            cleanupConnection(roomId);
+          }, 3000);
+        }
       }
 
-      // Yjs Document 정리
-      if (yjsDocRef.current) {
-        yjsDocRef.current.destroy();
-        yjsDocRef.current = null;
-      }
-
-      // 룸 떠나기
       if (roomId) {
         leaveRoom();
       }
 
-      // 상태 초기화
       setConnectionStatus(false);
+      setIsConnected(false);
       setError(null);
+      clearUsers();
+      currentUserIdRef.current = '';
+      initialContentRef.current = '';
     } catch (cleanupError) {
-      console.error('Yjs 정리 중 오류:', cleanupError);
+      console.error(`정리 중 오류: ${roomId}`, cleanupError);
     } finally {
       isInitializedRef.current = false;
       cleanupInProgressRef.current = false;
-      console.log('Yjs 연결 정리 완료');
     }
-  }, [roomId, leaveRoom, setConnectionStatus]);
+  }, [roomId, leaveRoom, setConnectionStatus, clearUsers]);
 
-  // Awareness 변경 핸들러
-  const handleAwarenessChange = useCallback(() => {
-    const provider = providerRef.current;
-    if (!provider?.awareness) return;
-
-    try {
-      const states = provider.awareness.getStates();
-
-      for (const [clientId, state] of states.entries()) {
-        // 타입 안전하게 state 처리
-        const awarenessState = state as AwarenessState;
-
-        if (awarenessState.user && clientId !== provider.awareness.clientID) {
-          const user = {
-            id: awarenessState.user.id,
-            name: awarenessState.user.name,
-            color: awarenessState.user.color,
-            cursor: awarenessState.cursor,
-            selection: awarenessState.selection,
-            lastSeen: Date.now(),
-          };
-          addUser(user);
-        }
-      }
-    } catch (awarenessError) {
-      console.error('Awareness 변경 처리 중 오류:', awarenessError);
-    }
-  }, [addUser]);
-
-  // 커서 변경 핸들러
-  const handleCursorChange = useCallback(
-    (event: { position: { lineNumber: number; column: number } }) => {
-      const provider = providerRef.current;
-      if (!provider?.awareness) return;
-
-      try {
-        const cursorPosition = {
-          line: event.position.lineNumber,
-          column: event.position.column,
-        };
-
-        provider.awareness.setLocalStateField('cursor', cursorPosition);
-      } catch (cursorError) {
-        console.error('커서 위치 업데이트 중 오류:', cursorError);
-      }
-    },
-    []
-  );
-
-  // 초기화 함수
   const initialize = useCallback(async () => {
     if (
       !editor ||
@@ -170,107 +145,171 @@ export const useYjsCollaboration = ({
     }
 
     try {
-      console.log('Yjs 협업 초기화 시작:', roomId);
+      console.log(`협업 초기화 시작: ${roomId}`);
 
-      // 1. 현재 사용자 설정
+      const model = editor.getModel();
+      if (!model) {
+        throw new Error('Monaco Editor 모델을 찾을 수 없습니다.');
+      }
+
+      initialContentRef.current = model.getValue();
+
       const currentUser = {
         id: userId,
         name: userName,
         color: generateUserColor(userId),
         lastSeen: Date.now(),
       };
+
       setCurrentUser(currentUser);
-
-      // 2. 룸 참가
       joinRoom(roomId);
+      currentUserIdRef.current = userId;
 
-      // 3. Yjs Document 생성
-      const yjsDocument = new Y.Doc() as YjsDocument;
-      yjsDocRef.current = yjsDocument;
-      const yText = yjsDocument.getText('monaco-content');
+      let connection = connections.get(roomId);
 
-      // 4. WebSocket Provider 생성
-      const wsUrl = getWebSocketUrl();
-      console.log(`WebSocket 연결 시도: ${wsUrl}/${roomId}`);
+      if (!connection) {
+        const doc = new Y.Doc();
+        const yText = doc.getText('monaco-content');
+        const wsUrl = getWebSocketUrl();
 
-      const provider = new WebsocketProvider(wsUrl, roomId, yjsDocument, {
-        connect: true,
-        maxBackoffTime: 2000,
-      });
-
-      const typedProvider = provider as unknown as YjsProvider;
-      providerRef.current = typedProvider;
-
-      // 5. Monaco Editor 모델 확인
-      const model = editor.getModel();
-      if (!model) {
-        throw new Error('Monaco Editor 모델을 찾을 수 없습니다.');
-      }
-
-      const initialModelContent = model.getValue();
-
-      // 6. Monaco 바인딩 생성
-      const editorSet = new Set([editor]);
-      const binding = new MonacoBinding(
-        yText,
-        model as never,
-        editorSet as never,
-        typedProvider.awareness as never
-      ) as MonacoBindingType;
-      bindingRef.current = binding;
-
-      const syncInitialContent = () => {
-        const currentYjsContent = yText.toString();
-
-        console.log('초기 내용 동기화 확인:', {
-          roomId,
-          initialContentLength: initialModelContent.length,
-          yjsContentLength: currentYjsContent.length,
-          shouldSync: currentYjsContent.length === 0 && initialModelContent.length > 0,
+        const provider = new WebsocketProvider(wsUrl, roomId, doc, {
+          connect: true,
+          maxBackoffTime: 5000,
+          resyncInterval: 60000,
         });
 
-        // 핵심 수정: Yjs 문서가 비어있고 탭에 기존 내용이 있다면 Yjs에 설정
-        if (currentYjsContent.length === 0 && initialModelContent.length > 0) {
-          console.log('첫 사용자: API 내용을 Yjs 문서에 초기화');
-          yText.insert(0, initialModelContent);
+        connection = {
+          doc,
+          provider,
+          yText,
+          activeUsers: new Set<string>(),
+          isContentInitialized: false,
+        };
+
+        provider.on('status', (event: { status: string }) => {
+          const connected = event.status === 'connected';
+          setConnectionStatus(connected);
+          setIsConnected(connected);
+
+          if (connected) {
+            setError(null);
+            provider.awareness.setLocalStateField('user', currentUser);
+
+            setTimeout(() => {
+              syncInitialContent();
+            }, 100);
+          } else {
+            if (event.status === 'disconnected') {
+              setError('연결이 끊어졌습니다.');
+            }
+          }
+        });
+
+        provider.on('connection-error', () => {
+          setIsConnected(false);
+          setError('연결 오류가 발생했습니다.');
+        });
+
+        const handleAwarenessChange = () => {
+          try {
+            const states = provider.awareness.getStates();
+            clearUsers();
+
+            for (const [clientId, state] of states.entries()) {
+              const awarenessState = state as AwarenessState;
+
+              if (awarenessState.user && clientId !== provider.awareness.clientID) {
+                const user = {
+                  id: awarenessState.user.id,
+                  name: awarenessState.user.name,
+                  color: awarenessState.user.color,
+                  cursor: awarenessState.cursor,
+                  selection: awarenessState.selection,
+                  lastSeen: Date.now(),
+                };
+                addUser(user);
+              }
+            }
+          } catch (awarenessError) {
+            console.error('Awareness 변경 처리 중 오류:', awarenessError);
+          }
+        };
+
+        provider.awareness.on('change', handleAwarenessChange);
+        connections.set(roomId, connection);
+        console.log(`새 연결 생성: ${roomId}`);
+      }
+
+      if (connection.cleanupTimer) {
+        clearTimeout(connection.cleanupTimer);
+        connection.cleanupTimer = undefined;
+      }
+
+      connection.activeUsers.add(userId);
+
+      const syncInitialContent = () => {
+        if (!connection || connection.isContentInitialized) return;
+
+        const currentYjsContent = connection.yText.toString();
+        console.log(`초기 내용 동기화: ${roomId}`, {
+          yjsLength: currentYjsContent.length,
+          initialLength: initialContentRef.current.length,
+        });
+
+        if (currentYjsContent.length === 0 && initialContentRef.current.length > 0) {
+          console.log('새 내용을 Yjs에 설정');
+          model.setValue('');
+          connection.yText.insert(0, initialContentRef.current);
         } else if (currentYjsContent.length > 0) {
-          console.log('기존 사용자 있음: Yjs 내용이 Monaco에 자동 동기화됨');
+          console.log('기존 Yjs 내용 적용');
+          model.setValue('');
+        } else {
+          console.log('빈 문서로 시작');
+          model.setValue('');
+        }
+
+        connection.isContentInitialized = true;
+      };
+
+      const editorSet = new Set([editor]);
+      const binding = new MonacoBinding(
+        connection.yText,
+        model as never,
+        editorSet as never,
+        connection.provider.awareness as never
+      ) as MonacoBindingType;
+
+      bindingRef.current = binding;
+
+      const handleCursorChange = (event: { position: { lineNumber: number; column: number } }) => {
+        try {
+          const cursorPosition = {
+            line: event.position.lineNumber,
+            column: event.position.column,
+          };
+          connection.provider.awareness.setLocalStateField('cursor', cursorPosition);
+        } catch (cursorError) {
+          console.error('커서 위치 업데이트 중 오류:', cursorError);
         }
       };
 
-      // Provider 상태 이벤트 핸들러
-      typedProvider.on('status', (event: { status: string }) => {
-        console.log(`연결 상태 변경: ${event.status}`);
-        const isConnected = event.status === 'connected';
-        setConnectionStatus(isConnected);
-
-        if (isConnected) {
-          console.log('WebSocket 연결 성공');
-          setError(null);
-
-          // 연결 성공 시 사용자 정보 설정
-          typedProvider.awareness.setLocalStateField('user', currentUser);
-          setTimeout(syncInitialContent, 300);
-        } else {
-          console.log('WebSocket 연결 실패 또는 끊김');
-          if (event.status === 'disconnected') {
-            setError('연결이 끊어졌습니다.');
-          }
-        }
-      });
-
-      // Awareness 변경 이벤트 핸들러
-      typedProvider.awareness.on('change', handleAwarenessChange);
-
-      // 커서 위치 변경 이벤트 핸들러
       const cursorDisposable = editor.onDidChangeCursorPosition(handleCursorChange);
       cursorDisposableRef.current = cursorDisposable;
 
+      const connected = connection.provider.wsconnected;
+      setConnectionStatus(connected);
+      setIsConnected(connected);
+
+      if (connected) {
+        connection.provider.awareness.setLocalStateField('user', currentUser);
+        setTimeout(syncInitialContent, 100);
+      }
+
       isInitializedRef.current = true;
-      console.log('Yjs 협업 초기화 완료');
+      console.log(`협업 초기화 완료: ${roomId}`);
     } catch (initError) {
-      console.error('Yjs 초기화 실패:', initError);
-      setError(initError instanceof Error ? initError.message : '초기화에 실패했습니다.');
+      console.error(`초기화 실패: ${roomId}`, initError);
+      setError('초기화에 실패했습니다.');
       cleanup();
     }
   }, [
@@ -282,36 +321,38 @@ export const useYjsCollaboration = ({
     joinRoom,
     setCurrentUser,
     setConnectionStatus,
-    handleAwarenessChange,
-    handleCursorChange,
+    addUser,
+    clearUsers,
     cleanup,
   ]);
 
-  // 초기화 및 정리 Effect
   useEffect(() => {
     if (enabled && editor && roomId && userId && userName) {
-      initialize().catch(initError => {
-        console.error('Yjs 초기화 Effect 에러:', initError);
-        setError('협업 기능 초기화에 실패했습니다.');
-      });
+      initialize();
     }
 
     return cleanup;
   }, [enabled, editor, roomId, userId, userName, initialize, cleanup]);
 
-  // 컴포넌트 언마운트 시 정리
-  useEffect(() => {
-    return cleanup;
-  }, [cleanup]);
-
-  // 상태 계산
-  const isConnected = Boolean(providerRef.current?.wsconnected);
+  const connection = connections.get(roomId);
   const isLoading =
     enabled && Boolean(roomId) && Boolean(editor) && !isInitializedRef.current && !error;
 
   return {
-    isConnected,
+    isConnected: isConnected || Boolean(connection?.provider?.wsconnected),
     isLoading,
     error,
+  };
+};
+
+export const getGlobalYjsStatus = () => {
+  return {
+    activeConnections: Array.from(connections.entries()).map(([roomId, conn]) => ({
+      roomId,
+      userCount: conn.activeUsers.size,
+      isConnected: conn.provider.wsconnected,
+      isContentInitialized: conn.isContentInitialized,
+    })),
+    totalConnections: connections.size,
   };
 };

@@ -14,7 +14,17 @@ import { useYjsFileTree } from '@/hooks/repo/useYjsFileTree';
 import styles from './FileTree.module.scss';
 import type { FileTreeProps, FileTreeNode } from './types';
 
-const FileTree: React.FC<FileTreeProps> = ({ repoId, repositoryId, className = '' }) => {
+// props에 협업 모드 지원
+interface ExtendedFileTreeProps extends FileTreeProps {
+  enableCollaboration?: boolean;
+}
+
+const FileTree: React.FC<ExtendedFileTreeProps> = ({
+  repoId,
+  repositoryId,
+  className = '',
+  enableCollaboration = false, // 기본값 false
+}) => {
   const {
     treeData,
     expandedFolders,
@@ -26,14 +36,16 @@ const FileTree: React.FC<FileTreeProps> = ({ repoId, repositoryId, className = '
     refetch,
   } = useFileTree({ repositoryId });
 
-  // YJS 훅 추가
+  // YJS 훅
   const { yMap } = useYjsFileTree(repositoryId);
 
+  //  enableCollaboration을 useFileTreeActions에 전달
   const { handleFileClick, handleFolderToggle } = useFileTreeActions({
     repoId,
     repositoryId,
     setExpandedFolders,
     setSelectedFile,
+    enableCollaboration, // 협업 모드 전달
   });
 
   const {
@@ -126,6 +138,17 @@ const FileTree: React.FC<FileTreeProps> = ({ repoId, repositoryId, className = '
     };
   }, [yMap, refetch]);
 
+  // 협업 모드 상태 로깅
+  useEffect(() => {
+    console.log('FileTree 상태:', {
+      repoId,
+      repositoryId,
+      enableCollaboration,
+      treeDataLength: treeData?.length || 0,
+      hasYjsMap: !!yMap,
+    });
+  }, [repoId, repositoryId, enableCollaboration, treeData?.length, yMap]);
+
   // 전역 드래그 이벤트 방지 (파일 자동 열림 완전 차단)
   useEffect(() => {
     const preventGlobalDrop = (e: DragEvent) => {
@@ -204,7 +227,7 @@ const FileTree: React.FC<FileTreeProps> = ({ repoId, repositoryId, className = '
   };
 
   // 렌더링 함수들 (안전성 강화)
-  const renderTreeNodes = (nodes: FileTreeNode[]) => {
+  const renderTreeNodes = (nodes: FileTreeNode[]): React.ReactNode => {
     // nodes 배열과 각 node의 유효성 검사
     if (!nodes || !Array.isArray(nodes)) {
       return null;
@@ -213,66 +236,88 @@ const FileTree: React.FC<FileTreeProps> = ({ repoId, repositoryId, className = '
     return nodes
       .map(node => {
         // node와 필수 속성들의 유효성 검사
-        if (!node || node.fileId === undefined || node.fileId === null) {
-          console.warn('Invalid node detected:', node);
+        if (!node || typeof node.fileId === 'undefined' || !node.fileName) {
+          console.warn('유효하지 않은 파일 트리 노드:', node);
           return null;
         }
 
-        const nodeId = node.fileId.toString();
-        const isExpanded = expandedFolders.has(nodeId);
+        const isExpanded = expandedFolders.has(node.fileId.toString());
         const isSelected = selectedFile === node.path;
 
         return (
-          <React.Fragment key={nodeId}>
+          <React.Fragment key={`${node.fileId}-${node.fileName}`}>
             <FileTreeItem
               node={node}
               isExpanded={isExpanded}
               isSelected={isSelected}
               onFileClick={handleFileClick}
               onFolderToggle={handleFolderToggle}
-              // 편집 관련
-              isEditing={editingNode === nodeId}
-              onEditSave={(node: FileTreeNode, newName: string) => renameItem(node, newName)}
-              onEditCancel={() => stopEditing()}
-              // 컨텍스트 메뉴 액션
-              onNewFile={() => openCreateModal('FILE', node)}
-              onNewFolder={() => openCreateModal('FOLDER', node)}
-              onRename={() => startEditing(nodeId)}
-              onDelete={() => deleteItem(node)}
+              // 컨텍스트 메뉴
+              onNewFile={(parentNode?: FileTreeNode) => openCreateModal('FILE', parentNode)}
+              onNewFolder={(parentNode?: FileTreeNode) => openCreateModal('FOLDER', parentNode)}
+              onRename={(targetNode: FileTreeNode) => startEditing(targetNode.fileId.toString())}
+              onDelete={deleteItem}
+              // 인라인 편집
+              isEditing={editingNode === node.fileId.toString()}
+              onEditSave={renameItem}
+              onEditCancel={stopEditing}
               // 내부 드래그앤드롭
-              isDragging={isDragging(nodeId)}
-              isDropTarget={isDropTarget(nodeId)}
-              canDrop={canDrop(node, node)} // 함수 호출로 수정
-              onDragStart={(node, event) => handleDragStart(node, event)}
+              isDragging={isDragging(node.fileId.toString())}
+              isDropTarget={isDropTarget(node.fileId.toString())}
+              canDrop={canDrop(node, node)} // 실제로는 드래그되는 노드와 비교해야 하지만 일단 기본값
+              onDragStart={(nodeParam: FileTreeNode, event: React.DragEvent) =>
+                handleDragStart(nodeParam, event)
+              }
               onDragEnd={handleDragEnd}
-              onDragOver={(node, event) => handleDragOver(node, event)}
+              onDragOver={(nodeParam: FileTreeNode, event: React.DragEvent) =>
+                handleDragOver(nodeParam, event)
+              }
               onDragLeave={handleDragLeave}
-              onDrop={(node, event) => handleDrop(node, event)}
+              onDrop={(nodeParam: FileTreeNode, event: React.DragEvent) =>
+                handleDrop(nodeParam, event)
+              }
               getDropPosition={getDropPosition}
               // 외부 파일 드롭
-              isExternalDragOver={isExternalDragOver(nodeId)}
-              onExternalDragOver={(node, event) => handleNodeExternalDragOver(node, event)}
-              onExternalDragLeave={(node, event) => handleNodeExternalDragLeave(node, event)}
-              onExternalDrop={(node, event) => handleNodeExternalDrop(node, event)}
+              isExternalDragOver={isExternalDragOver(node.fileId.toString())}
+              onExternalDragOver={handleNodeExternalDragOver}
+              onExternalDragLeave={handleNodeExternalDragLeave}
+              onExternalDrop={handleNodeExternalDrop}
             />
-            {node.children && isExpanded && Array.isArray(node.children) && (
-              <div className={styles.childrenContainer}>
-                {renderTreeNodes(node.children as FileTreeNode[])}
-              </div>
-            )}
+            {/* 자식 노드 렌더링 */}
+            {node.fileType === 'FOLDER' &&
+              isExpanded &&
+              node.children &&
+              Array.isArray(node.children) &&
+              node.children.length > 0 && (
+                <div className={styles.childrenContainer}>
+                  {renderTreeNodes(node.children as FileTreeNode[])}
+                </div>
+              )}
           </React.Fragment>
         );
       })
-      .filter(Boolean); // null 요소들 제거
+      .filter(Boolean); // null 값 제거
+  };
+
+  // 🔧 추가: 협업 모드 인디케이터
+  const renderCollaborationIndicator = (): React.ReactNode => {
+    if (!enableCollaboration) return null;
+
+    return (
+      <div className={styles.collaborationIndicator}>
+        <span className={styles.collaborationIcon}>🤝</span>
+        <span className={styles.collaborationText}>실시간 협업 활성</span>
+      </div>
+    );
   };
 
   // 로딩 상태
   if (isLoading) {
     return (
       <div className={clsx(styles.fileTree, className)}>
-        <div className={styles.loadingContainer}>
+        <div className={styles.loadingState}>
           <div className={styles.loadingSpinner} />
-          <span>파일 트리를 불러오는 중...</span>
+          <span>파일 트리 로딩 중...</span>
         </div>
       </div>
     );
@@ -282,9 +327,10 @@ const FileTree: React.FC<FileTreeProps> = ({ repoId, repositoryId, className = '
   if (error) {
     return (
       <div className={clsx(styles.fileTree, className)}>
-        <div className={styles.errorContainer}>
-          <span className={styles.errorMessage}>파일 트리를 불러오는데 실패했습니다.</span>
-          <button onClick={() => refetch()} className={styles.retryButton}>
+        <div className={styles.errorState}>
+          <span className={styles.errorIcon}>⚠️</span>
+          <span>파일 트리를 불러올 수 없습니다.</span>
+          <button onClick={refetch} className={styles.retryButton}>
             다시 시도
           </button>
         </div>
@@ -292,36 +338,27 @@ const FileTree: React.FC<FileTreeProps> = ({ repoId, repositoryId, className = '
     );
   }
 
-  // 빈 상태
+  // 빈 트리 데이터 체크
   if (!treeData || treeData.length === 0) {
     return (
-      <FileTreeContextMenu
-        onNewFile={() => openCreateModal('FILE')}
-        onNewFolder={() => openCreateModal('FOLDER')}
-      >
-        <div className={clsx(styles.fileTree, className)}>
-          <div className={styles.emptyContainer}>
-            <span className={styles.emptyHint}>
-              우클릭으로 파일을 생성하거나 파일을 드래그해서 업로드하세요
-            </span>
-          </div>
+      <div className={clsx(styles.fileTree, className)}>
+        <div className={styles.emptyState}>
+          <span>파일이 없습니다.</span>
         </div>
-      </FileTreeContextMenu>
+      </div>
     );
   }
 
-  // 정상 렌더링
   return (
     <>
       <FileTreeContextMenu
-        onNewFile={() => openCreateModal('FILE')}
-        onNewFolder={() => openCreateModal('FOLDER')}
+        onNewFile={(parentNode?: FileTreeNode) => openCreateModal('FILE', parentNode)}
+        onNewFolder={(parentNode?: FileTreeNode) => openCreateModal('FOLDER', parentNode)}
       >
         <div
           className={clsx(styles.fileTree, className, {
-            [styles.dragging]: dragDropState.isDragging,
-            [styles.externalDragOver]: externalDropState.isDragOver,
             [styles.loading]: isCreating || isRenaming || isDeleting || isMoving || isUploading,
+            [styles.collaborationMode]: enableCollaboration, // 협업 모드 CSS 클래스
           })}
           data-file-tree-container
           onDragEnter={handleCombinedDragEnter}
@@ -329,6 +366,9 @@ const FileTree: React.FC<FileTreeProps> = ({ repoId, repositoryId, className = '
           onDragLeave={handleCombinedDragLeave}
           onDrop={handleCombinedDrop}
         >
+          {/* 업 모드 인디케이터 */}
+          {renderCollaborationIndicator()}
+
           <div className={clsx(styles.treeContainer, styles.dropZone)}>
             {renderTreeNodes(treeData)}
           </div>

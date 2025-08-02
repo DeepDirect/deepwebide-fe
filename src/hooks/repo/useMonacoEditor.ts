@@ -4,7 +4,19 @@ import { getMonacoGlobal, disableLanguageDiagnostics } from '@/utils/monacoUtils
 import { useThemeStore } from '@/stores/themeStore';
 import { useFileSave } from './useFileSave';
 import { useTabStore } from '@/stores/tabStore';
-import type { MonacoEditorInstance, MonacoTextModel, MonacoAction } from '@/types/repo/yjs.types';
+import type { MonacoEditorInstance, MonacoAction } from '@/types/repo/monaco.types';
+
+// MonacoTextModel 인터페이스 정의
+interface MonacoTextModel {
+  getValue(): string;
+  setValue(value: string): void;
+  getFullModelRange?: () => {
+    startLineNumber: number;
+    startColumn: number;
+    endLineNumber: number;
+    endColumn: number;
+  };
+}
 
 interface UseMonacoEditorProps {
   language: string;
@@ -34,10 +46,11 @@ export const useMonacoEditor = ({
   const { isDarkMode } = useThemeStore();
   const { setTabDirty } = useTabStore();
 
-  // 협업 모드에서도 저장 기능 활성화 (수정된 부분)
+  // 협업 모드에서도 저장 기능 활성화
   const { saveCurrentFile, autoSaveFile, isSaving } = useFileSave({
     repositoryId,
-    enabled: true, // 협업 모드에서도 저장 기능 활성화
+    enabled: true,
+    collaborationMode: enableCollaboration,
   });
 
   // 안전한 Monaco 메서드 호출을 위한 헬퍼 함수
@@ -47,12 +60,12 @@ export const useMonacoEditor = ({
       if (!editor) return defaultValue;
 
       try {
-        const method = (editor as Record<string, unknown>)[methodName];
+        const method = (editor as unknown as Record<string, unknown>)[methodName];
         if (typeof method === 'function') {
           return (method as (...args: unknown[]) => T).apply(editor, args);
         }
-      } catch (error) {
-        console.warn(`Monaco Editor 메서드 ${methodName} 호출 실패:`, error);
+      } catch {
+        // 에러 로그 제거
       }
 
       return defaultValue;
@@ -69,31 +82,29 @@ export const useMonacoEditor = ({
           KeyCode: { KeyS: number; KeyF: number; KeyA: number };
         };
 
-        // 타입 안전한 에디터 메서드 호출을 위한 헬퍼
         const callEditorMethod = <T>(
           methodName: string,
           defaultValue: T,
           ...args: unknown[]
         ): T => {
           try {
-            const method = (monacoEditor as Record<string, unknown>)[methodName];
+            const method = (monacoEditor as unknown as Record<string, unknown>)[methodName];
             if (typeof method === 'function') {
               return (method as (...args: unknown[]) => T).apply(monacoEditor, args);
             }
-          } catch (error) {
-            console.warn(`Monaco Editor 메서드 ${methodName} 호출 실패:`, error);
+          } catch {
+            // 에러 로그 제거
           }
           return defaultValue;
         };
 
-        // Ctrl+S: 저장 (협업 모드에서도 활성화)
+        // Ctrl+S: 저장
         callEditorMethod(
           'addCommand',
           undefined,
           monacoObj.KeyMod.CtrlCmd | monacoObj.KeyCode.KeyS,
           () => {
             saveCurrentFile();
-            console.log('파일 저장 요청됨 (협업 모드:', enableCollaboration, ')');
           }
         );
 
@@ -127,50 +138,37 @@ export const useMonacoEditor = ({
             }
           }
         );
-      } catch (error) {
-        console.warn('키보드 단축키 설정 실패:', error);
+      } catch {
+        // 에러 로그 제거
       }
     },
-    [saveCurrentFile, enableCollaboration]
+    [saveCurrentFile]
   );
 
   // 에디터 마운트 핸들러
   const handleEditorDidMount: OnMount = useCallback(
     (editor, monaco) => {
-      // 타입 안전한 방식으로 에디터 설정
       editorRef.current = editor as unknown as MonacoEditorInstance;
       monacoEditorRef.current = editor as unknown as MonacoEditorInstance;
 
-      // 테마 적용 함수
       const applyTheme = () => {
         const currentTheme = isDarkMode ? 'vs-dark' : 'vs';
         try {
           (monaco as { editor: { setTheme: (theme: string) => void } }).editor.setTheme(
             currentTheme
           );
-          console.log('Monaco 에디터 테마 설정:', currentTheme);
-        } catch (error) {
-          console.warn('Monaco 테마 설정 실패:', error);
+        } catch {
+          // 테마 설정 실패 로그 제거
         }
       };
 
-      // 초기 테마 적용
       applyTheme();
-
-      // 키보드 단축키 설정
       setupKeyboardShortcuts(editorRef.current, monaco);
-
-      console.log('Monaco 에디터 마운트 완료:', {
-        language,
-        theme: isDarkMode ? 'vs-dark' : 'vs',
-        enableCollaboration,
-        saveEnabled: true, // 협업 모드에서도 저장 활성화
-      });
     },
-    [isDarkMode, language, setupKeyboardShortcuts, enableCollaboration]
+    [isDarkMode, setupKeyboardShortcuts]
   );
 
-  // 에디터 변경 핸들러 (수정된 부분)
+  // 에디터 변경 핸들러 - 타이머 중복 방지
   const handleEditorChange = useCallback(
     (value: string | undefined, activeTabId?: string) => {
       if (value !== undefined) {
@@ -183,39 +181,22 @@ export const useMonacoEditor = ({
         if (activeTabId) {
           setTabDirty(activeTabId, true);
 
-          // 협업 모드에서도 자동 저장 활성화 (수정된 부분)
-          if (enableCollaboration) {
-            // 협업 모드에서는 자동 저장 간격을 더 길게 설정 (5초)
-            // 다른 사용자의 변경사항과 충돌을 최소화하기 위함
-            const collaborationSaveDelay = 5000;
-            console.log('협업 모드 자동 저장 예약:', {
-              activeTabId,
-              delay: collaborationSaveDelay,
-            });
-
-            // 기존 타이머가 있다면 클리어하고 새로 설정
-            setTimeout(() => {
-              autoSaveFile(activeTabId, value);
-            }, collaborationSaveDelay);
-          } else {
-            // 일반 모드에서는 기존 자동 저장 로직 사용 (2초)
-            autoSaveFile(activeTabId, value);
-          }
+          // autoSaveFile의 내부 로직만 사용 (추가 타이머 생성하지 않음)
+          autoSaveFile(activeTabId, value);
         }
       }
     },
-    [onContentChange, setTabDirty, autoSaveFile, enableCollaboration]
+    [onContentChange, setTabDirty, autoSaveFile]
   );
 
-  // 언어별 진단 설정 - 언어가 변경될 때만 실행
+  // 언어별 진단 설정
   useEffect(() => {
     const monaco = getMonacoGlobal();
     if (!monaco || !editorRef.current) return;
 
-    console.log('언어별 진단 설정:', language);
     disableLanguageDiagnostics(monaco, language);
 
-    // Markdown의 경우 마커 제거 (성능 최적화: 500ms 간격)
+    // Markdown의 경우 마커 제거
     if (language === 'markdown') {
       const clearMarkers = () => {
         const editor = editorRef.current;
@@ -230,8 +211,8 @@ export const useMonacoEditor = ({
               if (monaco) {
                 monaco.editor.setModelMarkers(model as never, owner, []);
               }
-            } catch (error) {
-              console.warn(`마커 제거 실패 (${owner}):`, error);
+            } catch {
+              // 마커 제거 실패 로그 제거
             }
           });
         }
@@ -245,21 +226,18 @@ export const useMonacoEditor = ({
     return undefined;
   }, [language, safelyCallEditorMethod]);
 
-  // 테마 변경 감지 및 적용 - 실제 테마가 변경될 때만 실행
+  // 테마 변경 감지 및 적용
   useEffect(() => {
     const monaco = getMonacoGlobal();
     if (!monaco || !editorRef.current) return;
 
     const newTheme = isDarkMode ? 'vs-dark' : 'vs';
-
     try {
-      monaco.editor.setTheme(newTheme);
-      safelyCallEditorMethod('updateOptions', undefined, { theme: newTheme });
-      console.log('실시간 테마 변경:', newTheme);
-    } catch (error) {
-      console.warn('Monaco 테마 적용 실패:', error);
+      (monaco as { editor: { setTheme: (theme: string) => void } }).editor.setTheme(newTheme);
+    } catch {
+      // 테마 설정 실패 로그 제거
     }
-  }, [isDarkMode, safelyCallEditorMethod]);
+  }, [isDarkMode]);
 
   return {
     editorRef,
