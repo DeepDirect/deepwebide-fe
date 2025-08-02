@@ -37,8 +37,8 @@ const SharedWithMeRepoPage = () => {
     refetch: repositoryRefetch,
     // isLoading
   } = useGetRepository(getRepoURL, {
-    page: (pagination.page || 1) - 1,
-    size: pagination.current || 7,
+    page: (pagination.current || 1) - 1,
+    size: pagination.size || 7,
     liked: isLiked,
   });
   const { mutate: updateFavorite } = useRepositoryFavorite();

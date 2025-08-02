@@ -120,7 +120,7 @@ const SharedByMeRepoPage = () => {
 
       <div className={styles.paginationWrapper}>
         <Pagination
-          maxVisiblePages={pagination.total || 1}
+          maxVisiblePages={pagination.maxVisiblePages || 1}
           totalPages={pagination.total || 1}
           currentPage={pagination.current || 1}
           handlePageChange={handlePageChange}
