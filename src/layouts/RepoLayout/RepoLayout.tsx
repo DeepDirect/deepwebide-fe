@@ -12,10 +12,12 @@ import { useAuthStore } from '@/stores/authStore';
 import {
   getCurrentUserId,
   getCurrentNickname,
-  //   getCurrentUserProfileImage,
+  // getCurrentUserProfileImage,
 } from '@/utils/authChatUtils';
 // import ChatWSVer from '@/features/Chat/ChatWSVer';
-import ChatRoom from '@/features/Chat/ChatRoom';
+import Chat from '@/features/Chat/ChatStompVer';
+// import ChatRoom from '@/features/Chat/ChatRoom';
+import useStompChat from '@/hooks/chat/useStompChat';
 
 export function RepoLayout() {
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -28,7 +30,7 @@ export function RepoLayout() {
   // 로그인된 사용자 정보 가져오기
   const currentUserId = getCurrentUserId();
   const currentUserName = getCurrentNickname();
-  //   const currentUserProfileImage = getCurrentUserProfileImage();
+  // const currentUserProfileImage = getCurrentUserProfileImage();
 
   // 디버깅: 사용자 정보 변경 확인
   console.log('🔍 현재 사용자 정보', {
@@ -39,20 +41,10 @@ export function RepoLayout() {
     enabled: !!repoId && isLoggedIn,
   });
 
-  // ws 연결을 RepoLayout 레벨에서 관리 (채팅창 열림 닫힘과 무관)
-  //   const {
-  //     messages: wsMessages,
-  //     sendMessage,
-  //     isConnected,
-  //     isLoading,
-  //     onlineUsers,
-  //   } = useWebSocketChat({
-  //     roomId: repoId || 'default-room',
-  //     userId: currentUserId,
-  //     userName: currentUserName,
-  //     profileImageUrl: currentUserProfileImage,
-  //     enabled: !!repoId && isLoggedIn, // 레포에 있고 로그인되어 있을 때만 연결
-  //   });
+  const { isConnected, messages, send } = useStompChat(
+    'https://api.deepdirect.site/ws/chat',
+    repoId
+  );
 
   const handleChatToggle = () => {
     setIsChatOpen(prev => !prev);
@@ -84,14 +76,7 @@ export function RepoLayout() {
 
       {isChatOpen && (
         <div className={styles.chatContainer}>
-          {/* <ChatWSVer
-			  messages={wsMessages}
-			  sendMessage={sendMessage}
-			  isConnected={isConnected}
-			  isLoading={isLoading}
-			  onlineUsers={onlineUsers}
-			/> */}
-          <ChatRoom />
+          <Chat isConnected={isConnected} messages={messages} send={send} />
         </div>
       )}
     </div>
