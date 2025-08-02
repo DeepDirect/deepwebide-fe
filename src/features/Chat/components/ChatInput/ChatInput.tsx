@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useParams } from '@tanstack/react-router';
 import { useGetCodePaths } from '@/hooks/chat/useGetCodePaths';
+import { type SendCodeReference } from '@/features/Chat/types';
+
 import './ChatInput.scss';
 
 interface ChatInputProps {
-  onSendMessage: (message: string) => void;
+  onSendMessage: (message: string, codeReference: SendCodeReference) => void;
   placeholder?: string;
 }
 
@@ -35,7 +37,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
       const messageToSend = selectedPath
         ? `${message.trim()}\n\n📌 [[Ref: ${selectedPath}]]`
         : message.trim();
-      onSendMessage(messageToSend);
+      onSendMessage(messageToSend, { path: selectedPath });
       setMessage('');
       setSelectedPath('');
     }

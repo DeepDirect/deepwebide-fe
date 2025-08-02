@@ -3,6 +3,10 @@ interface CodeReference {
   path: string;
 }
 
+export interface SendCodeReference {
+  path: string;
+}
+
 export interface ChatMessageInfo {
   repositoryId: number;
   messageId: string;
@@ -23,9 +27,10 @@ export interface ChatSendMessage {
   type: 'CHAT';
   repositoryId: number;
   message: string;
-  codeReference: CodeReference | null;
+  codeReference: SendCodeReference | null;
 }
 
 export type ChatReceivedMessageType = ChatReceivedMessage;
 export type ChatSendMessageType = ChatSendMessage;
 export type ChatMessageInfoType = ChatMessageInfo;
+export type SendCodeReferenceType = SendCodeReference;

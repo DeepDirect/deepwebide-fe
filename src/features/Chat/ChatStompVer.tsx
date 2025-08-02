@@ -9,7 +9,11 @@ import ChatMessageComponent from './components/ChatMessage/ChatMessage';
 import ChatInput from './components/ChatInput/ChatInput';
 import DateDivider from './components/DateDivider/DateDivider';
 import ChatSearchBar from './components/ChatSearchBar/ChatSearchBar';
-import { type ChatSendMessage, type ChatReceivedMessage } from '@/features/Chat/types';
+import {
+  type ChatSendMessage,
+  type ChatReceivedMessage,
+  type SendCodeReference,
+} from '@/features/Chat/types';
 
 import { useGetPreviousChat } from '@/hooks/chat/useGetPreviousChat';
 // import CurrentMembers from './components/CurrentMembers/CurrentMembers';
@@ -110,13 +114,13 @@ const Chat: React.FC<ChattingProps> = ({ isConnected, messages, send }) => {
   //   userName: user.nickname,
   // }));
 
-  const handleSendMessage = (message: string) => {
+  const handleSendMessage = (message: string, codeReference: SendCodeReference) => {
     if (!message.trim()) return;
     send({
       type: 'CHAT',
       repositoryId: repoId,
       message: message,
-      codeReference: null,
+      codeReference: codeReference,
     });
   };
 
