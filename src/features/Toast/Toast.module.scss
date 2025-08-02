@@ -100,6 +100,7 @@ $animation-timing: cubic-bezier(0.16, 1, 0.3, 1);
   font-size: 14px;
   font-weight: 500;
   line-height: 1.4;
+  white-space: pre-line; // 개행 문자 인식
 
   .light & {
     color: $black-2;

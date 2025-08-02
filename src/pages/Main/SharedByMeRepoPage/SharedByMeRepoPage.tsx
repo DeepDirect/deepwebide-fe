@@ -62,6 +62,8 @@ const SharedByMeRepoPage = () => {
 
   // 레포 좋아요
   const handleFavoriteClick = (id: number) => {
+    const targetRepo = repositories?.find(repo => repo.repositoryId === id);
+
     updateFavorite(id, {
       onSuccess: () => {
         setRepositories(
@@ -71,6 +73,11 @@ const SharedByMeRepoPage = () => {
             ) ?? null
         );
         repositoryRefetch();
+
+        if (targetRepo) {
+          const action = targetRepo.isFavorite ? '즐겨찾기에서 제거' : '즐겨찾기에 추가';
+          toast.info(`공유한 "${targetRepo.repositoryName}" 레포지토리가 \n ${action}되었습니다.`);
+        }
       },
       onError: error => {
         toast.error(error.message);
@@ -113,7 +120,7 @@ const SharedByMeRepoPage = () => {
 
       <div className={styles.paginationWrapper}>
         <Pagination
-          maxVisiblePages={pagination.total || 1}
+          maxVisiblePages={pagination.maxVisiblePages || 1}
           totalPages={pagination.total || 1}
           currentPage={pagination.current || 1}
           handlePageChange={handlePageChange}
