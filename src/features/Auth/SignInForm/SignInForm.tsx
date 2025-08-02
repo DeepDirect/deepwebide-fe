@@ -69,12 +69,7 @@ export default function SignInForm() {
         <PasswordInput id="password" placeholder="********" {...register('password')} />
       </FormField>
 
-      <div className={styles.options}>
-        <label className={styles.checkbox}>
-          <input type="checkbox" />
-          <p>이메일 저장하기</p>
-        </label>
-      </div>
+      <div className={styles.sectionDepart}></div>
 
       <Button
         variant={isButtonDisabled ? 'general' : 'active'}
