@@ -68,8 +68,8 @@ export function useYjsFileTree(repositoryId: number) {
 
       const provider = new WebsocketProvider(wsUrl, roomName, doc, {
         connect: true,
-        maxBackoffTime: 30000,
-        resyncInterval: 120000,
+        maxBackoffTime: 30000, // 30초로 증가
+        resyncInterval: 30000, // 30초로 단축
       });
 
       connection = {
@@ -90,145 +90,101 @@ export function useYjsFileTree(repositoryId: number) {
             break;
           case 'connected':
             setConnectionState('connected');
+            console.log(`FileTree WebSocket 연결 성공: repository-${repositoryId}`);
             break;
           case 'disconnected':
             setConnectionState('disconnected');
+            console.log(`FileTree WebSocket 연결 끊김: repository-${repositoryId}`);
+
+            setTimeout(() => {
+              if (provider.shouldConnect && !provider.wsconnected) {
+                console.log(`FileTree 재연결 시도: repository-${repositoryId}`);
+                provider.connect();
+              }
+            }, 3000);
             break;
-        }
-      });
-
-      provider.on('connection-error', () => {
-        if (mountedRef.current) {
-          console.error(`FileTree 연결 오류 (repository-${repositoryId})`);
-          setConnectionState('disconnected');
-        }
-      });
-
-      provider.on('connection-close', () => {
-        if (mountedRef.current) {
-          console.log(`FileTree 연결 해제 (repository-${repositoryId})`);
-          setConnectionState('disconnected');
         }
       });
 
       fileTreeConnections.set(repositoryId, connection);
-      console.log(`FileTree 새 연결 생성: ${roomName}`);
+      console.log(`새 FileTree 연결 생성: repository-${repositoryId}`);
     }
 
     if (connection.cleanupTimer) {
       clearTimeout(connection.cleanupTimer);
       connection.cleanupTimer = undefined;
+      console.log(`기존 FileTree cleanup timer 취소: repository-${repositoryId}`);
     }
 
     connection.activeUsers.add(userId);
 
-    setYDoc(connection.doc);
-    setProvider(connection.provider);
-    setYMap(connection.map);
-
-    const isConnected = connection.provider.wsconnected;
     if (mountedRef.current) {
-      setConnectionState(isConnected ? 'connected' : 'connecting');
+      setYDoc(connection.doc);
+      setProvider(connection.provider);
+      setYMap(connection.map);
+      setConnectionState(connection.provider.wsconnected ? 'connected' : 'disconnected');
     }
-
-    console.log(
-      `FileTree 사용자 추가: repository-${repositoryId} (${connection.activeUsers.size}명)`
-    );
 
     return () => {
       if (!connection) return;
 
       connection.activeUsers.delete(userId);
-      console.log(
-        `FileTree 사용자 제거: repository-${repositoryId} (${connection.activeUsers.size}명)`
-      );
 
       if (connection.activeUsers.size === 0) {
-        if (connection.cleanupTimer) {
-          clearTimeout(connection.cleanupTimer);
-        }
-
         connection.cleanupTimer = setTimeout(() => {
           cleanupFileTreeConnection(repositoryId);
-        }, 3000);
+        }, 60000); // 60초로 연장
+        console.log(`FileTree cleanup timer 설정: repository-${repositoryId} (60초)`);
       }
 
       if (mountedRef.current) {
-        setProvider(null);
         setYDoc(null);
+        setProvider(null);
         setYMap(null);
         setConnectionState('disconnected');
       }
     };
   }, [repositoryId]);
 
-  const syncFileTreeFromServer = useCallback(async () => {
-    if (!yMap || connectionState !== 'connected') {
-      console.warn(
-        `FileTree 동기화 스킵: repository-${repositoryId} (연결상태: ${connectionState})`
-      );
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/repository/${repositoryId}/filetree`);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch file tree: ${response.status}`);
-      }
-
-      const latestFileTree = await response.json();
-
-      yMap.set('fileTree', latestFileTree);
-      yMap.set('lastUpdated', { value: Date.now() });
-
-      console.log(`FileTree 서버 동기화 완료: repository-${repositoryId}`);
-    } catch (error) {
-      console.error(`FileTree 서버 동기화 실패: repository-${repositoryId}`, error);
-    }
-  }, [repositoryId, yMap, connectionState]);
-
-  const broadcastFileTreeUpdate = useCallback(
-    (operation: string, data: unknown) => {
-      if (!yMap || !provider || connectionState !== 'connected') {
-        console.warn(
-          `FileTree 브로드캐스트 스킵: repository-${repositoryId} (연결상태: ${connectionState})`
-        );
-        return;
-      }
+  const updateFileTree = useCallback(
+    (updates: Record<string, unknown>) => {
+      if (!yMap) return;
 
       try {
-        yMap.set('lastOperation', {
-          type: operation,
-          data: data,
-          timestamp: Date.now(),
-          clientId: provider.awareness?.clientID,
+        Object.entries(updates).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            yMap.set(key, value as Record<string, unknown>);
+          }
         });
-
-        console.log(`FileTree 브로드캐스트: repository-${repositoryId}`, { operation });
+        console.log(`FileTree 업데이트: repository-${repositoryId}`, updates);
       } catch (error) {
-        console.error(`FileTree 브로드캐스트 실패: repository-${repositoryId}`, error);
+        console.error(`FileTree 업데이트 실패: repository-${repositoryId}`, error);
       }
     },
-    [yMap, provider, repositoryId, connectionState]
+    [yMap, repositoryId]
   );
+
+  const getFileTreeData = useCallback(() => {
+    if (!yMap) return {};
+
+    try {
+      const data = yMap.toJSON();
+      return data as Record<string, unknown>;
+    } catch (error) {
+      console.error(`FileTree 데이터 조회 실패: repository-${repositoryId}`, error);
+      return {};
+    }
+  }, [yMap, repositoryId]);
 
   return {
     yDoc,
     provider,
     yMap,
     connectionState,
-    syncFileTreeFromServer,
-    broadcastFileTreeUpdate,
+    updateFileTree,
+    getFileTreeData,
+    isConnected: connectionState === 'connected',
+    isConnecting: connectionState === 'connecting',
+    isDisconnected: connectionState === 'disconnected',
   };
 }
-
-export const getYjsFileTreeStatus = () => {
-  return {
-    activeConnections: Array.from(fileTreeConnections.entries()).map(([repoId, conn]) => ({
-      repositoryId: repoId,
-      userCount: conn.activeUsers.size,
-      isConnected: conn.provider.wsconnected,
-    })),
-    totalConnections: fileTreeConnections.size,
-  };
-};

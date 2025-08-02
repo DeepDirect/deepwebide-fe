@@ -111,7 +111,7 @@ export const useYjsCollaboration = ({
 
           connection.cleanupTimer = setTimeout(() => {
             cleanupConnection(roomId);
-          }, 3000);
+          }, 60000); // 60초로 연장햇슴다
         }
       }
 
@@ -174,8 +174,8 @@ export const useYjsCollaboration = ({
 
         const provider = new WebsocketProvider(wsUrl, roomId, doc, {
           connect: true,
-          maxBackoffTime: 5000,
-          resyncInterval: 60000,
+          maxBackoffTime: 30000, // 5초 → 30초로 증가
+          resyncInterval: 30000, // 60초 → 30초로 단축
         });
 
         connection = {
@@ -192,6 +192,7 @@ export const useYjsCollaboration = ({
           setIsConnected(connected);
 
           if (connected) {
+            console.log(`WebSocket 연결 성공: ${roomId}`);
             setError(null);
             provider.awareness.setLocalStateField('user', currentUser);
 
@@ -200,14 +201,24 @@ export const useYjsCollaboration = ({
             }, 100);
           } else {
             if (event.status === 'disconnected') {
-              setError('연결이 끊어졌습니다.');
+              console.log(`WebSocket 연결 끊김: ${roomId}`);
+              setError('연결이 끊어졌습니다. 재연결 시도 중...');
+
+              setTimeout(() => {
+                try {
+                  if (provider.shouldConnect && !provider.wsconnected) {
+                    console.log(`재연결 시도: ${roomId}`);
+                    provider.connect();
+                  }
+                } catch (reconnectError) {
+                  console.error(`재연결 실패: ${roomId}`, reconnectError);
+                }
+              }, 2000); // 2초 후 재연결 시도
+            } else if (event.status === 'connecting') {
+              console.log(`WebSocket 연결 중: ${roomId}`);
+              setError('연결 중...');
             }
           }
-        });
-
-        provider.on('connection-error', () => {
-          setIsConnected(false);
-          setError('연결 오류가 발생했습니다.');
         });
 
         const handleAwarenessChange = () => {
@@ -243,6 +254,7 @@ export const useYjsCollaboration = ({
       if (connection.cleanupTimer) {
         clearTimeout(connection.cleanupTimer);
         connection.cleanupTimer = undefined;
+        console.log(`기존 cleanup timer 취소: ${roomId}`);
       }
 
       connection.activeUsers.add(userId);
@@ -276,7 +288,7 @@ export const useYjsCollaboration = ({
         connection.yText,
         model as never,
         editorSet as never,
-        connection.provider.awareness as never
+        connection.provider.awareness
       ) as MonacoBindingType;
 
       bindingRef.current = binding;
