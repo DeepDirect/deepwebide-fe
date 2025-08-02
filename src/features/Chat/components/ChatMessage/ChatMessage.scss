@@ -40,7 +40,28 @@
   }
 }
 
-// 추후 아바타가 이미지로 대체되면 제거될 예정
+// 아바타 컨테이너
+.chat-message__avatar-container {
+  position: relative;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+}
+
+// 프로필 이미지
+.chat-message__avatar-image {
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgb(0 0 0 / 10%);
+  border-radius: 50%;
+  object-fit: cover;
+
+  .dark & {
+    border-color: rgb(255 255 255 / 20%);
+  }
+}
+
+// 기존 아바타 스타일 (fallback용)
 .chat-message__avatar {
   display: flex;
   flex-shrink: 0;
@@ -98,6 +119,16 @@
 
   .dark & {
     color: $white-2;
+  }
+}
+
+.chat-message__reference {
+  font-weight: $font-weight-bold;
+  color: $orange;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
   }
 }
 

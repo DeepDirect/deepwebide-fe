@@ -1,11 +1,49 @@
-import { useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
+import { useParams } from '@tanstack/react-router';
+import { useGetSearchedChat } from '@/hooks/chat/useGetSearchedChat';
+import { type SearchMessagesData } from '@/schemas/chat.schema';
 import './ChatSearchBar.scss';
 
-const ChatSearchBar: React.FC = () => {
-  const [searchQuery, setSearchQuery] = useState('');
+interface ChatSearchBarProps {
+  onSearchResults?: (results: SearchMessagesData | null) => void;
+}
 
-  // TODO - 검색 로직 구현 필요
-  // 엔터를 눌렀을 때 검색
+const ChatSearchBar: React.FC<ChatSearchBarProps> = ({ onSearchResults }) => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [triggerSearch, setTriggerSearch] = useState(false);
+  const { repoId } = useParams({ strict: false });
+
+  const { data: searchResults } = useGetSearchedChat(repoId as string, searchQuery, {
+    enabled: !!repoId && triggerSearch,
+  });
+
+  useEffect(() => {
+    if (onSearchResults && triggerSearch) {
+      if (searchResults?.data.data) {
+        onSearchResults(searchResults.data.data);
+      } else {
+        onSearchResults(null);
+      }
+      setTriggerSearch(false);
+    }
+  }, [searchResults, onSearchResults, triggerSearch]);
+
+  const handleSearch = useCallback(() => {
+    const trimmedQuery = searchQuery.trim();
+    if (trimmedQuery.length === 0) {
+      if (onSearchResults) {
+        onSearchResults(null);
+      }
+      return;
+    }
+    setTriggerSearch(true);
+  }, [searchQuery, onSearchResults]);
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
 
   return (
     <div className="chat-search-bar">
@@ -15,6 +53,8 @@ const ChatSearchBar: React.FC = () => {
           className="chat-search-bar__input"
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
+          onKeyPress={handleKeyPress}
+          placeholder="검색"
         />
         <svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
           <path
