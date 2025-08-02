@@ -13,6 +13,7 @@ import TabBar from '@/components/organisms/TabBar/TabBar';
 import MonacoCollaborativeEditor from '@/components/organisms/CodeEditor/MonacoCollaborativeEditor';
 import CodeRunner from '@/features/CodeRunner/CodeRunner';
 import { FileTree } from '@/features/Repo/fileTree';
+import { SavePoint } from '@/features/Repo/savePoint';
 
 // Repository 타입 확장 (currentUser 포함)
 interface RepositoryWithUser {
@@ -38,7 +39,11 @@ export function RepoPage() {
   const filePath = search.file;
 
   const { openTabs, activateTab, hasHydrated, keepOnlyCurrentRepoTabs } = useTabStoreHydrated();
-  const { isVisible: isFileSectionVisible, toggleVisibility } = useFileSectionStore();
+  const {
+    isVisible: isFileSectionVisible,
+    activeSection,
+    toggleVisibility,
+  } = useFileSectionStore();
   const { currentUser, setCurrentUser, clearUsers } = useCollaborationStore();
   const { getUserInfo } = useAuthStore();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -187,28 +192,31 @@ export function RepoPage() {
     }
   }, [repoId, hasHydrated, keepOnlyCurrentRepoTabs, enableCollaboration, clearUsers]);
 
-  // 키보드 단축키 (Ctrl+B로 파일 섹션 토글)
+  // 키보드 단축키 추가
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.key === 'b') {
         e.preventDefault();
-        toggleVisibility();
+        // Ctrl+B로 현재 활성 섹션 토글 (files가 기본)
+        const currentSection = activeSection || 'files';
+        if (isFileSectionVisible && activeSection === currentSection) {
+          toggleVisibility();
+        } else {
+          // 닫혀있거나 다른 섹션이면 files 섹션 열기
+          if (!isFileSectionVisible) {
+            toggleVisibility();
+          }
+        }
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [toggleVisibility]);
+  }, [toggleVisibility, isFileSectionVisible, activeSection]);
 
   // URL 파일 경로 변경 처리 (하이드레이션 완료 후에만)
   useEffect(() => {
     if (!hasHydrated) return;
-
-    console.log('URL 파일 경로 처리:', {
-      filePath,
-      repoId,
-      openTabsCount: openTabs.length,
-    });
 
     if (filePath && repoId) {
       // 현재 열린 탭 중에서 해당 경로의 탭 찾기
@@ -229,6 +237,24 @@ export function RepoPage() {
       }
     }
   }, [filePath, repoId, openTabs, activateTab, hasHydrated]);
+
+  // 사이드바 섹션에 따른 컴포넌트 렌더링
+  const renderSidebarContent = () => {
+    switch (activeSection) {
+      case 'files':
+        return (
+          <FileTree
+            repoId={repoId}
+            repositoryId={repositoryId}
+            enableCollaboration={enableCollaboration}
+          />
+        );
+      case 'save':
+        return <SavePoint repoId={repoId || ''} />;
+      default:
+        return null;
+    }
+  };
 
   // 유효하지 않은 repoId 처리
   if (!repoId || isNaN(repositoryId)) {
@@ -256,11 +282,7 @@ export function RepoPage() {
       {isFileSectionVisible && (
         <>
           <div className={styles.fileSection} style={{ width: fileSectionWidth }}>
-            <FileTree
-              repoId={repoId}
-              repositoryId={repositoryId}
-              enableCollaboration={enableCollaboration}
-            />
+            {renderSidebarContent()}
           </div>
 
           {/* 수평 리사이저 */}
