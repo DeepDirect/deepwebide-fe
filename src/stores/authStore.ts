@@ -21,10 +21,10 @@ export interface SignInUser {
   };
 }
 
-// 로컬스토리지에서 사용자 정보 가져오기
+// 세션스토리지에서 사용자 정보 가져오기
 const getUserFromStorage = (): UserInfo | null => {
   try {
-    const userStr = localStorage.getItem('user');
+    const userStr = sessionStorage.getItem('user');
     return userStr ? JSON.parse(userStr) : null;
   } catch (error) {
     console.error('사용자 정보 파싱 실패:', error);
@@ -34,7 +34,7 @@ const getUserFromStorage = (): UserInfo | null => {
 
 // 앱 시작시 토큰 확인
 const checkInitialAuth = (): boolean => {
-  const token = localStorage.getItem('accessToken');
+  const token = sessionStorage.getItem('accessToken');
   return !!token;
 };
 
@@ -68,17 +68,17 @@ export const useAuthStore = create<AuthState>()(
       // 소셜 로그인
       setAuthSocialLogin: (data: SignInUser) => {
         const { accessToken, user } = data;
-        localStorage.setItem('accessToken', accessToken);
-        localStorage.setItem('user', JSON.stringify(user));
+        sessionStorage.setItem('accessToken', accessToken);
+        sessionStorage.setItem('user', JSON.stringify(user));
 
         set({ isLoggedIn: true, user: user });
       },
 
       // 로그인 상태로 설정 (개별 훅에서 호출)
       setLoggedIn: (user: UserInfo, accessToken: string) => {
-        // 로컬스토리지 저장
-        localStorage.setItem('accessToken', accessToken);
-        localStorage.setItem('user', JSON.stringify(user));
+        // 세션스토리지 저장
+        sessionStorage.setItem('accessToken', accessToken);
+        sessionStorage.setItem('user', JSON.stringify(user));
 
         // 상태 업데이트
         set({
@@ -89,9 +89,9 @@ export const useAuthStore = create<AuthState>()(
 
       // 로그아웃 상태로 설정 (개별 훅에서 호출)
       setLoggedOut: () => {
-        // 로컬스토리지 정리
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('user');
+        // 세션스토리지 정리
+        sessionStorage.removeItem('accessToken');
+        sessionStorage.removeItem('user');
 
         // 상태 업데이트
         set({
@@ -107,6 +107,20 @@ export const useAuthStore = create<AuthState>()(
         isLoggedIn: state.isLoggedIn,
         user: state.user,
       }),
+      // persist도 sessionStorage를 사용하도록 변경
+      storage: {
+        getItem: (name: string) => {
+          const value = sessionStorage.getItem(name);
+          return value ? JSON.parse(value) : null;
+        },
+        setItem: (name: string, value: unknown) => {
+          // any → unknown
+          sessionStorage.setItem(name, JSON.stringify(value));
+        },
+        removeItem: (name: string) => {
+          sessionStorage.removeItem(name);
+        },
+      },
     }
   )
 );

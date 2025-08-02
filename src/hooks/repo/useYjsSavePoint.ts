@@ -60,7 +60,7 @@ export function useYjsSavePoint(repositoryId: number) {
       const response = await fetch(`/api/repositories/${repositoryId}/histories`, {
         credentials: 'include',
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+          Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
           'Content-Type': 'application/json',
         },
       });

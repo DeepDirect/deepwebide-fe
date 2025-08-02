@@ -7,7 +7,7 @@ type Member = {
 
 export function isCurrentUserOwner(data: Member[]): boolean {
   try {
-    const user = JSON.parse(localStorage.getItem('user') || '');
+    const user = JSON.parse(sessionStorage.getItem('user') || '');
     const currentUserId = user?.id;
     const owner = data.find(member => member.role === 'OWNER');
     return owner?.userId === currentUserId;

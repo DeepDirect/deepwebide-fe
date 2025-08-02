@@ -227,15 +227,23 @@ const FileTree: React.FC<ExtendedFileTreeProps> = ({
   // 빈 트리 데이터 체크
   if (!treeData || treeData.length === 0) {
     return (
-      <div className={clsx(styles.fileTree, className)}>
-        {renderCollaborationStatus()}
-        <div className={styles.emptyState}>
-          <span>파일이 없습니다.</span>
-          <button onClick={() => openCreateModal('FILE')} className={styles.createFirstFileButton}>
-            첫 번째 파일 만들기
-          </button>
+      <FileTreeContextMenu
+        onNewFile={(parentNode?: FileTreeNode) => openCreateModal('FILE', parentNode)}
+        onNewFolder={(parentNode?: FileTreeNode) => openCreateModal('FOLDER', parentNode)}
+      >
+        <div className={clsx(styles.fileTree, className)}>
+          {renderCollaborationStatus()}
+          <div className={styles.emptyState}>
+            <span>파일이 없습니다.</span>
+            <button
+              onClick={() => openCreateModal('FILE')}
+              className={styles.createFirstFileButton}
+            >
+              첫 번째 파일 만들기
+            </button>
+          </div>
         </div>
-      </div>
+      </FileTreeContextMenu>
     );
   }
 
@@ -323,53 +331,53 @@ const FileTree: React.FC<ExtendedFileTreeProps> = ({
 
   return (
     <>
-      <div
-        className={clsx(styles.fileTree, className, {
-          [styles.collaborationMode]: enableCollaboration,
-        })}
-        data-file-tree-container
-        onDragEnter={handleExternalDragEnter}
-        onDragOver={handleExternalDragOver}
-        onDragLeave={handleExternalDragLeave}
-        onDrop={handleExternalDrop}
-      >
-        {/* 협업 상태 표시 */}
-        {renderCollaborationStatus()}
-
-        {/* 파일 트리 내용 */}
-        <div className={styles.treeContent}>{renderTreeNodes(treeData)}</div>
-
-        {/* 로딩 인디케이터 */}
-        {(isCreating || isRenaming || isDeleting || isMoving || isUploading) && (
-          <div className={styles.operationLoading}>
-            <div className={styles.loadingSpinner} />
-            <span>
-              {isCreating && '생성 중...'}
-              {isRenaming && '이름 변경 중...'}
-              {isDeleting && '삭제 중...'}
-              {isMoving && '이동 중...'}
-              {isUploading && '업로드 중...'}
-            </span>
-          </div>
-        )}
-
-        {/* 외부 드래그 피드백 */}
-        {isExternalDragActive() && (
-          <div className={styles.dragOverlay}>
-            <div className={styles.dragMessage}>
-              <span className={styles.dragIcon}>📁</span>
-              <span>파일을 여기에 놓으세요</span>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* 컨텍스트 메뉴 */}
+      {/* 전체 영역을 FileTreeContextMenu로 래핑 */}
       <FileTreeContextMenu
         onNewFile={(parentNode?: FileTreeNode) => openCreateModal('FILE', parentNode)}
         onNewFolder={(parentNode?: FileTreeNode) => openCreateModal('FOLDER', parentNode)}
       >
-        <div />
+        <div
+          className={clsx(styles.fileTree, className, {
+            [styles.collaborationMode]: enableCollaboration,
+          })}
+          data-file-tree-container
+          onDragEnter={handleExternalDragEnter}
+          onDragOver={handleExternalDragOver}
+          onDragLeave={handleExternalDragLeave}
+          onDrop={handleExternalDrop}
+        >
+          {/* 협업 상태 표시 */}
+          {renderCollaborationStatus()}
+
+          {/* 파일 트리 내용 */}
+          <div className={clsx(styles.treeContainer, styles.dropZone)}>
+            {renderTreeNodes(treeData)}
+          </div>
+
+          {/* 로딩 인디케이터 */}
+          {(isCreating || isRenaming || isDeleting || isMoving || isUploading) && (
+            <div className={styles.operationLoading}>
+              <div className={styles.loadingSpinner} />
+              <span>
+                {isCreating && '생성 중...'}
+                {isRenaming && '이름 변경 중...'}
+                {isDeleting && '삭제 중...'}
+                {isMoving && '이동 중...'}
+                {isUploading && '업로드 중...'}
+              </span>
+            </div>
+          )}
+
+          {/* 외부 드래그 피드백 */}
+          {isExternalDragActive() && (
+            <div className={styles.dragOverlay}>
+              <div className={styles.dragMessage}>
+                <span className={styles.dragIcon}>📁</span>
+                <span>파일을 여기에 놓으세요</span>
+              </div>
+            </div>
+          )}
+        </div>
       </FileTreeContextMenu>
 
       {/* 파일/폴더 생성 모달 */}

@@ -91,7 +91,7 @@ export const useYjsCollaboration = ({
 
   const { setConnectionStatus, addUser, joinRoom, leaveRoom, setCurrentUser, clearUsers } =
     useCollaborationStore();
-  const { openTabs, setTabContent, setTabDirty } = useTabStore();
+  const { openTabs, setTabContent } = useTabStore();
 
   // 현재 활성 탭 찾기
   const activeTab = openTabs.find(tab => tab.isActive);
@@ -183,11 +183,11 @@ export const useYjsCollaboration = ({
           });
 
           setTabContent(activeTab.id, yjsContent);
-          setTabDirty(activeTab.id, false); // Yjs 동기화는 clean 상태
+          // setTabDirty(activeTab.id, false); // 일단 제거
         }
       }, 100);
     },
-    [activeTab, setTabContent, setTabDirty, roomId]
+    [activeTab, setTabContent, roomId]
   );
 
   // 안전한 커서 위치 업데이트 함수
