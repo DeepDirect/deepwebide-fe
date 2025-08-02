@@ -1,21 +1,24 @@
 import React from 'react';
-import { type ChatMessage as ChatMessageData } from '../../types';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
 import './ChatMessage.scss';
+import { type ChatReceivedMessage } from '@/features/Chat/types';
 
 interface ChatMessageProps {
-  message: ChatMessageData;
+  message: ChatReceivedMessage;
   isMyMessage: boolean;
 }
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.locale('ko');
 
 const ChatMessage: React.FC<ChatMessageProps> = ({ message, isMyMessage }) => {
   // 시간 포맷팅 함수
   const formatTime = (isoString: string) => {
-    const date = new Date(isoString);
-    return date.toLocaleTimeString('ko-KR', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    });
+    const time = dayjs.utc(isoString).tz('Asia/Seoul').format('HH:mm');
+    return time;
   };
 
   // 메시지 내용에서 코드 참조 파싱
@@ -55,26 +58,28 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isMyMessage }) => {
         <div className="chat-message__avatar-container">
           {/* 프로필 이미지 */}
           <img
-            src={message.profile_image_url}
-            alt={`${message.username} 프로필`}
+            src={message.senderProfileImageUrl}
+            alt={`${message.senderNickname} 프로필`}
             className="chat-message__avatar-image"
           />
         </div>
+
         {/* 메시지 내용 */}
         <div className="chat-message__content">
-          <div className="chat-message__user-name">{message.username}</div>
-          <div className="chat-message__text">{renderMessageContent(message.content)}</div>
+          <div className="chat-message__user-name">{message.senderNickname}</div>
+          <div className="chat-message__text">{renderMessageContent(message.message)}</div>
         </div>
+
         {/* 시간 */}
-        <div className="chat-message__time">{formatTime(message.created_at)}</div>
+        <div className="chat-message__time">{formatTime(message.sentAt)}</div>
       </div>
 
-      {/* 읽지 않은 사람 수 - 0명은 표시하지 않음 */}
-      {message.unreadNumber > 0 && (
+      {/* TODO : 읽지 않은 사람 수 - 0명은 표시하지 않음 */}
+      {/* {message.unreadNumber > 0 && (
         <div className="chat-message__unread-number">
           {String(message.unreadNumber).padStart(2, '0')}
         </div>
-      )}
+      )} */}
     </div>
   );
 };
