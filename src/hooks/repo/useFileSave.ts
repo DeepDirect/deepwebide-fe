@@ -14,7 +14,7 @@ export const useFileSave = ({
   repositoryId,
   enabled = true,
   collaborationMode = false,
-  continuousSaveInterval = 5000,
+  continuousSaveInterval,
 }: UseFileSaveProps) => {
   const queryClient = useQueryClient();
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -24,6 +24,10 @@ export const useFileSave = ({
   const continuousTimerRef = useRef<NodeJS.Timeout | null>(null);
   const currentTabIdRef = useRef<string | null>(null);
   const lastContentRef = useRef<string>('');
+
+  // 협업 모드에 따른 저장 주기 설정
+  const defaultInterval = collaborationMode ? 10000 : 5000; // 협업: 10초, 일반: 5초
+  const saveInterval = continuousSaveInterval || defaultInterval;
 
   // TabStore를 ref로 안정화
   const tabStoreRef = useRef(useTabStore.getState());
@@ -55,6 +59,13 @@ export const useFileSave = ({
     onSuccess: (data, variables) => {
       const { fileId, content } = variables;
 
+      console.log('파일 저장 성공:', {
+        fileId,
+        contentLength: content.length,
+        collaborationMode,
+        timestamp: new Date().toISOString(),
+      });
+
       // 상태 변경을 비동기로 처리하여 무한루프 방지
       setTimeout(() => {
         const { openTabs, setTabDirty } = tabStoreRef.current;
@@ -73,6 +84,9 @@ export const useFileSave = ({
         queryKey: ['fileContent', repositoryId],
       });
     },
+    onError: error => {
+      console.error('파일 저장 실패:', error);
+    },
   });
 
   // 지속적 저장 실행 함수
@@ -82,23 +96,35 @@ export const useFileSave = ({
 
     const { openTabs } = tabStoreRef.current;
     const currentTab = openTabs.find(tab => tab.id === currentTabId && tab.isActive);
-    if (!currentTab || !currentTab.isDirty) return;
+    if (!currentTab || !currentTab.isDirty || !currentTab.fileId) return;
 
     const currentContent = currentTab.content || '';
 
     // 내용이 변경되었는지 확인
-    if (currentContent !== lastContentRef.current && currentTab.fileId) {
-      // 직접 API 호출 (무한루프 방지)
-      saveFileContent(repositoryId, currentTab.fileId, currentContent).then(() => {
-        setLastSaved(new Date());
-        lastContentRef.current = currentContent;
-        setTimeout(() => {
-          const { setTabDirty } = tabStoreRef.current;
-          setTabDirty(currentTab.id, false);
-        }, 0);
+    if (currentContent !== lastContentRef.current) {
+      console.log('지속적 저장 실행:', {
+        tabId: currentTabId,
+        fileId: currentTab.fileId,
+        contentLength: currentContent.length,
+        collaborationMode,
+        lastContentLength: lastContentRef.current.length,
       });
+
+      // 직접 API 호출 (무한루프 방지)
+      saveFileContent(repositoryId, currentTab.fileId, currentContent)
+        .then(() => {
+          setLastSaved(new Date());
+          lastContentRef.current = currentContent;
+          setTimeout(() => {
+            const { setTabDirty } = tabStoreRef.current;
+            setTabDirty(currentTab.id, false);
+          }, 0);
+        })
+        .catch(error => {
+          console.error('지속적 저장 실패:', error);
+        });
     }
-  }, [repositoryId]);
+  }, [repositoryId, collaborationMode]);
 
   // 지속적 저장 활성화
   const enableContinuousSave = useCallback(
@@ -117,10 +143,16 @@ export const useFileSave = ({
         lastContentRef.current = currentTab.content || '';
       }
 
+      console.log('지속적 저장 활성화:', {
+        tabId,
+        interval: saveInterval,
+        collaborationMode,
+      });
+
       // 지속적 저장 타이머 시작
-      continuousTimerRef.current = setInterval(executeContinuousSave, continuousSaveInterval);
+      continuousTimerRef.current = setInterval(executeContinuousSave, saveInterval);
     },
-    [continuousSaveInterval, executeContinuousSave]
+    [saveInterval, executeContinuousSave, collaborationMode]
   );
 
   // 지속적 저장 비활성화
@@ -130,9 +162,14 @@ export const useFileSave = ({
       continuousTimerRef.current = null;
     }
 
+    console.log('지속적 저장 비활성화:', {
+      tabId: currentTabIdRef.current,
+      collaborationMode,
+    });
+
     currentTabIdRef.current = null;
     lastContentRef.current = '';
-  }, []);
+  }, [collaborationMode]);
 
   // 즉시 저장 (Ctrl+S)
   const saveCurrentFile = useCallback(() => {
@@ -142,15 +179,24 @@ export const useFileSave = ({
     const activeTab = openTabs.find(tab => tab.isActive);
     if (!activeTab || !activeTab.fileId) return;
 
+    console.log('즉시 저장 시도:', {
+      tabId: activeTab.id,
+      fileId: activeTab.fileId,
+      isDirty: activeTab.isDirty,
+      collaborationMode,
+    });
+
     if (activeTab.isDirty) {
       saveFileMutation.mutate({
         fileId: activeTab.fileId,
         content: activeTab.content || '',
       });
+    } else {
+      console.log('저장할 변경사항 없음');
     }
-  }, [enabled, saveFileMutation]);
+  }, [enabled, saveFileMutation, collaborationMode]);
 
-  // 자동 저장 - 타이머 중복 방지
+  // 자동 저장 - 협업 모드에서 지연 시간 조정
   const autoSaveFile = useCallback(
     (tabId: string, content: string) => {
       if (!enabled) return;
@@ -161,29 +207,47 @@ export const useFileSave = ({
         saveTimeoutRef.current = null;
       }
 
-      const saveDelay = collaborationMode ? 5000 : 2000;
+      // 협업 모드에서는 더 긴 지연 시간 (Yjs 동기화와 충돌 방지)
+      const saveDelay = collaborationMode ? 3000 : 1500; // 협업: 3초, 일반: 1.5초
+
+      console.log('자동 저장 예약:', {
+        tabId,
+        contentLength: content.length,
+        delay: saveDelay,
+        collaborationMode,
+      });
 
       saveTimeoutRef.current = setTimeout(() => {
         const { openTabs } = tabStoreRef.current;
-        const tab = openTabs.find(t => t.id === tabId);
-        if (!tab || !tab.isDirty || !tab.fileId) return;
+        const currentTab = openTabs.find(tab => tab.id === tabId);
 
-        saveFileMutation.mutate({
-          fileId: tab.fileId,
-          content,
-        });
+        if (currentTab?.isDirty && currentTab.fileId) {
+          console.log('자동 저장 실행:', {
+            tabId,
+            fileId: currentTab.fileId,
+            contentLength: content.length,
+            collaborationMode,
+          });
+
+          saveFileMutation.mutate({
+            fileId: currentTab.fileId,
+            content,
+          });
+        }
+
+        saveTimeoutRef.current = null;
       }, saveDelay);
     },
-    [enabled, saveFileMutation, collaborationMode]
+    [enabled, collaborationMode, saveFileMutation]
   );
 
   return {
     saveCurrentFile,
     autoSaveFile,
-    isSaving: saveFileMutation.isPending,
-    lastSaved,
     enableContinuousSave,
     disableContinuousSave,
-    executeContinuousSave,
+    isSaving: saveFileMutation.isPending,
+    lastSaved,
+    saveInterval,
   };
 };

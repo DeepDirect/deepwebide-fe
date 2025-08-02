@@ -17,6 +17,7 @@ export const useTabStore = create<TabStore>()(
 
       // 기본 탭 관리
       setOpenTabs: (tabs: OpenTab[]) => {
+        console.log('setOpenTabs 호출:', tabs.length);
         set({ openTabs: tabs });
       },
 
@@ -31,6 +32,7 @@ export const useTabStore = create<TabStore>()(
               isActive: t.id === tab.id,
             })),
           });
+          console.log('기존 탭 활성화:', tab.name);
         } else {
           set({
             openTabs: [
@@ -38,6 +40,7 @@ export const useTabStore = create<TabStore>()(
               { ...tab, isActive: true },
             ],
           });
+          console.log('새 탭 추가:', tab.name);
         }
       },
 
@@ -49,17 +52,23 @@ export const useTabStore = create<TabStore>()(
           updatedTabs[updatedTabs.length - 1].isActive = true;
         }
 
+        console.log('탭 닫기:', { id, remainingTabs: updatedTabs.length });
         set({ openTabs: updatedTabs });
       },
 
       activateTab: (id: string) => {
         const state = get();
-        set({
-          openTabs: state.openTabs.map(tab => ({
-            ...tab,
-            isActive: tab.id === id,
-          })),
-        });
+        const targetTab = state.openTabs.find(tab => tab.id === id);
+
+        if (targetTab) {
+          set({
+            openTabs: state.openTabs.map(tab => ({
+              ...tab,
+              isActive: tab.id === id,
+            })),
+          });
+          console.log('탭 활성화:', targetTab.name);
+        }
       },
 
       // 파일 관련
@@ -68,7 +77,7 @@ export const useTabStore = create<TabStore>()(
         const tabId = `${repoId}/${filePath}`;
         const existingTab = state.openTabs.find(tab => tab.id === tabId);
 
-        console.log('openFileByPath 호출:', {
+        console.log('📂 openFileByPath 호출:', {
           repoId,
           filePath,
           fileName,
@@ -78,15 +87,15 @@ export const useTabStore = create<TabStore>()(
         });
 
         if (existingTab) {
-          // 기존 탭이 있으면 fileId 업데이트 (없었던 경우를 대비)
+          // 기존 탭이 있으면 fileId 업데이트하고 활성화
           set({
             openTabs: state.openTabs.map(tab => ({
               ...tab,
               isActive: tab.id === tabId,
-              fileId: tab.id === tabId && fileId ? fileId : tab.fileId, // fileId 업데이트
+              fileId: tab.id === tabId && fileId ? fileId : tab.fileId,
             })),
           });
-          console.log('기존 탭 활성화:', existingTab.name);
+          console.log('기존 탭 활성화 및 fileId 업데이트:', existingTab.name);
         } else {
           // 새 탭 생성
           const finalFileName =
@@ -99,7 +108,7 @@ export const useTabStore = create<TabStore>()(
             path: filePath,
             isActive: true,
             isDirty: false,
-            content: '',
+            content: '', // 초기에는 빈 내용으로 시작
             fileId,
           };
 
@@ -125,14 +134,15 @@ export const useTabStore = create<TabStore>()(
         set({
           openTabs: state.openTabs.map(tab => {
             if (tab.id === tabId) {
-              // 파일에서 처음 로드하는 경우 isDirty를 false로 설정
-              // (에디터에서 변경하는 경우는 별도 처리)
+              // 기존 내용과 다른지 확인
+              const isContentChanged = tab.content !== content;
               const isInitialLoad = tab.content === '';
 
               console.log('탭 내용 업데이트:', {
                 tabId,
                 name: tab.name,
                 isInitialLoad,
+                isContentChanged,
                 oldContentLength: tab.content?.length || 0,
                 newContentLength: content.length,
               });
@@ -140,7 +150,8 @@ export const useTabStore = create<TabStore>()(
               return {
                 ...tab,
                 content,
-                isDirty: isInitialLoad ? false : tab.isDirty, // 초기 로드시는 clean 상태
+                // 초기 로드시는 clean 상태, 내용 변경시는 기존 dirty 상태 유지
+                isDirty: isInitialLoad ? false : tab.isDirty,
               };
             }
             return tab;
@@ -148,10 +159,13 @@ export const useTabStore = create<TabStore>()(
         });
       },
 
-      // 파일에서 처음 내용을 로드할 때 사용할 메서드
+      // 파일에서 처음 내용을 로드할 때 사용할 메서드 (항상 clean 상태)
       setTabContentFromFile: (tabId: string, content: string) => {
         const state = get();
-        console.log('setTabContentFromFile 호출:', { tabId, contentLength: content.length });
+        console.log('setTabContentFromFile 호출:', {
+          tabId,
+          contentLength: content.length,
+        });
 
         set({
           openTabs: state.openTabs.map(tab =>
@@ -168,15 +182,35 @@ export const useTabStore = create<TabStore>()(
 
       setTabDirty: (tabId: string, isDirty: boolean) => {
         const state = get();
-        set({
-          openTabs: state.openTabs.map(tab => (tab.id === tabId ? { ...tab, isDirty } : tab)),
-        });
+        const targetTab = state.openTabs.find(tab => tab.id === tabId);
+
+        if (targetTab && targetTab.isDirty !== isDirty) {
+          console.log('탭 dirty 상태 변경:', {
+            tabId,
+            name: targetTab.name,
+            oldDirty: targetTab.isDirty,
+            newDirty: isDirty,
+          });
+
+          set({
+            openTabs: state.openTabs.map(tab => (tab.id === tabId ? { ...tab, isDirty } : tab)),
+          });
+        }
       },
 
       // 레포지토리 관련
       clearTabsForRepo: (repoId: string) => {
         const state = get();
+        const beforeCount = state.openTabs.length;
         const filteredTabs = state.openTabs.filter(tab => !tab.id.startsWith(`${repoId}/`));
+
+        console.log('레포 탭 정리:', {
+          repoId,
+          before: beforeCount,
+          after: filteredTabs.length,
+          cleared: beforeCount - filteredTabs.length,
+        });
+
         set({ openTabs: filteredTabs });
       },
 
@@ -189,11 +223,36 @@ export const useTabStore = create<TabStore>()(
             currentRepoTabs[0].isActive = true;
           }
 
-          console.log(
-            `다른 레포 탭 ${state.openTabs.length - currentRepoTabs.length}개 정리, 현재 레포 탭 ${currentRepoTabs.length}개 유지`
-          );
+          console.log('다른 레포 탭 정리:', {
+            repoId,
+            totalBefore: state.openTabs.length,
+            currentRepoTabs: currentRepoTabs.length,
+            cleared: state.openTabs.length - currentRepoTabs.length,
+          });
+
           set({ openTabs: currentRepoTabs });
         }
+      },
+
+      // 디버그 헬퍼
+      getTabById: (tabId: string) => {
+        const state = get();
+        return state.openTabs.find(tab => tab.id === tabId);
+      },
+
+      getActiveTab: () => {
+        const state = get();
+        return state.openTabs.find(tab => tab.isActive);
+      },
+
+      getDirtyTabs: () => {
+        const state = get();
+        return state.openTabs.filter(tab => tab.isDirty);
+      },
+
+      getTabsByRepo: (repoId: string) => {
+        const state = get();
+        return state.openTabs.filter(tab => tab.id.startsWith(`${repoId}/`));
       },
     }),
     {
@@ -204,10 +263,16 @@ export const useTabStore = create<TabStore>()(
         if (error) {
           console.error('탭 상태 복원 실패:', error);
         } else if (state) {
-          console.log('탭 상태 복원 완료:', state.openTabs.length, '개 탭');
+          console.log('탭 상태 복원 완료:', {
+            tabCount: state.openTabs.length,
+            activeTabs: state.openTabs.filter(tab => tab.isActive).length,
+            dirtyTabs: state.openTabs.filter(tab => tab.isDirty).length,
+          });
 
+          // 활성 탭이 없으면 첫 번째 탭을 활성화
           if (state.openTabs.length > 0 && !state.openTabs.some(tab => tab.isActive)) {
             state.openTabs[0].isActive = true;
+            console.log('첫 번째 탭 자동 활성화:', state.openTabs[0].name);
           }
 
           state.setHasHydrated(true);
@@ -215,7 +280,11 @@ export const useTabStore = create<TabStore>()(
       },
 
       partialize: state => ({
-        openTabs: state.openTabs,
+        openTabs: state.openTabs.map(tab => ({
+          ...tab,
+          // 저장할 때는 dirty 상태를 false로 리셋 (새로고침 시 clean 상태로 시작)
+          isDirty: false,
+        })),
       }),
     }
   )

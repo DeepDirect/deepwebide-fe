@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Editor } from '@monaco-editor/react';
 import { useYjsCollaboration } from '@/hooks/repo/useYjsCollaboration';
 import { useMonacoEditor } from '@/hooks/repo/useMonacoEditor';
@@ -26,12 +26,12 @@ interface MonacoCollaborativeEditorProps {
 const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
   repoId,
   repositoryId,
-  enableCollaboration = false, // 기본값을 false로 변경
+  enableCollaboration = false,
   userId,
   userName,
 }) => {
   const { updateContent } = useEditorStore();
-  const { openTabs, setTabContent } = useTabStore();
+  const { openTabs, setTabContent, setTabDirty } = useTabStore();
   const { users, currentUser } = useCollaborationStore();
   const { getUserInfo } = useAuthStore();
   const { isDarkMode } = useThemeStore();
@@ -57,13 +57,30 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
     (content: string) => {
       if (!activeTab) return;
 
+      console.log('에디터 내용 변경:', {
+        tabId: activeTab.id,
+        contentLength: content.length,
+        enableCollaboration,
+        isDirty: content !== (activeTab.content || ''),
+      });
+
       // 에디터 스토어 업데이트
       updateContent(content);
 
-      // 탭 스토어 업데이트
-      setTabContent(activeTab.id, content);
+      // 탭 스토어 업데이트 (협업 모드에서는 Yjs가 관리하므로 dirty 상태만 업데이트)
+      if (enableCollaboration) {
+        // 협업 모드: Yjs가 탭 내용을 관리하므로 dirty 상태만 설정
+        const isDirty = content !== (activeTab.content || '');
+        if (isDirty) {
+          setTabDirty(activeTab.id, true);
+        }
+      } else {
+        // 일반 모드: 탭 내용과 dirty 상태 모두 업데이트
+        setTabContent(activeTab.id, content);
+        setTabDirty(activeTab.id, true);
+      }
     },
-    [activeTab, updateContent, setTabContent]
+    [activeTab, updateContent, setTabContent, setTabDirty, enableCollaboration]
   );
 
   // Monaco Editor 훅
@@ -72,7 +89,7 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
       language,
       repositoryId,
       onContentChange: handleContentChange,
-      enableCollaboration: shouldUseCollaboration, // 정확한 협업 상태 전달
+      enableCollaboration: shouldUseCollaboration,
     });
 
   // Yjs 협업 훅 - 협업 모드일 때만 활성화
@@ -81,17 +98,39 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
     editor: editorRef.current as unknown as MonacoEditorInstance | null,
     userId: finalUserId,
     userName: finalUserName,
-    enabled: shouldUseCollaboration, // 협업이 필요할 때만 활성화
+    enabled: shouldUseCollaboration,
   });
 
   // 에디터 변경 이벤트 핸들러
   const onEditorChange = useCallback(
     (value: string | undefined) => {
-      // activeTabId를 전달하여 저장 기능 활성화 (협업 모드에서도)
+      console.log('Monaco onChange 이벤트:', {
+        valueLength: value?.length || 0,
+        tabId: activeTab?.id,
+        enableCollaboration,
+        isConnected,
+      });
+
+      // activeTabId를 전달하여 저장 기능 활성화
       handleEditorChange(value, activeTab?.id);
     },
-    [handleEditorChange, activeTab?.id]
+    [handleEditorChange, activeTab?.id, enableCollaboration, isConnected]
   );
+
+  // 협업 모드 상태 로깅
+  useEffect(() => {
+    if (activeTab) {
+      console.log('MonacoCollaborativeEditor 상태:', {
+        tabId: activeTab.id,
+        tabPath: activeTab.path,
+        enableCollaboration,
+        shouldUseCollaboration,
+        roomId,
+        isConnected,
+        contentLength: activeTab.content?.length || 0,
+      });
+    }
+  }, [activeTab?.id, enableCollaboration, shouldUseCollaboration, roomId, isConnected]);
 
   // 활성 탭이 없는 경우 플레이스홀더 표시
   if (!activeTab) {
@@ -107,31 +146,56 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
   // Monaco Editor 옵션
   const editorOptions = getMonacoEditorOptions(language, isDarkMode);
 
+  // 에디터 value 결정 로직
+  const getEditorValue = () => {
+    if (enableCollaboration) {
+      // 협업 모드: 연결되기 전까지는 탭 내용 표시, 연결 후에는 Yjs가 제어
+      return isConnected ? undefined : activeTab.content || '';
+    } else {
+      // 일반 모드: 항상 탭 내용 표시
+      return activeTab.content || '';
+    }
+  };
+
   return (
     <div className={styles.collaborativeEditor}>
       {/* 협업 상태 표시 */}
-      {enableCollaboration && isConnected && <CollaborationStatus userCount={users.length + 1} />}
+      {enableCollaboration && (
+        <div className={styles.collaborationHeader}>
+          {isConnected && <CollaborationStatus userCount={users.length + 1} />}
+          {isLoading && (
+            <div className={styles.connectionStatus}>
+              <span className={styles.loadingSpinner} />
+              협업 모드 연결 중...
+            </div>
+          )}
+        </div>
+      )}
 
       {/* 에러 표시 */}
       {enableCollaboration && error && (
         <div className={styles.errorStatus}>
           <span className={styles.errorIcon}>!</span>
-          {error}
+          <span className={styles.errorMessage}>{error}</span>
+          <button className={styles.retryButton} onClick={() => window.location.reload()}>
+            새로고침
+          </button>
         </div>
       )}
 
-      {/* 저장 상태 표시 (협업 모드에서도 표시) */}
+      {/* 저장 상태 표시 */}
       {isSaving && (
         <div className={styles.saveStatus}>
           <div className={styles.savingIndicator}>
             <span className={styles.savingSpinner} />
-            저장 중...
+            <span>저장 중...</span>
+            {enableCollaboration && <span className={styles.saveMode}>(협업 모드)</span>}
           </div>
         </div>
       )}
 
       <div className={styles.editorContainer} ref={editorContainerRef}>
-        {/* 커서 오버레이 */}
+        {/* 커서 오버레이 (협업 모드에서만) */}
         {enableCollaboration && isConnected && (
           <CursorOverlay
             editorContainer={editorContainerRef.current}
@@ -142,11 +206,14 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
         <Editor
           height="100%"
           language={language}
-          // 협업 모드에서도 초기 내용은 표시하되, Yjs 연결 후 제어권 이양
-          value={enableCollaboration && isConnected ? undefined : activeTab.content || ''}
+          value={getEditorValue()}
           onChange={onEditorChange}
           onMount={handleEditorDidMount}
-          options={editorOptions}
+          options={{
+            ...editorOptions,
+            // 협업 모드에서는 읽기 전용 설정을 조정
+            readOnly: enableCollaboration && isLoading,
+          }}
           theme={isDarkMode ? 'vs-dark' : 'vs'}
         />
       </div>

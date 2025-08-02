@@ -23,7 +23,7 @@ const FileTree: React.FC<ExtendedFileTreeProps> = ({
   repoId,
   repositoryId,
   className = '',
-  enableCollaboration = false, // 기본값 false
+  enableCollaboration = false,
 }) => {
   const {
     treeData,
@@ -34,18 +34,18 @@ const FileTree: React.FC<ExtendedFileTreeProps> = ({
     isLoading,
     error,
     refetch,
-  } = useFileTree({ repositoryId });
+  } = useFileTree({ repositoryId: repositoryId || 0 });
 
-  // YJS 훅
-  const { yMap } = useYjsFileTree(repositoryId);
+  // YJS 훅 (협업 모드에서만 활성화)
+  const { yMap } = useYjsFileTree(repositoryId || 0);
 
-  //  enableCollaboration을 useFileTreeActions에 전달
+  // enableCollaboration을 useFileTreeActions에 전달
   const { handleFileClick, handleFolderToggle } = useFileTreeActions({
     repoId,
     repositoryId,
     setExpandedFolders,
     setSelectedFile,
-    enableCollaboration, // 협업 모드 전달
+    enableCollaboration,
   });
 
   const {
@@ -75,7 +75,7 @@ const FileTree: React.FC<ExtendedFileTreeProps> = ({
     isMoving,
     isUploading,
   } = useFileTreeOperations({
-    repositoryId,
+    repositoryId: repositoryId || 0,
     onSuccess: refetch,
     rootFolderId: treeData?.[0]?.fileId,
   });
@@ -106,37 +106,41 @@ const FileTree: React.FC<ExtendedFileTreeProps> = ({
     handleNodeExternalDragOver,
     handleNodeExternalDragLeave,
     handleNodeExternalDrop,
-    isExternalDragOver,
   } = useFileTreeExternalDrop({
-    onFileUpload: uploadFiles, // 실제 API 업로드 함수 연결
+    onFileUpload: uploadFiles,
   });
 
-  // YJS 파일트리 변경사항 실시간 동기화
+  // YJS 파일트리 변경사항 실시간 동기화 (협업 모드에서만)
   useEffect(() => {
-    if (!yMap) return;
+    if (!enableCollaboration || !yMap) return;
 
     const handleYjsUpdate = () => {
-      // YJS에서 파일트리가 업데이트되면 React Query 캐시도 업데이트
       const updatedFileTree = yMap.get('fileTree');
       const lastUpdated = yMap.get('lastUpdated');
 
       if (updatedFileTree && lastUpdated) {
-        console.log('YJS 파일트리 업데이트 감지:', updatedFileTree);
+        console.log('YJS 파일트리 업데이트 감지:', {
+          enableCollaboration,
+          updatedFileTree: !!updatedFileTree,
+          lastUpdated,
+        });
+
         // React Query 데이터 갱신
         refetch();
       }
     };
 
-    // YJS 변경사항 감지
+    console.log('YJS 파일트리 변경사항 감지 시작');
     yMap.observe(handleYjsUpdate);
 
     // 초기 데이터 로드 시에도 확인
     handleYjsUpdate();
 
     return () => {
+      console.log('YJS 파일트리 변경사항 감지 정리');
       yMap.unobserve(handleYjsUpdate);
     };
-  }, [yMap, refetch]);
+  }, [yMap, refetch, enableCollaboration]);
 
   // 협업 모드 상태 로깅
   useEffect(() => {
@@ -146,13 +150,14 @@ const FileTree: React.FC<ExtendedFileTreeProps> = ({
       enableCollaboration,
       treeDataLength: treeData?.length || 0,
       hasYjsMap: !!yMap,
+      isLoading,
+      hasError: !!error,
     });
-  }, [repoId, repositoryId, enableCollaboration, treeData?.length, yMap]);
+  }, [repoId, repositoryId, enableCollaboration, treeData?.length, yMap, isLoading, error]);
 
   // 전역 드래그 이벤트 방지 (파일 자동 열림 완전 차단)
   useEffect(() => {
     const preventGlobalDrop = (e: DragEvent) => {
-      // FileTree 영역 밖에서의 드롭을 방지
       if (!(e.target as HTMLElement)?.closest('[data-file-tree-container]')) {
         e.preventDefault();
         e.stopPropagation();
@@ -160,153 +165,30 @@ const FileTree: React.FC<ExtendedFileTreeProps> = ({
     };
 
     const preventGlobalDragOver = (e: DragEvent) => {
-      // FileTree 영역 밖에서의 드래그오버를 방지
       if (!(e.target as HTMLElement)?.closest('[data-file-tree-container]')) {
         e.preventDefault();
         e.stopPropagation();
       }
     };
 
-    document.addEventListener('dragover', preventGlobalDragOver);
     document.addEventListener('drop', preventGlobalDrop);
+    document.addEventListener('dragover', preventGlobalDragOver);
 
     return () => {
-      document.removeEventListener('dragover', preventGlobalDragOver);
       document.removeEventListener('drop', preventGlobalDrop);
+      document.removeEventListener('dragover', preventGlobalDragOver);
     };
   }, []);
 
-  // 통합 드래그 이벤트 핸들러들
-  const handleCombinedDragEnter = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    // 내부/외부 드래그 구분해서 처리
-    if (e.dataTransfer.types.includes('application/x-file-tree-node')) {
-      // 내부 드래그: 별도 처리 없음 (개별 노드에서 처리)
-    } else {
-      // 외부 파일 드래그
-      handleExternalDragEnter(e);
-    }
-  };
-
-  const handleCombinedDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (e.dataTransfer.types.includes('application/x-file-tree-node')) {
-      // 내부 드래그: 별도 처리 없음
-    } else {
-      // 외부 파일 드래그
-      handleExternalDragOver(e);
-    }
-  };
-
-  const handleCombinedDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (e.dataTransfer.types.includes('application/x-file-tree-node')) {
-      // 내부 드래그
-    } else {
-      // 외부 파일 드래그
-      handleExternalDragLeave(e);
-    }
-  };
-
-  const handleCombinedDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (e.dataTransfer.types.includes('application/x-file-tree-node')) {
-      // 내부 드래그: 개별 노드에서 처리됨
-    } else {
-      // 외부 파일 드래그
-      handleExternalDrop(e);
-    }
-  };
-
-  // 렌더링 함수들 (안전성 강화)
-  const renderTreeNodes = (nodes: FileTreeNode[]): React.ReactNode => {
-    // nodes 배열과 각 node의 유효성 검사
-    if (!nodes || !Array.isArray(nodes)) {
-      return null;
-    }
-
-    return nodes
-      .map(node => {
-        // node와 필수 속성들의 유효성 검사
-        if (!node || typeof node.fileId === 'undefined' || !node.fileName) {
-          console.warn('유효하지 않은 파일 트리 노드:', node);
-          return null;
-        }
-
-        const isExpanded = expandedFolders.has(node.fileId.toString());
-        const isSelected = selectedFile === node.path;
-
-        return (
-          <React.Fragment key={`${node.fileId}-${node.fileName}`}>
-            <FileTreeItem
-              node={node}
-              isExpanded={isExpanded}
-              isSelected={isSelected}
-              onFileClick={handleFileClick}
-              onFolderToggle={handleFolderToggle}
-              // 컨텍스트 메뉴
-              onNewFile={(parentNode?: FileTreeNode) => openCreateModal('FILE', parentNode)}
-              onNewFolder={(parentNode?: FileTreeNode) => openCreateModal('FOLDER', parentNode)}
-              onRename={(targetNode: FileTreeNode) => startEditing(targetNode.fileId.toString())}
-              onDelete={deleteItem}
-              // 인라인 편집
-              isEditing={editingNode === node.fileId.toString()}
-              onEditSave={renameItem}
-              onEditCancel={stopEditing}
-              // 내부 드래그앤드롭
-              isDragging={isDragging(node.fileId.toString())}
-              isDropTarget={isDropTarget(node.fileId.toString())}
-              canDrop={canDrop(node, node)} // 실제로는 드래그되는 노드와 비교해야 하지만 일단 기본값
-              onDragStart={(nodeParam: FileTreeNode, event: React.DragEvent) =>
-                handleDragStart(nodeParam, event)
-              }
-              onDragEnd={handleDragEnd}
-              onDragOver={(nodeParam: FileTreeNode, event: React.DragEvent) =>
-                handleDragOver(nodeParam, event)
-              }
-              onDragLeave={handleDragLeave}
-              onDrop={(nodeParam: FileTreeNode, event: React.DragEvent) =>
-                handleDrop(nodeParam, event)
-              }
-              getDropPosition={getDropPosition}
-              // 외부 파일 드롭
-              isExternalDragOver={isExternalDragOver(node.fileId.toString())}
-              onExternalDragOver={handleNodeExternalDragOver}
-              onExternalDragLeave={handleNodeExternalDragLeave}
-              onExternalDrop={handleNodeExternalDrop}
-            />
-            {/* 자식 노드 렌더링 */}
-            {node.fileType === 'FOLDER' &&
-              isExpanded &&
-              node.children &&
-              Array.isArray(node.children) &&
-              node.children.length > 0 && (
-                <div className={styles.childrenContainer}>
-                  {renderTreeNodes(node.children as FileTreeNode[])}
-                </div>
-              )}
-          </React.Fragment>
-        );
-      })
-      .filter(Boolean); // null 값 제거
-  };
-
-  // 🔧 추가: 협업 모드 인디케이터
-  const renderCollaborationIndicator = (): React.ReactNode => {
+  // 협업 모드 표시 컴포넌트
+  const renderCollaborationStatus = () => {
     if (!enableCollaboration) return null;
 
     return (
-      <div className={styles.collaborationIndicator}>
+      <div className={styles.collaborationStatus}>
         <span className={styles.collaborationIcon}>🤝</span>
         <span className={styles.collaborationText}>실시간 협업 활성</span>
+        {yMap && <span className={styles.collaborationConnected}>✓</span>}
       </div>
     );
   };
@@ -315,6 +197,7 @@ const FileTree: React.FC<ExtendedFileTreeProps> = ({
   if (isLoading) {
     return (
       <div className={clsx(styles.fileTree, className)}>
+        {renderCollaborationStatus()}
         <div className={styles.loadingState}>
           <div className={styles.loadingSpinner} />
           <span>파일 트리 로딩 중...</span>
@@ -327,6 +210,7 @@ const FileTree: React.FC<ExtendedFileTreeProps> = ({
   if (error) {
     return (
       <div className={clsx(styles.fileTree, className)}>
+        {renderCollaborationStatus()}
         <div className={styles.errorState}>
           <span className={styles.errorIcon}>⚠️</span>
           <span>파일 트리를 불러올 수 없습니다.</span>
@@ -342,73 +226,159 @@ const FileTree: React.FC<ExtendedFileTreeProps> = ({
   if (!treeData || treeData.length === 0) {
     return (
       <div className={clsx(styles.fileTree, className)}>
+        {renderCollaborationStatus()}
         <div className={styles.emptyState}>
           <span>파일이 없습니다.</span>
+          <button onClick={() => openCreateModal('FILE')} className={styles.createFirstFileButton}>
+            첫 번째 파일 만들기
+          </button>
         </div>
       </div>
     );
   }
 
+  // node 객체를 찾는 헬퍼 함수
+  const findNodeById = (nodes: FileTreeNode[], nodeId: string): FileTreeNode | null => {
+    for (const node of nodes) {
+      if (node.fileId.toString() === nodeId) {
+        return node;
+      }
+      if (node.children) {
+        const found = findNodeById(node.children as FileTreeNode[], nodeId);
+        if (found) return found;
+      }
+    }
+    return null;
+  };
+
+  // 외부 드래그 상태 확인 함수
+  const isExternalDragActive = () => {
+    return externalDropState.isDragOver;
+  };
+
+  // 트리 렌더링 함수
+  const renderTreeNodes = (nodes: FileTreeNode[], level = 0) => {
+    return nodes.map(node => {
+      // children을 미리 계산
+      const childrenElements =
+        node.children && node.children.length > 0 && expandedFolders.has(node.fileId.toString())
+          ? renderTreeNodes(node.children as FileTreeNode[], level + 1)
+          : null;
+
+      return (
+        <React.Fragment key={node.fileId}>
+          <FileTreeItem
+            node={node}
+            level={level}
+            isExpanded={expandedFolders.has(node.fileId.toString())}
+            isSelected={selectedFile === node.path}
+            // 파일/폴더 액션
+            onFileClick={handleFileClick}
+            onFolderToggle={handleFolderToggle}
+            // 컨텍스트 메뉴
+            onNewFile={parentNode => openCreateModal('FILE', parentNode)}
+            onNewFolder={parentNode => openCreateModal('FOLDER', parentNode)}
+            onRename={node => startEditing(node.fileId.toString())}
+            onDelete={deleteItem}
+            // 인라인 편집
+            isEditing={editingNode === node.fileId.toString()}
+            onEditSave={(node, newName) => renameItem(node, newName)}
+            onEditCancel={stopEditing}
+            // 내부 드래그앤드롭
+            isDragging={isDragging(node.fileId.toString())}
+            isDropTarget={isDropTarget(node.fileId.toString())}
+            canDrop={(() => {
+              if (!dragDropState.draggedItem) return false;
+              const draggedNode = findNodeById(treeData, dragDropState.draggedItem.id);
+              return draggedNode ? canDrop(draggedNode, node) : false;
+            })()}
+            onDragStart={(node, e) => handleDragStart(node, e)}
+            onDragEnd={handleDragEnd}
+            onDragOver={(node, e) => handleDragOver(node, e)}
+            onDragLeave={handleDragLeave}
+            onDrop={(node, e) => handleDrop(node, e)}
+            getDropPosition={nodeId => getDropPosition(nodeId)}
+            // 외부 파일 드롭
+            isExternalDragOver={
+              externalDropState.dropTarget?.nodeId === node.fileId.toString() ||
+              (externalDropState.isDragOver && !externalDropState.dropTarget)
+            }
+            onExternalDragOver={(node, e) => handleNodeExternalDragOver(node, e)}
+            onExternalDragLeave={(node, e) => handleNodeExternalDragLeave(node, e)}
+            onExternalDrop={(node, e) => handleNodeExternalDrop(node, e)}
+          />
+          {childrenElements}
+        </React.Fragment>
+      );
+    });
+  };
+
   return (
     <>
+      <div
+        className={clsx(styles.fileTree, className, {
+          [styles.collaborationMode]: enableCollaboration,
+        })}
+        data-file-tree-container
+        onDragEnter={handleExternalDragEnter}
+        onDragOver={handleExternalDragOver}
+        onDragLeave={handleExternalDragLeave}
+        onDrop={handleExternalDrop}
+      >
+        {/* 파일 트리 내용 */}
+        <div className={styles.treeContent}>{renderTreeNodes(treeData)}</div>
+
+        {/* 로딩 인디케이터 */}
+        {(isCreating || isRenaming || isDeleting || isMoving || isUploading) && (
+          <div className={styles.operationLoading}>
+            <div className={styles.loadingSpinner} />
+            <span>
+              {isCreating && '생성 중...'}
+              {isRenaming && '이름 변경 중...'}
+              {isDeleting && '삭제 중...'}
+              {isMoving && '이동 중...'}
+              {isUploading && '업로드 중...'}
+            </span>
+          </div>
+        )}
+
+        {/* 외부 드래그 피드백 */}
+        {isExternalDragActive() && (
+          <div className={styles.dragOverlay}>
+            <div className={styles.dragMessage}>
+              <span className={styles.dragIcon}>📁</span>
+              <span>파일을 여기에 놓으세요</span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 컨텍스트 메뉴 */}
       <FileTreeContextMenu
         onNewFile={(parentNode?: FileTreeNode) => openCreateModal('FILE', parentNode)}
         onNewFolder={(parentNode?: FileTreeNode) => openCreateModal('FOLDER', parentNode)}
       >
-        <div
-          className={clsx(styles.fileTree, className, {
-            [styles.loading]: isCreating || isRenaming || isDeleting || isMoving || isUploading,
-            [styles.collaborationMode]: enableCollaboration, // 협업 모드 CSS 클래스
-          })}
-          data-file-tree-container
-          onDragEnter={handleCombinedDragEnter}
-          onDragOver={handleCombinedDragOver}
-          onDragLeave={handleCombinedDragLeave}
-          onDrop={handleCombinedDrop}
-        >
-          {/* 업 모드 인디케이터 */}
-          {renderCollaborationIndicator()}
-
-          <div className={clsx(styles.treeContainer, styles.dropZone)}>
-            {renderTreeNodes(treeData)}
-          </div>
-
-          {/* 내부 드래그 프리뷰 표시 */}
-          {dragDropState.isDragging && dragDropState.dragPreview && (
-            <div className={styles.dragIndicator}>📄 {dragDropState.dragPreview} 이동 중...</div>
-          )}
-
-          {/* 외부 파일 드래그 프리뷰 표시 */}
-          {externalDropState.isDragOver && externalDropState.dragPreview && (
-            <div className={styles.externalDragIndicator}>
-              📤 {externalDropState.dragPreview} 업로드 준비
-            </div>
-          )}
-
-          {/* 로딩 인디케이터 */}
-          {(isCreating || isRenaming || isDeleting || isMoving || isUploading) && (
-            <div className={styles.operationIndicator}>
-              <div className={styles.loadingSpinner} />
-              <span>
-                {isCreating && '생성 중...'}
-                {isRenaming && '이름 변경 중...'}
-                {isDeleting && '삭제 중...'}
-                {isMoving && '이동 중...'}
-                {isUploading && '업로드 중...'}
-              </span>
-            </div>
-          )}
-        </div>
+        <div />
       </FileTreeContextMenu>
 
       {/* 파일/폴더 생성 모달 */}
-      {createModalType && (
+      {createModalOpen && createModalType && (
         <CreateFileModal
           open={createModalOpen}
-          onOpenChange={closeCreateModal}
+          onOpenChange={open => {
+            if (!open) closeCreateModal();
+          }}
           type={createModalType}
           parentNode={createModalParent || undefined}
-          onConfirm={createItem}
+          onConfirm={name => {
+            createItem(name)
+              .then(() => {
+                closeCreateModal();
+              })
+              .catch(error => {
+                console.error('파일 생성 실패:', error);
+              });
+          }}
           onCancel={closeCreateModal}
         />
       )}
@@ -417,3 +387,6 @@ const FileTree: React.FC<ExtendedFileTreeProps> = ({
 };
 
 export default FileTree;
+
+// 명시적 export도 추가
+export { FileTree };
