@@ -13,6 +13,7 @@ import { type ChatReceivedMessage, type ChatSendMessage } from '@/features/Chat/
 const useStompChat = (url: string, repositoryId: number) => {
   const clientRef = useRef<Client | null>(null);
   const [messages, setMessages] = useState<ChatReceivedMessage[]>([]);
+  const [connectedCount, setConnectedCount] = useState<number>(0);
   const [isConnected, setIsConnected] = useState(false);
 
   const token = localStorage.getItem('accessToken');
@@ -49,15 +50,19 @@ const useStompChat = (url: string, repositoryId: number) => {
         console.log('✅ [STOMP] STOMP connected successfully');
 
         client.subscribe(`/topic/repositories/${repositoryId}/chat`, (message: IMessage) => {
-          console.log('📥 [RECEIVE-TOPIC] Message received:', message.body);
-          console.log('📥 [RECEIVE-TOPIC] Headers:', message.headers);
-          // const body: ChatMessage = JSON.parse(message.body);
-          // setMessages(prev => [...prev, body]);
+          console.log('📥 [STOMP] [RECEIVE-TOPIC] Message received:', message.body);
+          console.log('📥 [STOMP][RECEIVE-TOPIC] Headers:', message.headers);
+          const parsedMessage = JSON.parse(message.body);
+          if (parsedMessage['type'] === 'USER_JOINED') {
+            setConnectedCount(prevCount => prevCount + 1);
+          } else if (parsedMessage['type'] === 'USER_LEFT') {
+            setConnectedCount(prevCount => Math.max(prevCount - 1, 0));
+          }
         });
 
         client.subscribe(`/sub/repositories/${repositoryId}/chat`, (message: IMessage) => {
-          console.log('📥 [RECEIVE-SUB] Message received:', message.body);
-          console.log('📥 [RECEIVE-SUB] Headers:', message.headers);
+          console.log('📥 [STOMP][RECEIVE-SUB] Message received:', message.body);
+          console.log('📥 [STOMP][RECEIVE-SUB] Headers:', message.headers);
           try {
             const body: ChatReceivedMessage = JSON.parse(message.body);
             setMessages(prev => [...prev, body]);
@@ -121,6 +126,7 @@ const useStompChat = (url: string, repositoryId: number) => {
 
   return {
     isConnected,
+    connectedCount,
     messages,
     send: (message: ChatSendMessage) => {
       console.log('🔥 [STOMP-WRAPPER] Send function wrapper called');
