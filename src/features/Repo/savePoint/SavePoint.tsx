@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { SaveModal } from './SaveModal';
 import { useSavePoint } from './hooks/useSavePoint';
 import { useSaveHistoryMutation, useRestoreHistoryMutation } from './hooks/useSavePointApi';
+import { useYjsSavePoint } from '@/hooks/repo/useYjsSavePoint';
+import { useTabStore } from '@/stores/tabStore';
 import AlertDialog from '@/components/molecules/AlertDialog/AlertDialog';
 import { useToast } from '@/hooks/common/useToast';
 import styles from './SavePoint.module.scss';
@@ -23,11 +25,43 @@ export function SavePoint({ repoId }: SavePointProps) {
   });
 
   const toast = useToast();
+  const { clearAllTabs } = useTabStore();
+  const repositoryIdNumber = parseInt(repoId, 10);
+  const { yMap, broadcastHistoryUpdate } = useYjsSavePoint(repositoryIdNumber);
 
-  // Yjs 동기화가 포함된 훅들 사용
   const { histories, isLoading, error, refetch } = useSavePoint({ repositoryId: repoId });
   const saveMutation = useSaveHistoryMutation(repoId);
   const restoreMutation = useRestoreHistoryMutation(repoId);
+
+  useEffect(() => {
+    if (!yMap) return;
+
+    const handleRestoreNotification = () => {
+      const lastOperation = yMap.get('lastOperation') as
+        | {
+            type: string;
+            data: unknown;
+            timestamp: number;
+            clientId?: number;
+          }
+        | undefined;
+
+      if (lastOperation?.type === 'restore') {
+        const now = Date.now();
+        const timeDiff = now - lastOperation.timestamp;
+
+        if (timeDiff < 3000) {
+          console.log('복원 이벤트 감지 - 모든 탭 초기화');
+          clearAllTabs();
+          localStorage.removeItem('tab-storage');
+          toast.info('프로젝트가 복원되었습니다. 파일트리에서 파일을 다시 열어주세요.');
+        }
+      }
+    };
+
+    yMap.observe(handleRestoreNotification);
+    return () => yMap.unobserve(handleRestoreNotification);
+  }, [yMap, clearAllTabs, toast]);
 
   const handleSave = async (message: string) => {
     try {
@@ -51,6 +85,15 @@ export function SavePoint({ repoId }: SavePointProps) {
       try {
         await restoreMutation.mutateAsync(restoreDialog.historyId);
         setRestoreDialog({ isOpen: false, historyId: null, message: '' });
+
+        clearAllTabs();
+        localStorage.removeItem('tab-storage');
+
+        broadcastHistoryUpdate('restore', {
+          historyId: restoreDialog.historyId,
+          timestamp: Date.now(),
+        });
+
         toast.success('세이브 포인트가 성공적으로 복원되었습니다.');
       } catch {
         toast.error(
@@ -150,7 +193,7 @@ export function SavePoint({ repoId }: SavePointProps) {
         open={restoreDialog.isOpen}
         onOpenChange={open => !open && handleRestoreCancel()}
         title="해당 세이브 포인트로 복원"
-        description={`"${restoreDialog.message}" 상태로 복원하시겠습니까?\n현재 작업 내용이 손실될 수 있습니다.`}
+        description={`"${restoreDialog.message}" 상태로 복원하시겠습니까?\n현재 작업 내용이 손실될 수 있습니다.\n\n모든 사용자의 열린 탭이 초기화됩니다.`}
         confirmText={restoreMutation.isPending ? '복원 중...' : '복원'}
         cancelText="취소"
         onConfirm={handleRestoreConfirm}
