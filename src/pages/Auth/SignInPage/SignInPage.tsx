@@ -15,7 +15,7 @@ export default function SignInPage() {
 
   useEffect(() => {
     if (isLoggedIn) navigate({ to: '/main' });
-  }, [isLoggedIn]);
+  }, [isLoggedIn, navigate]);
 
   return (
     <div className={styles.inner}>
