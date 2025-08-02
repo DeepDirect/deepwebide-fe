@@ -70,27 +70,39 @@ const TabBar = ({ repoId }: TabBarProps) => {
           key={tab.id}
           className={clsx(styles.tab, {
             [styles.active]: tab.isActive,
-            [styles.deleted]: tab.isDeleted || false,
+            [styles.deleted]: tab.isDeleted,
+            [styles.changed]: tab.hasFileTreeMismatch,
           })}
           onClick={() => handleTabClick(tab)}
-          title={tab.isDeleted ? `${tab.path} (삭제됨)` : tab.path}
+          title={
+            tab.isDeleted
+              ? `${tab.path} (삭제됨)`
+              : tab.hasFileTreeMismatch
+                ? `${tab.path} (위치 또는 이름 변경됨 - 파일트리에서 다시 선택해주세요)`
+                : tab.path
+          }
         >
           <div className={styles.tabContent}>
             <div
               className={clsx(styles.statusIndicator, {
-                [styles.dirty]: tab.isDirty && !(tab.isDeleted || false),
-                [styles.saved]: !tab.isDirty && !(tab.isDeleted || false),
-                [styles.deleted]: tab.isDeleted || false,
+                [styles.dirty]: tab.isDirty && !tab.isDeleted && !tab.hasFileTreeMismatch,
+                [styles.saved]: !tab.isDirty && !tab.isDeleted && !tab.hasFileTreeMismatch,
+                [styles.deleted]: tab.isDeleted,
+                [styles.changed]: tab.hasFileTreeMismatch,
               })}
             />
             <img
               src={getFileIcon(tab.name)}
               alt={`${tab.name} 파일 아이콘`}
-              className={styles.fileIcon}
+              className={clsx(styles.fileIcon, {
+                [styles.deletedIcon]: tab.isDeleted,
+                [styles.changedIcon]: tab.hasFileTreeMismatch,
+              })}
             />
             <span
               className={clsx(styles.tabName, {
-                [styles.deletedText]: tab.isDeleted || false,
+                [styles.deletedText]: tab.isDeleted,
+                [styles.changedText]: tab.hasFileTreeMismatch,
               })}
             >
               {tab.name}

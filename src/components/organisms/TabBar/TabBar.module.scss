@@ -9,7 +9,6 @@
   white-space: nowrap;
   background-color: var(--tab-bar-bg);
 
-  // 스크롤바 스타일링
   &::-webkit-scrollbar {
     height: 3px;
   }
@@ -64,6 +63,16 @@
       background-color: var(--tab-bg-deleted-hover);
     }
   }
+
+  &.changed {
+    color: var(--tab-text-changed);
+    background-color: var(--tab-bg-changed);
+
+    &:hover {
+      color: var(--tab-text-changed-hover);
+      background-color: var(--tab-bg-changed-hover);
+    }
+  }
 }
 
 .active {
@@ -86,6 +95,17 @@
       background-color: var(--tab-bg-active-deleted);
     }
   }
+
+  &.changed {
+    border-bottom: 2px solid var(--tab-active-line-changed);
+    color: var(--tab-text-active-changed);
+    background-color: var(--tab-bg-active-changed);
+
+    &:hover {
+      color: var(--tab-text-active-changed);
+      background-color: var(--tab-bg-active-changed);
+    }
+  }
 }
 
 .tabContent {
@@ -102,8 +122,6 @@
   height: 12px;
   opacity: 0.8;
   transition: opacity 0.2s ease;
-
-  // 픽셀아트 아이콘의 선명함을 위해
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   image-rendering: crisp-edges;
@@ -112,12 +130,21 @@
     filter: brightness(0) invert(1);
   }
 
-  .deleted & {
+  &.deletedIcon {
     opacity: 0.5;
     filter: grayscale(100%);
 
     :global(.dark) & {
       filter: brightness(0) invert(1) grayscale(100%);
+    }
+  }
+
+  &.changedIcon {
+    opacity: 0.7;
+    filter: hue-rotate(200deg);
+
+    :global(.dark) & {
+      filter: brightness(0) invert(1) hue-rotate(200deg);
     }
   }
 }
@@ -129,6 +156,11 @@
   white-space: nowrap;
 
   &.deletedText {
+    font-style: italic;
+    text-decoration: line-through;
+  }
+
+  &.changedText {
     font-style: italic;
     text-decoration: line-through;
   }
@@ -185,6 +217,12 @@
     background-color: $red;
     opacity: 1;
   }
+
+  &.changed {
+    background-color: $blue-3;
+    opacity: 1;
+    animation: pulse 2s infinite;
+  }
 }
 
 @keyframes pulse {
@@ -198,7 +236,6 @@
   }
 }
 
-// 반응형 디자인
 @media (width <= 768px) {
   .tab {
     max-width: 150px;
@@ -223,9 +260,7 @@
   }
 }
 
-// 색상 변수 추가
 :root {
-  // 삭제된 탭 스타일 (라이트 모드)
   --tab-text-deleted: #{$red};
   --tab-text-deleted-hover: #{$red};
   --tab-bg-deleted: #{$gray-10};
@@ -233,10 +268,16 @@
   --tab-text-active-deleted: #{$red};
   --tab-bg-active-deleted: #{$white-2};
   --tab-active-line-deleted: #{$red};
+  --tab-text-changed: #{$blue-3};
+  --tab-text-changed-hover: #{$blue-3};
+  --tab-bg-changed: #{color.scale($blue-3, $lightness: 95%)};
+  --tab-bg-changed-hover: #{color.scale($blue-3, $lightness: 90%)};
+  --tab-text-active-changed: #{$blue-3};
+  --tab-bg-active-changed: #{$white-2};
+  --tab-active-line-changed: #{$blue-3};
 }
 
 :global(.dark) {
-  // 삭제된 탭 스타일 (다크 모드)
   --tab-text-deleted: #{$red};
   --tab-text-deleted-hover: #{color.scale($red, $lightness: 10%)};
   --tab-bg-deleted: #{$gray-2};
@@ -244,4 +285,11 @@
   --tab-text-active-deleted: #{$red};
   --tab-bg-active-deleted: #{$gray-4};
   --tab-active-line-deleted: #{$red};
+  --tab-text-changed: #{$blue-3};
+  --tab-text-changed-hover: #{color.scale($blue-3, $lightness: 10%)};
+  --tab-bg-changed: #{color.scale($blue-3, $lightness: -80%)};
+  --tab-bg-changed-hover: #{color.scale($blue-3, $lightness: -75%)};
+  --tab-text-active-changed: #{$blue-3};
+  --tab-bg-active-changed: #{$gray-4};
+  --tab-active-line-changed: #{$blue-3};
 }
