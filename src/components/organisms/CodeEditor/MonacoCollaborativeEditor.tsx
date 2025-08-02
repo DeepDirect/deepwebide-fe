@@ -5,6 +5,7 @@ import { useMonacoEditor } from '@/hooks/repo/useMonacoEditor';
 import { useEditorStore } from '@/stores/editorStore';
 import { useTabStore } from '@/stores/tabStore';
 import { useCollaborationStore } from '@/stores/collaborationStore';
+import { useAuthStore } from '@/stores/authStore';
 import { useThemeStore } from '@/stores/themeStore';
 import { getLanguageFromFile } from '@/utils/fileExtensions';
 import { getMonacoEditorOptions } from '@/utils/monacoUtils';
@@ -32,6 +33,7 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
   const { updateContent } = useEditorStore();
   const { openTabs, setTabContent } = useTabStore();
   const { users, currentUser } = useCollaborationStore();
+  const { getUserInfo } = useAuthStore();
   const { isDarkMode } = useThemeStore();
 
   // 활성 탭 정보
@@ -44,9 +46,11 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
   // 협업 모드가 비활성화되어 있으면 Yjs 관련 기능 완전 비활성화
   const shouldUseCollaboration = enableCollaboration && Boolean(activeTab) && Boolean(roomId);
 
-  // 사용자 정보 설정 (협업 모드일 때만)
-  const finalUserId = userId || currentUser.id || `user-${Date.now()}`;
-  const finalUserName = userName || currentUser.name || 'Anonymous';
+  // 사용자 정보 설정 (협업 모드일 때만) - authStore nickname 우선 사용
+  const authUser = getUserInfo();
+  const finalUserId = userId || currentUser.id || String(authUser?.id) || `user-${Date.now()}`;
+  const finalUserName =
+    userName || currentUser.name || authUser?.nickname || authUser?.username || 'Anonymous';
 
   // 에디터 내용 변경 핸들러
   const handleContentChange = useCallback(
