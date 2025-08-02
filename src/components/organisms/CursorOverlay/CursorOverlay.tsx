@@ -59,6 +59,34 @@ const CursorOverlay: React.FC<CursorOverlayProps> = ({
     [safelyCallMethod]
   );
 
+  // 스크롤 위치 가져오기
+  const getScrollInfo = useCallback(
+    (editor: MonacoEditorInstance) => {
+      try {
+        const scrollTop = safelyCallMethod(editor, 'getScrollTop', 0);
+        const scrollLeft = safelyCallMethod(editor, 'getScrollLeft', 0);
+        return { scrollTop, scrollLeft };
+      } catch (error) {
+        console.warn('스크롤 정보 가져오기 실패:', error);
+        return { scrollTop: 0, scrollLeft: 0 };
+      }
+    },
+    [safelyCallMethod]
+  );
+
+  // 라인 높이 가져오기
+  const getLineHeight = useCallback(
+    (editor: MonacoEditorInstance): number => {
+      try {
+        return (getEditorOption(editor, 59) as number) || 19; // EditorOption.lineHeight = 59
+      } catch (error) {
+        console.warn('라인 높이 가져오기 실패:', error);
+        return 19; // 기본값
+      }
+    },
+    [getEditorOption]
+  );
+
   // 커서 위치 계산 함수
   const calculateCursorPosition = useCallback(
     (
@@ -74,10 +102,18 @@ const CursorOverlay: React.FC<CursorOverlayProps> = ({
           column: user.cursor.column,
         };
 
-        // Monaco Editor의 내장 메서드 사용 시도
+        // Monaco Editor의 getScrolledVisiblePosition을 먼저 시도
         const pixelPosition = getScrolledVisiblePosition(editor, position);
 
         if (pixelPosition && pixelPosition.left >= 0 && pixelPosition.top >= 0) {
+          console.log('Monaco 내장 메서드로 커서 위치 계산 성공:', {
+            user: user.name,
+            line: user.cursor.line,
+            column: user.cursor.column,
+            x: pixelPosition.left,
+            y: pixelPosition.top,
+          });
+
           return {
             x: pixelPosition.left,
             y: pixelPosition.top,
@@ -87,39 +123,63 @@ const CursorOverlay: React.FC<CursorOverlayProps> = ({
           };
         }
 
-        // 수동 계산 폴백
-        const lineElement = container.querySelector(
-          `.view-line[data-line-number="${user.cursor.line}"], .view-line:nth-child(${user.cursor.line})`
-        ) as HTMLElement;
+        // 폴백 계산 - 스크롤 위치 고려
+        console.log('Monaco 내장 메서드 실패, 폴백 계산 시도:', {
+          user: user.name,
+          line: user.cursor.line,
+          column: user.cursor.column,
+        });
 
-        if (lineElement) {
-          const containerRect = container.getBoundingClientRect();
-          const lineRect = lineElement.getBoundingClientRect();
+        const scrollInfo = getScrollInfo(editor);
+        const lineHeight = getLineHeight(editor);
+        const fontSize = (getEditorOption(editor, 40) as number) || 14; // EditorOption.fontSize = 40
+        const charWidth = fontSize * 0.6; // 대략적인 문자 너비
 
-          // 문자 너비 계산 (폰트 크기 기반)
-          const fontSize = (getEditorOption(editor, 40) as number) || 14;
-          const charWidth = fontSize * 0.6;
+        // 스크롤을 고려한 위치 계산
+        const lineY = (user.cursor.line - 1) * lineHeight - scrollInfo.scrollTop;
+        const columnX = (user.cursor.column - 1) * charWidth - scrollInfo.scrollLeft;
 
-          const x = lineRect.left - containerRect.left + (user.cursor.column - 1) * charWidth;
-          const y = lineRect.top - containerRect.top;
+        // 뷰포트 내에 있는지 확인
+        const editorHeight = container.clientHeight;
+        const editorWidth = container.clientWidth;
 
-          if (x >= 0 && y >= 0) {
-            return {
-              x,
-              y,
-              userId: user.id,
-              userName: user.name,
-              userColor: user.color,
-            };
-          }
+        if (lineY < 0 || lineY > editorHeight || columnX < 0 || columnX > editorWidth) {
+          console.log('📍 커서가 뷰포트 밖에 있음:', {
+            user: user.name,
+            lineY,
+            columnX,
+            editorHeight,
+            editorWidth,
+            scrollTop: scrollInfo.scrollTop,
+            scrollLeft: scrollInfo.scrollLeft,
+          });
+          return null; // 뷰포트 밖에 있으면 표시하지 않음
         }
+
+        console.log('폴백 계산으로 커서 위치 계산 성공:', {
+          user: user.name,
+          line: user.cursor.line,
+          column: user.cursor.column,
+          x: columnX,
+          y: lineY,
+          scrollTop: scrollInfo.scrollTop,
+          scrollLeft: scrollInfo.scrollLeft,
+        });
+
+        return {
+          x: columnX,
+          y: lineY,
+          userId: user.id,
+          userName: user.name,
+          userColor: user.color,
+        };
       } catch (error) {
         console.warn(`커서 위치 계산 실패 (사용자: ${user.name}):`, error);
       }
 
       return null;
     },
-    [getScrolledVisiblePosition, getEditorOption]
+    [getScrolledVisiblePosition, getEditorOption, getScrollInfo, getLineHeight]
   );
 
   // 커서 위치 업데이트 함수
@@ -186,11 +246,11 @@ const CursorOverlay: React.FC<CursorOverlayProps> = ({
 
     const cleanupFunctions: Array<(() => void) | null> = [];
 
-    // Monaco Editor 이벤트 리스너들
+    // 스크롤 이벤트를 더 적극적으로 감지
     const scrollCleanup = addEditorEventListener(
       monacoEditor,
       'onDidScrollChange',
-      debouncedUpdateCursors
+      updateCursors // 즉시 업데이트 (디바운싱 제거)
     );
     const layoutCleanup = addEditorEventListener(
       monacoEditor,
@@ -198,7 +258,14 @@ const CursorOverlay: React.FC<CursorOverlayProps> = ({
       debouncedUpdateCursors
     );
 
-    cleanupFunctions.push(scrollCleanup, layoutCleanup);
+    // 커서 위치 변경 이벤트도 감지
+    const cursorCleanup = addEditorEventListener(
+      monacoEditor,
+      'onDidChangeCursorPosition',
+      debouncedUpdateCursors
+    );
+
+    cleanupFunctions.push(scrollCleanup, layoutCleanup, cursorCleanup);
 
     // 창 크기 변경 이벤트
     const handleResize = () => {
@@ -207,8 +274,8 @@ const CursorOverlay: React.FC<CursorOverlayProps> = ({
     window.addEventListener('resize', handleResize);
     cleanupFunctions.push(() => window.removeEventListener('resize', handleResize));
 
-    // 주기적 업데이트 (1초마다)
-    const intervalId = setInterval(updateCursors, 1000);
+    // 더 빈번한 업데이트 (500ms마다)
+    const intervalId = setInterval(updateCursors, 500);
     cleanupFunctions.push(() => clearInterval(intervalId));
 
     // 정리 함수

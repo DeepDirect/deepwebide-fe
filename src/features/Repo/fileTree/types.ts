@@ -58,6 +58,7 @@ export interface FileTreeProps {
 
 export interface FileTreeItemProps {
   node: FileTreeNode;
+  level: number; // level prop 추가!
   isExpanded: boolean;
   isSelected: boolean;
   onFileClick?: (node: FileTreeNode) => void;

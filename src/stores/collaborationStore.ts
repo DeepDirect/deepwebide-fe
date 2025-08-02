@@ -298,7 +298,16 @@ export const cleanupInactiveUsers = (): void => {
   }
 };
 
-// 주기적으로 비활성 사용자 정리 (5분마다)
-if (typeof window !== 'undefined') {
-  setInterval(cleanupInactiveUsers, 5 * 60 * 1000);
-}
+export const startCleanupTimer = (): NodeJS.Timeout | null => {
+  if (typeof window !== 'undefined') {
+    // 10분으로 간격 늘리기 (기존 5분에서 변경)
+    return setInterval(cleanupInactiveUsers, 10 * 60 * 1000);
+  }
+  return null;
+};
+
+export const stopCleanupTimer = (timerId: NodeJS.Timeout | null): void => {
+  if (timerId) {
+    clearInterval(timerId);
+  }
+};
