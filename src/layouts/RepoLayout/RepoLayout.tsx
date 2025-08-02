@@ -7,16 +7,9 @@ import RepoHeader from '@/components/organisms/Header/RepoHeader/RepoHeader';
 import { Sidebar } from '@/components/organisms/Sidebar/RepoSidebar/RepoSidebar';
 import { useThemeStore } from '@/stores/themeStore';
 import { useFileSectionStore } from '@/stores/fileSectionStore';
-// import { useWebSocketChat } from '@/hooks/chat/useWebSocketChat';
 import { useAuthStore } from '@/stores/authStore';
-import {
-  getCurrentUserId,
-  getCurrentNickname,
-  // getCurrentUserProfileImage,
-} from '@/utils/authChatUtils';
-// import ChatWSVer from '@/features/Chat/ChatWSVer';
+import { getCurrentUserId, getCurrentNickname } from '@/utils/authChatUtils';
 import Chat from '@/features/Chat/ChatStompVer';
-// import ChatRoom from '@/features/Chat/ChatRoom';
 import useStompChat from '@/hooks/chat/useStompChat';
 
 export function RepoLayout() {
