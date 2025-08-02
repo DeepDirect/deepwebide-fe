@@ -184,7 +184,7 @@ export function RepoPage() {
 
         {/* 터미널 */}
         <div className={styles.terminalSection}>
-          <CodeRunner repoId={repoId} />
+          <CodeRunner repoId={repoId} repositoryName={repositoryInfo?.repositoryName} />
         </div>
       </div>
     </div>

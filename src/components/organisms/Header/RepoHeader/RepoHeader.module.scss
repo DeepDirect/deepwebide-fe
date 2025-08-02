@@ -41,31 +41,6 @@
   }
 }
 
-.pathArea {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  max-width: 400px;
-  min-width: 0;
-  padding: 0.5rem 6rem;
-  border-radius: 8px;
-  font-size: $font-size-xsmall;
-  color: var(--header-text);
-  background-color: var(--header-path-bg);
-
-  @media (width <= 1400px) {
-    max-width: 300px;
-    padding: 0.5rem 3rem;
-  }
-}
-
-.path {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .icon {
   flex-shrink: 0;
   width: 18px;

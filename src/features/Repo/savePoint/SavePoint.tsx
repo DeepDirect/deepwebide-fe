@@ -3,7 +3,7 @@ import { SaveModal } from './SaveModal';
 import { useSavePoint } from './hooks/useSavePoint';
 import { useSaveHistoryMutation, useRestoreHistoryMutation } from './hooks/useSavePointApi';
 import AlertDialog from '@/components/molecules/AlertDialog/AlertDialog';
-import { useToastStore } from '@/stores/toastStore';
+import { useToast } from '@/hooks/common/useToast';
 import styles from './SavePoint.module.scss';
 
 interface SavePointProps {
@@ -22,7 +22,7 @@ export function SavePoint({ repoId }: SavePointProps) {
     message: '',
   });
 
-  const { showToast } = useToastStore();
+  const toast = useToast();
 
   // Yjs 동기화가 포함된 훅들 사용
   const { histories, isLoading, error, refetch } = useSavePoint({ repositoryId: repoId });
@@ -32,10 +32,9 @@ export function SavePoint({ repoId }: SavePointProps) {
   const handleSave = async (message: string) => {
     try {
       await saveMutation.mutateAsync({ message });
-      showToast({ message: '세이브 포인트가 성공적으로 저장되었습니다.', type: 'success' });
-    } catch (err) {
-      console.error('Save error:', err);
-      showToast({ message: '세이브 포인트 저장 중 오류가 발생했습니다.', type: 'error' });
+      toast.success('세이브 포인트가 성공적으로 저장되었습니다.');
+    } catch {
+      toast.error('세이브 포인트 저장 중 오류가 발생했습니다.');
     }
   };
 
@@ -52,10 +51,11 @@ export function SavePoint({ repoId }: SavePointProps) {
       try {
         await restoreMutation.mutateAsync(restoreDialog.historyId);
         setRestoreDialog({ isOpen: false, historyId: null, message: '' });
-        showToast({ message: '세이브 포인트가 성공적으로 복원되었습니다.', type: 'success' });
-      } catch (err) {
-        console.error('Restore error:', err);
-        showToast({ message: '복원 중 오류가 발생했습니다.', type: 'error' });
+        toast.success('세이브 포인트가 성공적으로 복원되었습니다.');
+      } catch {
+        toast.error(
+          '복원 중 오류가 발생했습니다. \n 세이브 포인트 복원은 해당 레포지토리 오너만 할 수 있습니다.'
+        );
       }
     }
   };
@@ -98,10 +98,7 @@ export function SavePoint({ repoId }: SavePointProps) {
               className={styles.retryButton}
               onClick={() => {
                 refetch();
-                showToast({
-                  message: '세이브 포인트 히스토리 목록을 다시 불러오는 중...',
-                  type: 'info',
-                });
+                toast.info('세이브 포인트 히스토리 목록을 다시 불러오는 중...');
               }}
             >
               다시 시도

@@ -1,6 +1,7 @@
 import React from 'react';
 import { AlertDialog } from 'radix-ui';
 import Button from '@/components/atoms/Button/Button';
+import { useScrollLock } from '@/hooks/common/useScrollLock';
 import styles from './AlertDialog.module.scss';
 
 export interface AlertDialogProps {
@@ -28,6 +29,8 @@ const AlertDialogComponent: React.FC<AlertDialogProps> = ({
   showCancel = true,
   className = '',
 }) => {
+  useScrollLock(open);
+
   const handleConfirm = () => {
     if (onConfirm) {
       onConfirm();

@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
+import introTitle from '../../assets/images/intro-title.svg';
+import bareFace from '../../assets/images/bare-face.svg';
+import glasses from '../../assets/images/glasses.svg';
 import './LandingPage.scss';
 
 const LandingPage: React.FC = () => {
@@ -20,11 +23,7 @@ const LandingPage: React.FC = () => {
 
       {/* Title */}
       <div className="title-section">
-        <img
-          src="/src/assets/images/intro-title.svg"
-          alt="DeepDirect Logo"
-          className="logo-image"
-        />
+        <img src={introTitle} alt="DeepDirect Logo" className="logo-image" />
         <div className="web-ide-title">WEB IDE</div>
       </div>
 
@@ -34,8 +33,8 @@ const LandingPage: React.FC = () => {
       {/* Logo with animation */}
       <div className="logo-section">
         <div className={`logo ${isStarted ? 'logo--started' : ''}`}>
-          <img src="/src/assets/images/bare-face.svg" alt="Bare Face Logo" className="logo-image" />
-          <img src="/src/assets/images/glasses.svg" alt="Glasses Logo" className="glasses-image" />
+          <img src={bareFace} alt="Bare Face Logo" className="logo-image" />
+          <img src={glasses} alt="Glasses Logo" className="glasses-image" />
         </div>
       </div>
 

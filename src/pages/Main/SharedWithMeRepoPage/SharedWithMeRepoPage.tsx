@@ -37,8 +37,8 @@ const SharedWithMeRepoPage = () => {
     refetch: repositoryRefetch,
     // isLoading
   } = useGetRepository(getRepoURL, {
-    page: (pagination.page || 1) - 1,
-    size: pagination.current || 7,
+    page: (pagination.current || 1) - 1,
+    size: pagination.size || 7,
     liked: isLiked,
   });
   const { mutate: updateFavorite } = useRepositoryFavorite();
@@ -62,7 +62,8 @@ const SharedWithMeRepoPage = () => {
 
   // 레포 좋아요
   const handleFavoriteClick = (id: number) => {
-    // TODO: 토스트 추가
+    const targetRepo = repositories?.find(repo => repo.repositoryId === id);
+
     updateFavorite(id, {
       onSuccess: () => {
         setRepositories(
@@ -72,6 +73,13 @@ const SharedWithMeRepoPage = () => {
             ) ?? null
         );
         repositoryRefetch();
+
+        if (targetRepo) {
+          const action = targetRepo.isFavorite ? '즐겨찾기에서 제거' : '즐겨찾기에 추가';
+          toast.info(
+            `공유 받은 "${targetRepo.repositoryName}" 레포지토리가 \n ${action}되었습니다.`
+          );
+        }
       },
       onError: error => {
         toast.error(error.message);

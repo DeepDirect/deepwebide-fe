@@ -53,62 +53,126 @@
   }
 }
 
-.errorInput {
-  :global(.input) {
-    border-color: var(--create-modal-error) !important;
-    background-color: var(--create-modal-error-input-bg) !important;
+.inputWrapper {
+  position: relative;
 
-    &:focus {
+  &.hasError {
+    :global(.input-container .input-wrapper .input) {
       border-color: var(--create-modal-error) !important;
-      box-shadow: 0 0 0 2px var(--create-modal-error-shadow) !important;
+
+      &:focus {
+        border-color: var(--create-modal-error) !important;
+        box-shadow: 0 0 0 2px var(--create-modal-error-shadow) !important;
+      }
     }
   }
 }
 
-.errorMessage {
+.errorMessage,
+.warningMessage,
+.successMessage {
   display: flex;
   align-items: flex-start;
   gap: 0.5rem;
   margin-top: 0.375rem;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid var(--create-modal-error-border);
-  border-radius: 6px;
+  padding: 0.625rem 0.875rem;
+  border-radius: 8px;
   font-size: $font-size-xxsmall;
   font-weight: $font-weight-medium;
-  line-height: 1.3;
+  line-height: 1.4;
+  animation: slide-in 0.2s ease;
+}
+
+.errorMessage {
+  border: 1px solid var(--create-modal-error-border);
   color: var(--create-modal-error-text);
   background-color: var(--create-modal-error-bg);
-  animation: slide-in 0.2s ease;
-
-  &::before {
-    content: '⚠️';
-    flex-shrink: 0;
-    margin-top: 1px;
-    font-size: 14px;
-  }
 }
 
 .warningMessage {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
-  margin-top: 0.375rem;
-  padding: 0.5rem 0.75rem;
   border: 1px solid var(--create-modal-warning-border);
-  border-radius: 6px;
-  font-size: $font-size-xxsmall;
-  font-weight: $font-weight-regular;
-  line-height: 1.3;
   color: var(--create-modal-warning-text);
   background-color: var(--create-modal-warning-bg);
-  animation: slide-in 0.2s ease;
+}
 
-  &::before {
-    content: '💡';
-    flex-shrink: 0;
-    margin-top: 1px;
-    font-size: 14px;
+.successMessage {
+  border: 1px solid var(--create-modal-success-border);
+  color: var(--create-modal-success-text);
+  background-color: var(--create-modal-success-bg);
+}
+
+.messageIcon {
+  flex-shrink: 0;
+  margin-top: 1px;
+  font-size: 14px;
+}
+
+.messageText {
+  flex: 1;
+  line-height: 1.4;
+}
+
+.guidelines {
+  padding: 1.25rem;
+  border: 1px solid var(--create-modal-guidelines-border);
+  border-radius: 10px;
+  background-color: var(--create-modal-guidelines-bg);
+}
+
+.guidelinesTitle {
+  margin: 0 0 1rem;
+  font-size: $font-size-xsmall;
+  font-weight: $font-weight-bold;
+  color: var(--create-modal-text);
+}
+
+.guidelinesContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.guidelinesSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: $font-size-xxsmall;
+  font-weight: $font-weight-semi-bold;
+  color: var(--create-modal-section-title);
+}
+
+.rulesList {
+  margin: 0;
+  padding-left: 1.25rem;
+
+  li {
+    margin-bottom: 0.25rem;
+    font-size: $font-size-xxxsmall;
+    line-height: 1.4;
+    color: var(--create-modal-guidelines-text);
+
+    &:last-child {
+      margin-bottom: 0;
+    }
   }
+}
+
+.examplesList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-left: 0.5rem;
+}
+
+.exampleGood {
+  font-family: 'Courier New', monospace;
+  font-size: $font-size-xxxsmall;
+  font-weight: $font-weight-medium;
+  color: var(--create-modal-example-good);
 }
 
 @keyframes slide-in {
@@ -123,10 +187,11 @@
   }
 }
 
-// 다크모드/라이트모드 색상 변수 - 모달 내부 콘텐츠만
+// 다크모드/라이트모드 색상 변수
 :root {
   // 라이트모드
   --create-modal-text: #{$black-1};
+  --create-modal-section-title: #{$gray-2};
   --create-modal-path-bg: #{$gray-10};
   --create-modal-path-hover: #{$gray-9};
   --create-modal-path-border: #{$gray-8};
@@ -135,24 +200,36 @@
   --create-modal-path-code-hover: #{$gray-10};
   --create-modal-path-code-border: #{$gray-7};
 
-  // 에러 상태
+  // 에러 상태 (빨간색)
   --create-modal-error: #{$red};
-  --create-modal-error-input-bg: rgb(220 38 38 / 3%);
   --create-modal-error-shadow: rgb(220 38 38 / 20%);
   --create-modal-error-bg: rgb(220 38 38 / 8%);
-  --create-modal-error-border: rgb(220 38 38 / 20%);
+  --create-modal-error-border: rgb(220 38 38 / 25%);
   --create-modal-error-text: #{$red};
 
-  // 경고 상태
+  // 경고 상태 (주황색)
   --create-modal-warning: #{$orange};
-  --create-modal-warning-bg: rgb(255 101 0 / 8%);
-  --create-modal-warning-border: rgb(255 101 0 / 20%);
+  --create-modal-warning-bg: rgb(255 146 0 / 8%);
+  --create-modal-warning-border: rgb(255 146 0 / 25%);
   --create-modal-warning-text: #{$orange};
+
+  // 성공 상태 (초록색)
+  --create-modal-success: #{$green};
+  --create-modal-success-bg: rgb(34 197 94 / 8%);
+  --create-modal-success-border: rgb(34 197 94 / 25%);
+  --create-modal-success-text: #{$green};
+
+  // 가이드라인
+  --create-modal-guidelines-bg: #{$gray-10};
+  --create-modal-guidelines-border: #{$gray-8};
+  --create-modal-guidelines-text: #{$gray-4};
+  --create-modal-example-good: #{$green};
 }
 
 :global(.dark) {
   // 다크모드
   --create-modal-text: #{$white-2};
+  --create-modal-section-title: #{$gray-7};
   --create-modal-path-bg: #{$gray-4};
   --create-modal-path-hover: #{$gray-3};
   --create-modal-path-border: #{$gray-5};
@@ -161,17 +238,61 @@
   --create-modal-path-code-hover: #{$gray-4};
   --create-modal-path-code-border: #{$gray-5};
 
-  // 에러 상태
+  // 에러 상태 (빨간색)
   --create-modal-error: #{$red};
-  --create-modal-error-input-bg: rgb(220 38 38 / 8%);
   --create-modal-error-shadow: rgb(220 38 38 / 30%);
-  --create-modal-error-bg: rgb(220 38 38 / 15%);
-  --create-modal-error-border: rgb(220 38 38 / 30%);
+  --create-modal-error-bg: rgb(220 38 38 / 12%);
+  --create-modal-error-border: rgb(220 38 38 / 35%);
   --create-modal-error-text: #{$red};
 
-  // 경고 상태
+  // 경고 상태 (주황색)
   --create-modal-warning: #{$orange};
-  --create-modal-warning-bg: rgb(255 101 0 / 15%);
-  --create-modal-warning-border: rgb(255 101 0 / 30%);
+  --create-modal-warning-bg: rgb(255 146 0 / 12%);
+  --create-modal-warning-border: rgb(255 146 0 / 35%);
   --create-modal-warning-text: #{$orange};
+
+  // 성공 상태 (초록색)
+  --create-modal-success: #{$green};
+  --create-modal-success-bg: rgb(34 197 94 / 12%);
+  --create-modal-success-border: rgb(34 197 94 / 35%);
+  --create-modal-success-text: #{$green};
+
+  // 가이드라인
+  --create-modal-guidelines-bg: #{$gray-4};
+  --create-modal-guidelines-border: #{$gray-5};
+  --create-modal-guidelines-text: #{$gray-6};
+  --create-modal-example-good: #{$green};
+}
+
+// 모바일 대응
+@media (width <= 768px) {
+  .createFileModal {
+    gap: 1.25rem;
+  }
+
+  .guidelines {
+    padding: 1rem;
+  }
+
+  .guidelinesContent {
+    gap: 0.875rem;
+  }
+}
+
+@media (width <= 480px) {
+  .createFileModal {
+    gap: 1rem;
+  }
+
+  .guidelines {
+    padding: 0.875rem;
+  }
+
+  .guidelinesContent {
+    gap: 0.75rem;
+  }
+
+  .rulesList {
+    padding-left: 1rem;
+  }
 }
