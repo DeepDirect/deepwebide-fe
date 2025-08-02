@@ -77,7 +77,7 @@ export const useTabStore = create<TabStore>()(
         const tabId = `${repoId}/${filePath}`;
         const existingTab = state.openTabs.find(tab => tab.id === tabId);
 
-        console.log('📂 openFileByPath 호출:', {
+        console.log('openFileByPath 호출:', {
           repoId,
           filePath,
           fileName,
@@ -159,12 +159,13 @@ export const useTabStore = create<TabStore>()(
         });
       },
 
-      // 파일에서 처음 내용을 로드할 때 사용할 메서드 (항상 clean 상태)
+      //파일에서 처음 내용을 로드할 때 사용할 메서드 (항상 clean 상태)
       setTabContentFromFile: (tabId: string, content: string) => {
         const state = get();
         console.log('setTabContentFromFile 호출:', {
           tabId,
           contentLength: content.length,
+          timestamp: new Date().toISOString(),
         });
 
         set({
@@ -259,9 +260,17 @@ export const useTabStore = create<TabStore>()(
       name: 'tab-storage',
       storage: createJSONStorage(() => localStorage),
 
+      // 하이드레이션 로직 개선
       onRehydrateStorage: () => (state, error) => {
         if (error) {
           console.error('탭 상태 복원 실패:', error);
+          // 에러 발생시 localStorage 클리어하여 무한루프 방지
+          try {
+            localStorage.removeItem('tab-storage');
+            console.log('손상된 탭 저장소 정리됨');
+          } catch (cleanupError) {
+            console.error('localStorage 정리 실패:', cleanupError);
+          }
         } else if (state) {
           console.log('탭 상태 복원 완료:', {
             tabCount: state.openTabs.length,
@@ -269,23 +278,43 @@ export const useTabStore = create<TabStore>()(
             dirtyTabs: state.openTabs.filter(tab => tab.isDirty).length,
           });
 
-          // 활성 탭이 없으면 첫 번째 탭을 활성화
-          if (state.openTabs.length > 0 && !state.openTabs.some(tab => tab.isActive)) {
-            state.openTabs[0].isActive = true;
-            console.log('첫 번째 탭 자동 활성화:', state.openTabs[0].name);
+          // 활성 탭이 없거나 여러 개면 정리
+          const activeTabs = state.openTabs.filter(tab => tab.isActive);
+          if (state.openTabs.length > 0 && activeTabs.length !== 1) {
+            console.log('활성 탭 상태 정리:', {
+              activeCount: activeTabs.length,
+              totalCount: state.openTabs.length,
+            });
+
+            // 모든 탭을 비활성화하고 첫 번째 탭만 활성화
+            state.openTabs = state.openTabs.map((tab, index) => ({
+              ...tab,
+              isActive: index === 0,
+            }));
+
+            if (state.openTabs.length > 0) {
+              console.log('첫 번째 탭 자동 활성화:', state.openTabs[0].name);
+            }
           }
 
+          // 하이드레이션 완료 표시
           state.setHasHydrated(true);
         }
       },
 
+      // 저장할 데이터 최적화
       partialize: state => ({
         openTabs: state.openTabs.map(tab => ({
           ...tab,
           // 저장할 때는 dirty 상태를 false로 리셋 (새로고침 시 clean 상태로 시작)
           isDirty: false,
+          // 내용이 너무 크면 저장하지 않음 (성능 최적화)
+          content: (tab.content?.length || 0) > 100000 ? '' : tab.content,
         })),
       }),
+
+      // 저장/복원 에러 시 재시도 방지
+      version: 1, // 스키마 버전 관리
     }
   )
 );

@@ -101,6 +101,84 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
     enabled: shouldUseCollaboration,
   });
 
+  // 일반 모드에서 탭 내용 변경 감지 및 에디터 업데이트
+  useEffect(() => {
+    // 협업 모드가 아닐 때만 실행
+    if (enableCollaboration || !activeTab || !editorRef.current) return;
+
+    // Monaco Editor의 타입 정의
+    interface MonacoEditorMethods {
+      getValue(): string;
+      setValue(value: string): void;
+    }
+
+    // 안전하게 에디터 값 가져오기
+    const getEditorValue = (): string => {
+      try {
+        const editor = editorRef.current as unknown as MonacoEditorMethods;
+        if (editor && typeof editor.getValue === 'function') {
+          return editor.getValue() || '';
+        }
+      } catch (error) {
+        console.warn('에디터 값 가져오기 실패:', error);
+      }
+      return '';
+    };
+
+    // 안전하게 에디터 값 설정하기
+    const setEditorValue = (value: string): void => {
+      try {
+        const editor = editorRef.current as unknown as MonacoEditorMethods;
+        if (editor && typeof editor.setValue === 'function') {
+          editor.setValue(value);
+        }
+      } catch (error) {
+        console.warn('에디터 값 설정 실패:', error);
+      }
+    };
+
+    const currentEditorValue = getEditorValue();
+    const tabContent = activeTab.content || '';
+
+    // 에디터가 비어있고 탭에 내용이 있을 때만 업데이트 (덮어쓰기 방지)
+    if (currentEditorValue === '' && tabContent !== '') {
+      console.log('일반 모드 - 빈 에디터에 탭 내용 로드:', {
+        tabId: activeTab.id,
+        fileName: activeTab.name,
+        tabContentLength: tabContent.length,
+        editorContentLength: currentEditorValue.length,
+      });
+
+      setEditorValue(tabContent);
+
+      // 에디터 스토어도 동기화
+      updateContent(tabContent);
+
+      console.log('일반 모드 - 에디터 내용 업데이트 완료:', {
+        tabId: activeTab.id,
+        contentLength: tabContent.length,
+      });
+    } else if (currentEditorValue !== tabContent && tabContent !== '') {
+      // 내용이 다르고 탭에 내용이 있으면 탭 내용으로 업데이트
+      console.log('일반 모드 - 탭 내용과 에디터 동기화:', {
+        tabId: activeTab.id,
+        fileName: activeTab.name,
+        tabContentLength: tabContent.length,
+        editorContentLength: currentEditorValue.length,
+      });
+
+      setEditorValue(tabContent);
+      updateContent(tabContent);
+    }
+  }, [
+    activeTab?.content,
+    activeTab?.id,
+    activeTab?.name,
+    enableCollaboration, // 협업 모드 변경 감지
+    updateContent,
+    editorRef,
+  ]);
+
   // 에디터 변경 이벤트 핸들러
   const onEditorChange = useCallback(
     (value: string | undefined) => {
@@ -130,7 +208,7 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
         contentLength: activeTab.content?.length || 0,
       });
     }
-  }, [activeTab?.id, enableCollaboration, shouldUseCollaboration, roomId, isConnected]);
+  }, [activeTab?.id, enableCollaboration, shouldUseCollaboration, roomId, isConnected, activeTab]);
 
   // 활성 탭이 없는 경우 플레이스홀더 표시
   if (!activeTab) {
@@ -146,11 +224,20 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
   // Monaco Editor 옵션
   const editorOptions = getMonacoEditorOptions(language, isDarkMode);
 
-  // 에디터 value 결정 로직
+  // 에디터 value 결정 로직 개선 - 내용 사라짐 방지
   const getEditorValue = () => {
     if (enableCollaboration) {
-      // 협업 모드: 연결되기 전까지는 탭 내용 표시, 연결 후에는 Yjs가 제어
-      return isConnected ? undefined : activeTab.content || '';
+      // 협업 모드: 연결 완료되고 Yjs가 초기화될 때까지 탭 내용 유지
+      if (isConnected && isLoading) {
+        // 연결되었지만 아직 초기화 중이면 탭 내용 표시
+        return activeTab.content || '';
+      } else if (isConnected && !isLoading) {
+        // 연결되고 초기화 완료되면 Yjs에 제어권 위임
+        return undefined;
+      } else {
+        // 연결 전에는 탭 내용 표시
+        return activeTab.content || '';
+      }
     } else {
       // 일반 모드: 항상 탭 내용 표시
       return activeTab.content || '';

@@ -36,7 +36,7 @@ interface ConnectionData {
   activeUsers: Set<string>;
   isContentInitialized: boolean;
   cleanupTimer?: NodeJS.Timeout;
-  lastTabContent: string; // 마지막 탭 내용 추적
+  lastTabContent: string;
 }
 
 const connections = new Map<string, ConnectionData>();
@@ -84,6 +84,11 @@ export const useYjsCollaboration = ({
   const cleanupInProgressRef = useRef(false);
   const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // 커서 위치 업데이트 방지를 위한 ref들
+  const lastCursorPositionRef = useRef<{ line: number; column: number } | null>(null);
+  const cursorUpdateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isUpdatingCursorRef = useRef(false);
+
   const { setConnectionStatus, addUser, joinRoom, leaveRoom, setCurrentUser, clearUsers } =
     useCollaborationStore();
   const { openTabs, setTabContent, setTabDirty } = useTabStore();
@@ -96,6 +101,12 @@ export const useYjsCollaboration = ({
     cleanupInProgressRef.current = true;
 
     try {
+      // 커서 관련 타이머 정리
+      if (cursorUpdateTimeoutRef.current) {
+        clearTimeout(cursorUpdateTimeoutRef.current);
+        cursorUpdateTimeoutRef.current = null;
+      }
+
       // 동기화 타이머 정리
       if (syncTimeoutRef.current) {
         clearTimeout(syncTimeoutRef.current);
@@ -123,7 +134,7 @@ export const useYjsCollaboration = ({
 
           connection.cleanupTimer = setTimeout(() => {
             cleanupConnection(roomId);
-          }, 60000); // 60초 후 정리
+          }, 60000);
         }
       }
 
@@ -136,6 +147,10 @@ export const useYjsCollaboration = ({
       setError(null);
       clearUsers();
       currentUserIdRef.current = '';
+
+      // ref 초기화
+      lastCursorPositionRef.current = null;
+      isUpdatingCursorRef.current = false;
     } catch (cleanupError) {
       console.error(`정리 중 오류: ${roomId}`, cleanupError);
     } finally {
@@ -173,6 +188,58 @@ export const useYjsCollaboration = ({
       }, 100);
     },
     [activeTab, setTabContent, setTabDirty, roomId]
+  );
+
+  // 안전한 커서 위치 업데이트 함수
+  const updateCursorPosition = useCallback(
+    (newPosition: { line: number; column: number }) => {
+      // 이미 업데이트 중이면 건너뛰기
+      if (isUpdatingCursorRef.current) {
+        return;
+      }
+
+      // 이전 위치와 동일하면 건너뛰기
+      const lastPosition = lastCursorPositionRef.current;
+      if (
+        lastPosition &&
+        lastPosition.line === newPosition.line &&
+        lastPosition.column === newPosition.column
+      ) {
+        return;
+      }
+
+      // 기존 타이머 클리어
+      if (cursorUpdateTimeoutRef.current) {
+        clearTimeout(cursorUpdateTimeoutRef.current);
+      }
+
+      // 디바운싱으로 무한 루프 방지 (50ms)
+      cursorUpdateTimeoutRef.current = setTimeout(() => {
+        try {
+          isUpdatingCursorRef.current = true;
+
+          const connection = connections.get(roomId);
+          if (!connection) return;
+
+          // awareness 업데이트
+          connection.provider.awareness.setLocalStateField('cursor', newPosition);
+          lastCursorPositionRef.current = newPosition;
+
+          console.log('커서 위치 업데이트:', {
+            roomId,
+            position: newPosition,
+          });
+        } catch (cursorError) {
+          console.error('커서 위치 업데이트 중 오류:', cursorError);
+        } finally {
+          // 100ms 후에 업데이트 플래그 해제 (데코레이션 업데이트 완료 대기)
+          setTimeout(() => {
+            isUpdatingCursorRef.current = false;
+          }, 100);
+        }
+      }, 50);
+    },
+    [roomId]
   );
 
   const initialize = useCallback(async () => {
@@ -241,7 +308,7 @@ export const useYjsCollaboration = ({
             // 연결 성공 후 내용 동기화
             setTimeout(() => {
               syncInitialContent();
-            }, 200); // 200ms 지연으로 안정성 확보
+            }, 200);
           } else {
             if (event.status === 'disconnected') {
               console.log(`WebSocket 연결 끊김: ${roomId}`);
@@ -317,7 +384,7 @@ export const useYjsCollaboration = ({
           lastTabContent: connection.lastTabContent,
         });
 
-        // 중복 동기화 방지: 마지막 탭 내용과 동일하면 건너뛰기
+        // 중복 동기화 방지
         if (connection.lastTabContent === currentTabContent && currentYjsContent.length > 0) {
           console.log('중복 동기화 방지:', { roomId });
           connection.isContentInitialized = true;
@@ -368,17 +435,19 @@ export const useYjsCollaboration = ({
 
       connection.yText.observe(handleYjsChange);
 
-      // 커서 위치 추적
+      // 안전한 커서 위치 추적
       const handleCursorChange = (event: { position: { lineNumber: number; column: number } }) => {
-        try {
-          const cursorPosition = {
-            line: event.position.lineNumber,
-            column: event.position.column,
-          };
-          connection.provider.awareness.setLocalStateField('cursor', cursorPosition);
-        } catch (cursorError) {
-          console.error('커서 위치 업데이트 중 오류:', cursorError);
+        // MonacoBinding에 의한 업데이트 중이면 건너뛰기
+        if (isUpdatingCursorRef.current) {
+          return;
         }
+
+        const cursorPosition = {
+          line: event.position.lineNumber,
+          column: event.position.column,
+        };
+
+        updateCursorPosition(cursorPosition);
       };
 
       const cursorDisposable = editor.onDidChangeCursorPosition(handleCursorChange);
@@ -389,6 +458,7 @@ export const useYjsCollaboration = ({
       setIsConnected(connected);
 
       if (connected) {
+        // 초기 사용자 정보만 설정 (커서는 실제 변경시에만)
         connection.provider.awareness.setLocalStateField('user', currentUser);
         setTimeout(syncInitialContent, 200);
       }
@@ -414,6 +484,7 @@ export const useYjsCollaboration = ({
     clearUsers,
     cleanup,
     syncTabContentToYjs,
+    updateCursorPosition,
   ]);
 
   useEffect(() => {
