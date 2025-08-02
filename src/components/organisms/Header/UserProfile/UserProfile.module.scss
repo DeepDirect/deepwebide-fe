@@ -12,6 +12,27 @@
   }
 }
 
+.chatButtonContainer {
+  display: flex;
+  flex-direction: row;
+
+  @media (width > 900px) {
+    display: none;
+  }
+}
+
+.newChatAlert {
+  position: relative;
+  top: -5px;
+  left: -5px;
+  font-size: xx-small;
+  color: $red;
+
+  @media (width > 900px) {
+    display: none;
+  }
+}
+
 .chatButton {
   position: relative;
   display: flex;

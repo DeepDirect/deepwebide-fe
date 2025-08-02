@@ -17,6 +17,7 @@ interface UserProfileProps {
   showChatButton?: boolean;
   onChatButtonClick?: () => void;
   isChatOpen?: boolean;
+  isNewChatMessage?: boolean;
 }
 
 const UserProfile = ({
@@ -24,6 +25,7 @@ const UserProfile = ({
   showChatButton = false,
   onChatButtonClick,
   isChatOpen = false,
+  isNewChatMessage,
 }: UserProfileProps) => {
   const navigate = useNavigate();
   const { getUserInfo } = useAuthStore(); // 상태만 조회
@@ -57,14 +59,17 @@ const UserProfile = ({
 
   return (
     <div className={styles.profileArea}>
-      {showChatButton && (
-        <button
-          className={`${styles.chatButton} ${isChatOpen ? styles.active : ''}`}
-          onClick={onChatButtonClick}
-        >
-          <MessageTextIcon className={styles.chatIcon} />
-        </button>
-      )}
+      <div className={styles.chatButtonContainer}>
+        {showChatButton && (
+          <button
+            className={`${styles.chatButton} ${isChatOpen ? styles.active : ''}`}
+            onClick={onChatButtonClick}
+          >
+            <MessageTextIcon className={styles.chatIcon} />
+          </button>
+        )}
+        {!isChatOpen && isNewChatMessage && <div className={styles.newChatAlert}>●</div>}
+      </div>
 
       <ProfileDropdown onLogout={handleLogout}>
         <button
