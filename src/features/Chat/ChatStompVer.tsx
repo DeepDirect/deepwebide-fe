@@ -15,7 +15,7 @@ import {
   type SendCodeReference,
 } from '@/features/Chat/types';
 
-import { useGetPreviousChat } from '@/hooks/chat/useGetPreviousChat';
+import { useGetChatMessagesInfinite } from '@/hooks/chat/useGetPreviousChat';
 import CurrentMembers from './components/CurrentMembers/CurrentMembers';
 import Loading from '@/components/molecules/Loading/Loading';
 import './Chat.scss';
@@ -35,23 +35,15 @@ interface ChattingProps {
 const Chat: React.FC<ChattingProps> = ({ isConnected, connectedCount, messages, send }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { repoId } = useParams({ strict: false });
-  const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true);
   const [totalMessages, setTotalMessages] = useState<ChatReceivedMessage[]>([]);
   const prevMessagesRef = useRef<ChatReceivedMessage[]>([]);
   const [searchResults, setSearchResults] = useState<SearchMessagesData | null>(null);
 
   // 현재 사용자 ID (메시지 비교용)
   const currentUserId = getCurrentUserId();
-
-  const {
-    data: previousChatData,
-    isLoading: isPreviousLoading,
-    refetch: refetchPreviousChat,
-  } = useGetPreviousChat(
-    repoId,
-    { size: 20 },
-    { enabled: false } // 자동 호출 비활성화
-  );
+  // const { data, isSuccess } = useGetPreviousChat(repoId);
+  const { data, fetchNextPage, hasNextPage, isLoading, isSuccess } =
+    useGetChatMessagesInfinite(repoId);
 
   // SearchMessageData 타입을 ChatReceivedMessage로 변환
   const searchMessages: ChatReceivedMessage[] = searchResults
@@ -70,22 +62,9 @@ const Chat: React.FC<ChattingProps> = ({ isConnected, connectedCount, messages, 
     setSearchResults(results);
   };
 
-  // 초기 로드 시에만 수동으로 데이터 페칭
   useEffect(() => {
-    if (isConnected && isInitialLoad && repoId) {
-      console.log('🚀 [Chat] 초기 로드 - API 호출 시작');
-      refetchPreviousChat(); // Promise 결과는 사용하지 않음
-    }
-  }, [isConnected, isInitialLoad, repoId, refetchPreviousChat]);
-
-  // 처음 렌더링 후 isInitialLoad를 false로 변경
-  useEffect(() => {
-    // idle 상태이고 데이터가 있을 때만 실행
-    if (!isPreviousLoading && previousChatData && isInitialLoad) {
-      console.log('📦 [Chat] 이전 채팅 메시지 수신 완료:', previousChatData);
-
-      // API 응답에서 실제 메시지 배열 추출 및 타입 변환
-      const messages = previousChatData.data?.data?.messages || [];
+    if (isSuccess && data) {
+      const messages = data.pages.flatMap(page => page.data.messages) || [];
       const formattedMessages: ChatReceivedMessage[] = messages
         .map(msg => ({
           ...msg,
@@ -94,37 +73,14 @@ const Chat: React.FC<ChattingProps> = ({ isConnected, connectedCount, messages, 
           messageId: msg.messageId.toString(),
         }))
         .sort((a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime());
-
       setTotalMessages(formattedMessages);
-      setIsInitialLoad(false);
-
-      requestAnimationFrame(() => {
-        scrollToBottom();
-      });
+      if (!isSuccess) {
+        requestAnimationFrame(() => {
+          scrollToBottom();
+        });
+      }
     }
-  }, [previousChatData, isPreviousLoading, isInitialLoad, repoId]);
-
-  // useEffect(() => {
-  //   if (previousChatData && isInitialLoad) {
-  //     // API 응답에서 실제 메시지 배열 추출 및 타입 변환
-  //     const messages = previousChatData.data?.data?.messages || [];
-  //     const formattedMessages: ChatReceivedMessage[] = messages
-  //       .map(msg => ({
-  //         ...msg,
-  //         type: 'CHAT' as const,
-  //         repositoryId: repoId,
-  //         messageId: msg.messageId.toString(),
-  //       }))
-  //       .sort((a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime());
-  //     setTotalMessages(formattedMessages);
-
-  //     // 초기 로드 완료 표시
-  //     setIsInitialLoad(false);
-  //     requestAnimationFrame(() => {
-  //       scrollToBottom();
-  //     });
-  //   }
-  // }, [previousChatData, repoId, isInitialLoad]);
+  }, [data, repoId, isSuccess]);
 
   // props messages가 변경될 때 추가된 메시지만 totalMessages에 추가
   useEffect(() => {
@@ -137,7 +93,6 @@ const Chat: React.FC<ChattingProps> = ({ isConnected, connectedCount, messages, 
         const newMessages = messages.slice(prevLength); // 추가된 부분만 가져오기
         setTotalMessages(prevTotal => [...prevTotal, ...newMessages]);
       }
-
       // 현재 messages를 이전 messages로 저장
       prevMessagesRef.current = messages;
       requestAnimationFrame(() => {
@@ -157,22 +112,19 @@ const Chat: React.FC<ChattingProps> = ({ isConnected, connectedCount, messages, 
     }
   }, [messages, searchResults]);
 
-  // 초기 로드 완료 후 플래그 설정
-  useEffect(() => {
-    if (previousChatData && isInitialLoad) {
-      setIsInitialLoad(false);
-      // 초기 로드 완료 후 맨 아래로 스크롤
-      setTimeout(() => {
-        scrollToBottom();
-      }, 100);
-    }
-  }, [previousChatData, isInitialLoad]);
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const container = e.currentTarget;
+    const scrollTop = container.scrollTop;
 
-  // 온라인 사용자 형식 변환
-  // const onlineUsers = stompOnlineUsers.map(user => ({
-  //   userId: user.userId.toString(),
-  //   userName: user.nickname,
-  // }));
+    // 스크롤이 최상단 근처에 있을 때
+    if (scrollTop <= 0) {
+      console.log('hasNextPage:', hasNextPage);
+      console.log('params:', data?.pageParams);
+      if (hasNextPage) {
+        fetchNextPage();
+      }
+    }
+  };
 
   const handleSendMessage = (message: string, codeReference: SendCodeReference) => {
     if (!message.trim()) return;
@@ -216,17 +168,17 @@ const Chat: React.FC<ChattingProps> = ({ isConnected, connectedCount, messages, 
         <CurrentMembers onlineCount={connectedCount} />
 
         {/* 로딩 중일 때 로딩 컴포넌트 표시 */}
-        {!isConnected && isPreviousLoading && <Loading />}
+        {!isConnected && !isLoading && <Loading />}
 
         {/* 채팅 메시지 목록 */}
-        <div className="chat__messages">
-          {/* {messages.length === 0 && !isPreviousLoading && (
+        <div className="chat__messages" onScroll={handleScroll}>
+          {totalMessages.length === 0 && (
             <div style={{ padding: '10px', textAlign: 'center', color: '#999', fontSize: '12px' }}>
               아직 메시지가 없습니다. 첫 메시지를 보내보세요! 👋
             </div>
-          )} */}
+          )}
 
-          {displayMessages && displayMessages.length === 0 && !isPreviousLoading && (
+          {displayMessages && displayMessages.length === 0 && (
             <div style={{ padding: '10px', textAlign: 'center', color: '#999', fontSize: '12px' }}>
               {searchResults ? '검색 결과가 없습니다.' : <Loading />}
             </div>
@@ -243,18 +195,6 @@ const Chat: React.FC<ChattingProps> = ({ isConnected, connectedCount, messages, 
               </React.Fragment>
             );
           })}
-
-          {/* {totalMessages?.map((message, index) => {
-            const shouldShowDate = shouldShowDateDivider(message, index);
-            const isMyMessage = message.senderId.toString() === currentUserId;
-
-            return (
-              <React.Fragment key={`${message.senderId}-${message.sentAt}-${index}`}>
-                {shouldShowDate && <DateDivider date={formatDateToKorean(message.sentAt)} />}
-                <ChatMessageComponent message={message} isMyMessage={isMyMessage} />
-              </React.Fragment>
-            );
-          })} */}
           <div ref={messagesEndRef} />
         </div>
 
