@@ -11,6 +11,7 @@ import { useFileTreeOperations } from './hooks/useFileTreeOperations';
 import { useFileTreeDragDrop } from './hooks/useFileTreeDragDrop';
 import { useFileTreeExternalDrop } from './hooks/useFileTreeExternalDrop';
 import { useYjsFileTree } from '@/hooks/repo/useYjsFileTree';
+import { useTabStore } from '@/stores/tabStore';
 import { isValidNode, getNodeId, findNodeById, filterValidNodes, debugNode } from './helpers';
 import styles from './FileTree.module.scss';
 import type { FileTreeProps, FileTreeNode } from './types';
@@ -39,6 +40,9 @@ const FileTree: React.FC<ExtendedFileTreeProps> = ({
 
   // YJS는 협업 모드에서만 활성화
   const { yMap, needsRefresh, clearRefreshFlag } = useYjsFileTree(repositoryId || 0);
+
+  // 탭 스토어 추가
+  const { syncTabsWithFileTree } = useTabStore();
 
   const { handleFileClick, handleFolderToggle } = useFileTreeActions({
     repoId,
@@ -119,6 +123,43 @@ const FileTree: React.FC<ExtendedFileTreeProps> = ({
   } = useFileTreeExternalDrop({
     onFileUpload: uploadFiles,
   });
+
+  // 파일트리 데이터가 변경될 때마다 탭과 동기화
+  useEffect(() => {
+    if (treeData && treeData.length > 0) {
+      const flattenNodes = (
+        nodes: FileTreeNode[]
+      ): Array<{ fileId: number; fileName: string; path: string }> => {
+        const result: Array<{ fileId: number; fileName: string; path: string }> = [];
+
+        const traverse = (nodeList: FileTreeNode[]) => {
+          for (const node of nodeList) {
+            if (node.fileType === 'FILE') {
+              result.push({
+                fileId: node.fileId,
+                fileName: node.fileName,
+                path: node.path,
+              });
+            }
+            if (node.children && node.children.length > 0) {
+              traverse(node.children as FileTreeNode[]);
+            }
+          }
+        };
+
+        traverse(nodes);
+        return result;
+      };
+
+      const fileNodes = flattenNodes(treeData);
+      console.log('파일트리 변경 감지 - 탭 동기화:', {
+        fileCount: fileNodes.length,
+        repositoryId,
+      });
+
+      syncTabsWithFileTree(fileNodes);
+    }
+  }, [treeData, syncTabsWithFileTree, repositoryId]);
 
   // YJS 파일트리 실시간 동기화
   useEffect(() => {

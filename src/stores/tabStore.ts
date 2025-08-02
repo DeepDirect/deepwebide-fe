@@ -112,6 +112,8 @@ export const useTabStore = create<TabStore>()(
             content: '', // 초기에는 빈 내용으로 시작
             fileId,
             isLoading: true, // 새 탭은 로딩 상태로 시작
+            isDeleted: false,
+            hasFileTreeMismatch: false,
           };
 
           set({
@@ -258,6 +260,100 @@ export const useTabStore = create<TabStore>()(
         }
       },
 
+      updateTabFromFileTree: (fileId: number, fileName: string, path: string) => {
+        const state = get();
+        set({
+          openTabs: state.openTabs.map(tab => {
+            if (tab.fileId === fileId) {
+              const repoId = tab.id.split('/')[0];
+              const newTabId = `${repoId}/${path}`;
+              console.log('파일트리 변경으로 탭 업데이트:', {
+                oldId: tab.id,
+                newId: newTabId,
+                oldName: tab.name,
+                newName: fileName,
+                oldPath: tab.path,
+                newPath: path,
+              });
+              return {
+                ...tab,
+                id: newTabId,
+                name: fileName,
+                path: path,
+                isDeleted: false,
+                hasFileTreeMismatch: false,
+              };
+            }
+            return tab;
+          }),
+        });
+      },
+
+      markTabAsDeleted: (fileId: number) => {
+        const state = get();
+        const targetTab = state.openTabs.find(tab => tab.fileId === fileId);
+        if (targetTab) {
+          console.log('파일 삭제로 탭을 삭제됨으로 표시:', {
+            tabId: targetTab.id,
+            name: targetTab.name,
+            fileId,
+          });
+          set({
+            openTabs: state.openTabs.map(tab =>
+              tab.fileId === fileId ? { ...tab, isDeleted: true, hasFileTreeMismatch: false } : tab
+            ),
+          });
+        }
+      },
+
+      syncTabsWithFileTree: (
+        fileTreeNodes: Array<{ fileId: number; fileName: string; path: string }>
+      ) => {
+        const state = get();
+        const fileTreeMap = new Map(fileTreeNodes.map(node => [node.fileId, node]));
+
+        console.log('파일트리와 탭 동기화:', {
+          fileTreeCount: fileTreeNodes.length,
+          tabCount: state.openTabs.length,
+        });
+
+        set({
+          openTabs: state.openTabs.map(tab => {
+            if (!tab.fileId) return tab;
+
+            const fileTreeNode = fileTreeMap.get(tab.fileId);
+
+            if (!fileTreeNode) {
+              console.log('파일트리에서 제거된 탭:', { tabId: tab.id, name: tab.name });
+              return { ...tab, isDeleted: true, hasFileTreeMismatch: false };
+            }
+
+            if (fileTreeNode.fileName !== tab.name || fileTreeNode.path !== tab.path) {
+              const repoId = tab.id.split('/')[0];
+              const newTabId = `${repoId}/${fileTreeNode.path}`;
+              console.log('파일트리 변경으로 탭 업데이트:', {
+                oldId: tab.id,
+                newId: newTabId,
+                oldName: tab.name,
+                newName: fileTreeNode.fileName,
+                oldPath: tab.path,
+                newPath: fileTreeNode.path,
+              });
+              return {
+                ...tab,
+                id: newTabId,
+                name: fileTreeNode.fileName,
+                path: fileTreeNode.path,
+                isDeleted: false,
+                hasFileTreeMismatch: false,
+              };
+            }
+
+            return { ...tab, isDeleted: false, hasFileTreeMismatch: false };
+          }),
+        });
+      },
+
       // 디버그 헬퍼
       getTabById: (tabId: string) => {
         const state = get();
@@ -336,6 +432,9 @@ export const useTabStore = create<TabStore>()(
           isLoading: false,
           // 내용이 너무 크면 저장하지 않음 (성능 최적화)
           content: (tab.content?.length || 0) > 100000 ? '' : tab.content,
+          // 삭제 상태는 저장하지 않음 (새로고침 후에는 정상 상태로 시작)
+          isDeleted: false,
+          hasFileTreeMismatch: false,
         })),
       }),
 

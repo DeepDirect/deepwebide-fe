@@ -39,7 +39,8 @@ export function RepoPage() {
   const repoId = params.repoId;
   const filePath = search.file;
 
-  const { openTabs, activateTab, hasHydrated, keepOnlyCurrentRepoTabs } = useTabStoreHydrated();
+  const { openTabs, activateTab, hasHydrated, keepOnlyCurrentRepoTabs, clearTabsForRepo } =
+    useTabStoreHydrated();
   const {
     isVisible: isFileSectionVisible,
     activeSection,
@@ -211,6 +212,16 @@ export function RepoPage() {
     enableCollaboration,
     clearUsers,
   ]);
+
+  // 컴포넌트 언마운트 시 모든 탭 정리
+  useEffect(() => {
+    return () => {
+      if (repoId) {
+        console.log('RepoPage 언마운트 - 모든 탭 정리:', repoId);
+        clearTabsForRepo(repoId);
+      }
+    };
+  }, [repoId, clearTabsForRepo]);
 
   // 키보드 단축키 추가
   useEffect(() => {

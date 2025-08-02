@@ -1,4 +1,5 @@
 @use '@/styles/variables' as *;
+@use 'sass:color';
 
 .tabBar {
   display: flex;
@@ -53,6 +54,16 @@
   &:first-child {
     border-left: none;
   }
+
+  &.deleted {
+    color: var(--tab-text-deleted);
+    background-color: var(--tab-bg-deleted);
+
+    &:hover {
+      color: var(--tab-text-deleted-hover);
+      background-color: var(--tab-bg-deleted-hover);
+    }
+  }
 }
 
 .active {
@@ -63,6 +74,17 @@
   &:hover {
     color: var(--tab-text-active);
     background-color: var(--tab-bg-active);
+  }
+
+  &.deleted {
+    border-bottom: 2px solid var(--tab-active-line-deleted);
+    color: var(--tab-text-active-deleted);
+    background-color: var(--tab-bg-active-deleted);
+
+    &:hover {
+      color: var(--tab-text-active-deleted);
+      background-color: var(--tab-bg-active-deleted);
+    }
   }
 }
 
@@ -89,6 +111,15 @@
   :global(.dark) & {
     filter: brightness(0) invert(1);
   }
+
+  .deleted & {
+    opacity: 0.5;
+    filter: grayscale(100%);
+
+    :global(.dark) & {
+      filter: brightness(0) invert(1) grayscale(100%);
+    }
+  }
 }
 
 .tabName {
@@ -96,6 +127,11 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+
+  &.deletedText {
+    font-style: italic;
+    text-decoration: line-through;
+  }
 }
 
 .closeBtn {
@@ -144,6 +180,11 @@
     opacity: 1;
     animation: pulse 2s infinite;
   }
+
+  &.deleted {
+    background-color: $red;
+    opacity: 1;
+  }
 }
 
 @keyframes pulse {
@@ -180,4 +221,27 @@
     width: 5px;
     height: 5px;
   }
+}
+
+// 색상 변수 추가
+:root {
+  // 삭제된 탭 스타일 (라이트 모드)
+  --tab-text-deleted: #{$red};
+  --tab-text-deleted-hover: #{$red};
+  --tab-bg-deleted: #{$gray-10};
+  --tab-bg-deleted-hover: #{$gray-9};
+  --tab-text-active-deleted: #{$red};
+  --tab-bg-active-deleted: #{$white-2};
+  --tab-active-line-deleted: #{$red};
+}
+
+:global(.dark) {
+  // 삭제된 탭 스타일 (다크 모드)
+  --tab-text-deleted: #{$red};
+  --tab-text-deleted-hover: #{color.scale($red, $lightness: 10%)};
+  --tab-bg-deleted: #{$gray-2};
+  --tab-bg-deleted-hover: #{$gray-3};
+  --tab-text-active-deleted: #{$red};
+  --tab-bg-active-deleted: #{$gray-4};
+  --tab-active-line-deleted: #{$red};
 }
