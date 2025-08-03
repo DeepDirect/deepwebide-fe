@@ -359,7 +359,15 @@ export function RepoPage() {
         </div>
 
         <div className={styles.terminalSection}>
-          <CodeRunner repoId={repoId} repositoryName={repositoryInfo?.repositoryName} />
+          <CodeRunner
+            repoId={repoId}
+            repositoryName={repositoryInfo?.repositoryName}
+            enableCollaboration={enableCollaboration}
+            userId={currentUser.id || String(getUserInfo()?.id) || `user-${repositoryId}`}
+            userName={
+              currentUser.name || getUserInfo()?.nickname || getUserInfo()?.username || 'Anonymous'
+            }
+          />
         </div>
       </div>
     </div>

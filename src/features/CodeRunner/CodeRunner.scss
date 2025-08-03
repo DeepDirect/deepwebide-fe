@@ -22,6 +22,7 @@
   right: 17px;
   z-index: 1;
   display: flex;
+  align-items: center;
   gap: 4px;
 }
 
@@ -48,6 +49,63 @@
   svg {
     width: 25px;
     height: 25px;
+  }
+}
+
+.code-runner__collaboration-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 16px;
+  transition: all 0.3s ease;
+
+  &.connected {
+    color: #10b981;
+  }
+
+  &.disconnected {
+    color: #6b7280;
+  }
+
+  &.error {
+    color: #ef4444;
+    animation: shake 0.5s ease-in-out;
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-2px);
+  }
+
+  75% {
+    transform: translateX(2px);
+  }
+}
+
+.code-runner__status {
+  position: absolute;
+  top: 50px;
+  right: 17px;
+  z-index: 2;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  color: #6b7280;
+  background-color: rgb(255 255 255 / 90%);
+  backdrop-filter: blur(4px);
+
+  .dark & {
+    color: #9ca3af;
+    background-color: rgb(0 0 0 / 70%);
   }
 }
 

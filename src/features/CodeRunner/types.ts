@@ -1,14 +1,17 @@
+import type { ReactNode } from 'react';
+
 export interface CommandHistory {
   command: string;
-  output: string;
+  output: string | ReactNode;
   timestamp: Date;
 }
 
 export interface CodeRunnerProps {
-  repoId?: string;
-  onCommandExecute?: (command: string) => Promise<string> | string;
-  onClose?: () => void;
-  initialHistory?: CommandHistory[];
+  repoId?: number | string;
+  repositoryName?: string;
+  enableCollaboration?: boolean;
+  userId?: string;
+  userName?: string;
 }
 
 export interface CodeRunnerState {
