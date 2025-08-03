@@ -7,6 +7,8 @@ React, TypeScript, Vite 기반의 실시간 웹 IDE입니다.
 Link: https://www.deepdirect.site/  
 Code: [FE](https://github.com/DeepDirect/deepwebide-fe), [BE](https://github.com/DeepDirect/deepwebide-be)
 
+<br />
+
 ---
 
 ## 🫶 팀원
@@ -20,11 +22,15 @@ Code: [FE](https://github.com/DeepDirect/deepwebide-fe), [BE](https://github.com
 | 이은지     | Frontend           | [@ebbll](https://github.com/ebbll)             |
 | 최범근     | Backend            | [@vayaconChoi](https://github.com/vayaconChoi) |
 
+<br />
+
 ---
 
 ## 🚀 주요 기능
 - 실시간 협업 코드 편집
 - 실시간 채팅
+
+<br />
 
 ---
 
@@ -48,6 +54,8 @@ Code: [FE](https://github.com/DeepDirect/deepwebide-fe), [BE](https://github.com
 | 스타일링        | SCSS                                                             |
 | 코드 품질 도구   | ESLint, Prettier, Stylelint, Husky, lint-staged                  |
 
+<br />
+
 ### BE
 | 분류             | 사용 기술 / 라이브러리                              | 설명 |
 |-----------------|------------------------------------------------------|------|
@@ -66,10 +74,15 @@ Code: [FE](https://github.com/DeepDirect/deepwebide-fe), [BE](https://github.com
 | 에러 추적       | Sentry (`sentry-spring-boot-starter`, logback 연동) | 런타임 에러 실시간 추적 |
 | 로깅 유틸리티    | Logback, Commons IO                                  | 로깅, 파일 유틸리티 |
 
+<br />
+
 ---
 
 ## 📸 Screenshots
 
+
+
+<br />
 
 ---
 
@@ -92,6 +105,8 @@ src/
 ├── types/ # 전역 타입 정의 (TypeScript interface/type 모음)
 └── utils/ # 공통 유틸리티 함수
 ```
+
+<br />
 
 ---
 
