@@ -2,6 +2,8 @@ import React from 'react';
 import MenuItem from '@/components/molecules/Modals/MenuItem/MenuItem';
 import InputMenuItem from '@/components/molecules/Modals/InputMenuItem/InputMenuItem';
 import MeatballModal from '@/components/organisms/Modals/MeatballModal/MeatballModal';
+import copyIcon from '@/assets/icons/copy.svg';
+import userMinusIcon from '@/assets/icons/user-minus.svg';
 
 export interface SharedWithMeRepoMeatballModalProps {
   open: boolean;
@@ -46,14 +48,14 @@ const SharedWithMeRepoMeatballModal: React.FC<SharedWithMeRepoMeatballModalProps
       <InputMenuItem
         label="공유 링크"
         value={shareLink}
-        iconPath="/src/assets/icons/copy.svg"
+        iconPath={copyIcon}
         onIconClick={handleShareLinkCopy}
         readOnly
       />
 
       <MenuItem
         label="공유받은 레포지토리 떠나기"
-        iconPath="/src/assets/icons/user-minus.svg"
+        iconPath={userMinusIcon}
         onClick={handleLeaveRepository}
         variant="orange"
       />

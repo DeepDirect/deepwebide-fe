@@ -3,6 +3,10 @@ import MenuItem from '@/components/molecules/Modals/MenuItem/MenuItem';
 import InputMenuItem from '@/components/molecules/Modals/InputMenuItem/InputMenuItem';
 import ToggleInputMenuItem from '@/components/molecules/Modals/ToggleInputMenuItem/ToggleInputMenuItem';
 import MeatballModal from '@/components/organisms/Modals/MeatballModal/MeatballModal';
+import editBoxIcon from '@/assets/icons/edit-box.svg';
+import copyIcon from '@/assets/icons/copy.svg';
+import arrowDownBoxIcon from '@/assets/icons/arrow-down-box.svg';
+import mailOffIcon from '@/assets/icons/mail-off.svg';
 
 export interface SharedByMeRepoMeatballModalProps {
   open: boolean;
@@ -68,15 +72,11 @@ const SharedByMeRepoMeatballModal: React.FC<SharedByMeRepoMeatballModalProps> = 
       position={position}
       className={className}
     >
-      <MenuItem
-        label="이름 변경하기"
-        iconPath="/src/assets/icons/edit-box.svg"
-        onClick={handleRename}
-      />
+      <MenuItem label="이름 변경하기" iconPath={editBoxIcon} onClick={handleRename} />
 
       <InputMenuItem
         label="공유 링크"
-        iconPath="/src/assets/icons/copy.svg"
+        iconPath={copyIcon}
         value={shareLink}
         readOnly
         onIconClick={handleShareLinkCopy}
@@ -86,8 +86,8 @@ const SharedByMeRepoMeatballModal: React.FC<SharedByMeRepoMeatballModalProps> = 
         key={open ? 'open' : 'closed'}
         label="입장 코드 확인하기"
         expandedLabel="입장 코드"
-        iconPath="/src/assets/icons/arrow-down-box.svg"
-        expandedIconPath="/src/assets/icons/copy.svg"
+        iconPath={arrowDownBoxIcon}
+        expandedIconPath={copyIcon}
         value={entryCode}
         isPassword={true}
         readOnly
@@ -103,7 +103,7 @@ const SharedByMeRepoMeatballModal: React.FC<SharedByMeRepoMeatballModalProps> = 
 
       <MenuItem
         label="공유 취소하기"
-        iconPath="/src/assets/icons/mail-off.svg"
+        iconPath={mailOffIcon}
         onClick={handleCancelShare}
         variant="orange"
       />
