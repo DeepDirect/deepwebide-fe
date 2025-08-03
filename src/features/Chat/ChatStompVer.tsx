@@ -42,7 +42,6 @@ const Chat: React.FC<ChattingProps> = ({ isConnected, connectedCount, messages, 
 
   // 현재 사용자 ID (메시지 비교용)
   const currentUserId = getCurrentUserId();
-  // const { data, isSuccess } = useGetPreviousChat(repoId);
   const { data, fetchNextPage, hasNextPage, isSuccess } = useGetChatMessagesInfinite(repoId);
 
   useEffect(() => {
@@ -183,12 +182,6 @@ const Chat: React.FC<ChattingProps> = ({ isConnected, connectedCount, messages, 
           {totalMessages.length === 0 && (
             <div style={{ padding: '10px', textAlign: 'center', color: '#999', fontSize: '12px' }}>
               아직 메시지가 없습니다. 첫 메시지를 보내보세요! 👋
-            </div>
-          )}
-
-          {displayMessages && displayMessages.length === 0 && (
-            <div style={{ padding: '10px', textAlign: 'center', color: '#999', fontSize: '12px' }}>
-              {searchResults ? '검색 결과가 없습니다.' : <Loading />}
             </div>
           )}
 
