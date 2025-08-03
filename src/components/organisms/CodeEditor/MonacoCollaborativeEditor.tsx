@@ -165,20 +165,11 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
       setEditorValue(tabContent);
       updateContent(tabContent);
     }
-  }, [
-    activeTab?.content,
-    activeTab?.id,
-    activeTab?.name,
-    activeTab?.isDeleted,
-    activeTab?.hasFileTreeMismatch,
-    enableCollaboration,
-    updateContent,
-    editorRef,
-  ]);
+  }, [activeTab, enableCollaboration, updateContent, editorRef]);
 
   const onEditorChange = useCallback(
     (value: string | undefined) => {
-      if (activeTab?.isLoading || isTabReadOnly) {
+      if (!activeTab || activeTab.isLoading || isTabReadOnly) {
         console.log('탭 로딩 중이거나 읽기 전용 - onChange 무시:', {
           tabId: activeTab?.id,
           isLoading: activeTab?.isLoading,
@@ -187,7 +178,7 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
         return;
       }
 
-      if (value !== undefined && activeTab && value !== (activeTab.content || '')) {
+      if (value !== undefined && value !== (activeTab.content || '')) {
         if (value === '' && (activeTab.content || '').length > 0) {
           console.warn('빈 내용으로 변경 시도 - 검증 필요:', {
             tabId: activeTab.id,
@@ -204,7 +195,7 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
         handleEditorChange(value, activeTab?.id);
       }
     },
-    [handleEditorChange, activeTab?.id, activeTab?.content, activeTab?.isLoading, isTabReadOnly]
+    [activeTab, handleEditorChange, isTabReadOnly]
   );
 
   useEffect(() => {
@@ -223,15 +214,7 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
         isReadOnly: isTabReadOnly,
       });
     }
-  }, [
-    activeTab?.id,
-    enableCollaboration,
-    shouldUseCollaboration,
-    roomId,
-    isConnected,
-    activeTab,
-    isTabReadOnly,
-  ]);
+  }, [activeTab, enableCollaboration, shouldUseCollaboration, roomId, isConnected, isTabReadOnly]);
 
   if (!activeTab) {
     return (

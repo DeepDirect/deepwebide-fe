@@ -84,7 +84,6 @@ export const useYjsCollaboration = ({
   const cleanupInProgressRef = useRef(false);
   const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // 커서 위치 업데이트 방지를 위한 ref들
   const lastCursorPositionRef = useRef<{ line: number; column: number } | null>(null);
   const cursorUpdateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isUpdatingCursorRef = useRef(false);
@@ -93,7 +92,6 @@ export const useYjsCollaboration = ({
     useCollaborationStore();
   const { openTabs, setTabContent } = useTabStore();
 
-  // 현재 활성 탭 찾기
   const activeTab = openTabs.find(tab => tab.isActive);
 
   const cleanup = useCallback(() => {
@@ -101,13 +99,11 @@ export const useYjsCollaboration = ({
     cleanupInProgressRef.current = true;
 
     try {
-      // 커서 관련 타이머 정리
       if (cursorUpdateTimeoutRef.current) {
         clearTimeout(cursorUpdateTimeoutRef.current);
         cursorUpdateTimeoutRef.current = null;
       }
 
-      // 동기화 타이머 정리
       if (syncTimeoutRef.current) {
         clearTimeout(syncTimeoutRef.current);
         syncTimeoutRef.current = null;
@@ -148,7 +144,6 @@ export const useYjsCollaboration = ({
       clearUsers();
       currentUserIdRef.current = '';
 
-      // ref 초기화
       lastCursorPositionRef.current = null;
       isUpdatingCursorRef.current = false;
     } catch (cleanupError) {
@@ -159,21 +154,17 @@ export const useYjsCollaboration = ({
     }
   }, [roomId, leaveRoom, setConnectionStatus, clearUsers]);
 
-  // 탭 내용을 Yjs로 동기화 (지연 적용으로 중복 방지)
   const syncTabContentToYjs = useCallback(
     (yjsContent: string) => {
       if (!activeTab || !setTabContent) return;
 
-      // 기존 타이머 클리어
       if (syncTimeoutRef.current) {
         clearTimeout(syncTimeoutRef.current);
       }
 
-      // 100ms 지연으로 중복 업데이트 방지
       syncTimeoutRef.current = setTimeout(() => {
         const currentTabContent = activeTab.content || '';
 
-        // 내용이 실제로 다를 때만 업데이트
         if (yjsContent !== currentTabContent) {
           console.log('Yjs → Tab 동기화:', {
             roomId,
@@ -183,22 +174,18 @@ export const useYjsCollaboration = ({
           });
 
           setTabContent(activeTab.id, yjsContent);
-          // setTabDirty(activeTab.id, false); // 일단 제거
         }
       }, 100);
     },
     [activeTab, setTabContent, roomId]
   );
 
-  // 안전한 커서 위치 업데이트 함수
   const updateCursorPosition = useCallback(
     (newPosition: { line: number; column: number }) => {
-      // 이미 업데이트 중이면 건너뛰기
       if (isUpdatingCursorRef.current) {
         return;
       }
 
-      // 이전 위치와 동일하면 건너뛰기
       const lastPosition = lastCursorPositionRef.current;
       if (
         lastPosition &&
@@ -208,12 +195,10 @@ export const useYjsCollaboration = ({
         return;
       }
 
-      // 기존 타이머 클리어
       if (cursorUpdateTimeoutRef.current) {
         clearTimeout(cursorUpdateTimeoutRef.current);
       }
 
-      // 디바운싱으로 무한 루프 방지 (50ms)
       cursorUpdateTimeoutRef.current = setTimeout(() => {
         try {
           isUpdatingCursorRef.current = true;
@@ -221,7 +206,6 @@ export const useYjsCollaboration = ({
           const connection = connections.get(roomId);
           if (!connection) return;
 
-          // awareness 업데이트
           connection.provider.awareness.setLocalStateField('cursor', newPosition);
           lastCursorPositionRef.current = newPosition;
 
@@ -232,7 +216,6 @@ export const useYjsCollaboration = ({
         } catch (cursorError) {
           console.error('커서 위치 업데이트 중 오류:', cursorError);
         } finally {
-          // 100ms 후에 업데이트 플래그 해제 (데코레이션 업데이트 완료 대기)
           setTimeout(() => {
             isUpdatingCursorRef.current = false;
           }, 100);
@@ -305,7 +288,6 @@ export const useYjsCollaboration = ({
             setError(null);
             provider.awareness.setLocalStateField('user', currentUser);
 
-            // 연결 성공 후 내용 동기화
             setTimeout(() => {
               syncInitialContent();
             }, 200);
@@ -384,7 +366,6 @@ export const useYjsCollaboration = ({
           lastTabContent: connection.lastTabContent,
         });
 
-        // 중복 동기화 방지
         if (connection.lastTabContent === currentTabContent && currentYjsContent.length > 0) {
           console.log('중복 동기화 방지:', { roomId });
           connection.isContentInitialized = true;
@@ -392,18 +373,15 @@ export const useYjsCollaboration = ({
         }
 
         if (currentYjsContent.length === 0 && currentTabContent.length > 0) {
-          // Yjs가 비어있고 탭에 내용이 있으면 → 탭 내용을 Yjs로
           console.log('탭 → Yjs 동기화 (새 문서)');
           connection.yText.insert(0, currentTabContent);
           connection.lastTabContent = currentTabContent;
         } else if (currentYjsContent.length > 0 && currentYjsContent !== currentTabContent) {
-          // Yjs에 내용이 있고 탭과 다르면 → Yjs 내용을 탭으로
           console.log('Yjs → 탭 동기화 (기존 문서)');
           model.setValue(currentYjsContent);
           syncTabContentToYjs(currentYjsContent);
           connection.lastTabContent = currentYjsContent;
         } else {
-          // 둘 다 비어있거나 동일하면 현재 상태 유지
           console.log('동기화 불필요 (빈 문서 또는 동일한 내용)');
           connection.lastTabContent = currentTabContent;
         }
@@ -411,7 +389,6 @@ export const useYjsCollaboration = ({
         connection.isContentInitialized = true;
       };
 
-      // Monaco Binding 설정
       const editorSet = new Set([editor]);
       const binding = new MonacoBinding(
         connection.yText,
@@ -422,7 +399,6 @@ export const useYjsCollaboration = ({
 
       bindingRef.current = binding;
 
-      // Yjs 내용 변경 시 탭 동기화
       const handleYjsChange = () => {
         if (connection && connection.isContentInitialized) {
           const newContent = connection.yText.toString();
@@ -435,9 +411,7 @@ export const useYjsCollaboration = ({
 
       connection.yText.observe(handleYjsChange);
 
-      // 안전한 커서 위치 추적
       const handleCursorChange = (event: { position: { lineNumber: number; column: number } }) => {
-        // MonacoBinding에 의한 업데이트 중이면 건너뛰기
         if (isUpdatingCursorRef.current) {
           return;
         }
@@ -458,7 +432,6 @@ export const useYjsCollaboration = ({
       setIsConnected(connected);
 
       if (connected) {
-        // 초기 사용자 정보만 설정 (커서는 실제 변경시에만)
         connection.provider.awareness.setLocalStateField('user', currentUser);
         setTimeout(syncInitialContent, 200);
       }
@@ -493,7 +466,7 @@ export const useYjsCollaboration = ({
     }
 
     return cleanup;
-  }, [enabled, editor, roomId, userId, userName, activeTab?.id, initialize, cleanup]);
+  }, [enabled, editor, roomId, userId, userName, activeTab, initialize, cleanup]);
 
   const connection = connections.get(roomId);
   const isLoading =
