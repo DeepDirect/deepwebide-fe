@@ -13,7 +13,6 @@ const TabBar = ({ repoId }: TabBarProps) => {
   const { openTabs, closeTab, activateTab } = useTabStore();
   const navigate = useNavigate();
 
-  // 탭 클릭 핸들러
   const handleTabClick = (tab: (typeof openTabs)[0]) => {
     if (!tab.isActive) {
       activateTab(tab.id);
@@ -30,24 +29,20 @@ const TabBar = ({ repoId }: TabBarProps) => {
     }
   };
 
-  // 탭 닫기 핸들러
   const handleTabClose = (e: React.MouseEvent, tabId: string) => {
     e.stopPropagation();
     closeTab(tabId);
 
-    // 탭을 닫은 후 남은 활성 탭으로 네비게이션
     const remainingTabs = openTabs.filter(tab => tab.id !== tabId);
     const activeTab = remainingTabs.find(tab => tab.isActive);
 
     if (activeTab) {
-      // 다른 활성 탭이 있으면 그 탭으로 이동
       navigate({
         to: '/$repoId/',
         params: { repoId },
         search: { file: activeTab.path },
       });
     } else if (remainingTabs.length > 0) {
-      // 활성 탭이 없으면 마지막 탭으로
       const lastTab = remainingTabs[remainingTabs.length - 1];
       activateTab(lastTab.id);
       navigate({
@@ -56,7 +51,6 @@ const TabBar = ({ repoId }: TabBarProps) => {
         search: { file: lastTab.path },
       });
     } else {
-      // 모든 탭이 닫혔으면 레포 메인으로
       navigate({
         to: '/$repoId/',
         params: { repoId },
@@ -65,7 +59,6 @@ const TabBar = ({ repoId }: TabBarProps) => {
     }
   };
 
-  // 탭이 없으면 렌더링하지 않음
   if (openTabs.length === 0) {
     return null;
   }
@@ -75,23 +68,45 @@ const TabBar = ({ repoId }: TabBarProps) => {
       {openTabs.map(tab => (
         <div
           key={tab.id}
-          className={clsx(styles.tab, { [styles.active]: tab.isActive })}
+          className={clsx(styles.tab, {
+            [styles.active]: tab.isActive,
+            [styles.deleted]: tab.isDeleted,
+            [styles.changed]: tab.hasFileTreeMismatch,
+          })}
           onClick={() => handleTabClick(tab)}
-          title={tab.path}
+          title={
+            tab.isDeleted
+              ? `${tab.path} (삭제됨)`
+              : tab.hasFileTreeMismatch
+                ? `${tab.path} (위치 또는 이름 변경됨 - 파일트리에서 다시 선택해주세요)`
+                : tab.path
+          }
         >
           <div className={styles.tabContent}>
             <div
               className={clsx(styles.statusIndicator, {
-                [styles.dirty]: tab.isDirty,
-                [styles.saved]: !tab.isDirty,
+                [styles.dirty]: tab.isDirty && !tab.isDeleted && !tab.hasFileTreeMismatch,
+                [styles.saved]: !tab.isDirty && !tab.isDeleted && !tab.hasFileTreeMismatch,
+                [styles.deleted]: tab.isDeleted,
+                [styles.changed]: tab.hasFileTreeMismatch,
               })}
             />
             <img
               src={getFileIcon(tab.name)}
               alt={`${tab.name} 파일 아이콘`}
-              className={styles.fileIcon}
+              className={clsx(styles.fileIcon, {
+                [styles.deletedIcon]: tab.isDeleted,
+                [styles.changedIcon]: tab.hasFileTreeMismatch,
+              })}
             />
-            <span className={styles.tabName}>{tab.name}</span>
+            <span
+              className={clsx(styles.tabName, {
+                [styles.deletedText]: tab.isDeleted,
+                [styles.changedText]: tab.hasFileTreeMismatch,
+              })}
+            >
+              {tab.name}
+            </span>
           </div>
           <button
             className={styles.closeBtn}

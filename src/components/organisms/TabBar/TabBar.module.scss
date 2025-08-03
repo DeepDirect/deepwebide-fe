@@ -1,4 +1,5 @@
 @use '@/styles/variables' as *;
+@use 'sass:color';
 
 .tabBar {
   display: flex;
@@ -8,7 +9,6 @@
   white-space: nowrap;
   background-color: var(--tab-bar-bg);
 
-  // 스크롤바 스타일링
   &::-webkit-scrollbar {
     height: 3px;
   }
@@ -53,6 +53,26 @@
   &:first-child {
     border-left: none;
   }
+
+  &.deleted {
+    color: var(--tab-text-deleted);
+    background-color: var(--tab-bg-deleted);
+
+    &:hover {
+      color: var(--tab-text-deleted-hover);
+      background-color: var(--tab-bg-deleted-hover);
+    }
+  }
+
+  &.changed {
+    color: var(--tab-text-changed);
+    background-color: var(--tab-bg-changed);
+
+    &:hover {
+      color: var(--tab-text-changed-hover);
+      background-color: var(--tab-bg-changed-hover);
+    }
+  }
 }
 
 .active {
@@ -63,6 +83,28 @@
   &:hover {
     color: var(--tab-text-active);
     background-color: var(--tab-bg-active);
+  }
+
+  &.deleted {
+    border-bottom: 2px solid var(--tab-active-line-deleted);
+    color: var(--tab-text-active-deleted);
+    background-color: var(--tab-bg-active-deleted);
+
+    &:hover {
+      color: var(--tab-text-active-deleted);
+      background-color: var(--tab-bg-active-deleted);
+    }
+  }
+
+  &.changed {
+    border-bottom: 2px solid var(--tab-active-line-changed);
+    color: var(--tab-text-active-changed);
+    background-color: var(--tab-bg-active-changed);
+
+    &:hover {
+      color: var(--tab-text-active-changed);
+      background-color: var(--tab-bg-active-changed);
+    }
   }
 }
 
@@ -80,14 +122,30 @@
   height: 12px;
   opacity: 0.8;
   transition: opacity 0.2s ease;
-
-  // 픽셀아트 아이콘의 선명함을 위해
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   image-rendering: crisp-edges;
 
   :global(.dark) & {
     filter: brightness(0) invert(1);
+  }
+
+  &.deletedIcon {
+    opacity: 0.5;
+    filter: grayscale(100%);
+
+    :global(.dark) & {
+      filter: brightness(0) invert(1) grayscale(100%);
+    }
+  }
+
+  &.changedIcon {
+    opacity: 0.7;
+    filter: hue-rotate(200deg);
+
+    :global(.dark) & {
+      filter: brightness(0) invert(1) hue-rotate(200deg);
+    }
   }
 }
 
@@ -96,6 +154,16 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+
+  &.deletedText {
+    font-style: italic;
+    text-decoration: line-through;
+  }
+
+  &.changedText {
+    font-style: italic;
+    text-decoration: line-through;
+  }
 }
 
 .closeBtn {
@@ -144,6 +212,17 @@
     opacity: 1;
     animation: pulse 2s infinite;
   }
+
+  &.deleted {
+    background-color: $red;
+    opacity: 1;
+  }
+
+  &.changed {
+    background-color: $blue-3;
+    opacity: 1;
+    animation: pulse 2s infinite;
+  }
 }
 
 @keyframes pulse {
@@ -157,7 +236,6 @@
   }
 }
 
-// 반응형 디자인
 @media (width <= 768px) {
   .tab {
     max-width: 150px;
@@ -180,4 +258,38 @@
     width: 5px;
     height: 5px;
   }
+}
+
+:root {
+  --tab-text-deleted: #{$red};
+  --tab-text-deleted-hover: #{$red};
+  --tab-bg-deleted: #{$gray-10};
+  --tab-bg-deleted-hover: #{$gray-9};
+  --tab-text-active-deleted: #{$red};
+  --tab-bg-active-deleted: #{$white-2};
+  --tab-active-line-deleted: #{$red};
+  --tab-text-changed: #{$blue-3};
+  --tab-text-changed-hover: #{$blue-3};
+  --tab-bg-changed: #{color.scale($blue-3, $lightness: 95%)};
+  --tab-bg-changed-hover: #{color.scale($blue-3, $lightness: 90%)};
+  --tab-text-active-changed: #{$blue-3};
+  --tab-bg-active-changed: #{$white-2};
+  --tab-active-line-changed: #{$blue-3};
+}
+
+:global(.dark) {
+  --tab-text-deleted: #{$red};
+  --tab-text-deleted-hover: #{color.scale($red, $lightness: 10%)};
+  --tab-bg-deleted: #{$gray-2};
+  --tab-bg-deleted-hover: #{$gray-3};
+  --tab-text-active-deleted: #{$red};
+  --tab-bg-active-deleted: #{$gray-4};
+  --tab-active-line-deleted: #{$red};
+  --tab-text-changed: #{$blue-3};
+  --tab-text-changed-hover: #{color.scale($blue-3, $lightness: 10%)};
+  --tab-bg-changed: #{color.scale($blue-3, $lightness: -80%)};
+  --tab-bg-changed-hover: #{color.scale($blue-3, $lightness: -75%)};
+  --tab-text-active-changed: #{$blue-3};
+  --tab-bg-active-changed: #{$gray-4};
+  --tab-active-line-changed: #{$blue-3};
 }

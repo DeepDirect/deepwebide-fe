@@ -1,62 +1,129 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
 
-// 전역 관리 객체들
-const yDocMap = new Map<number, Y.Doc>();
-const providerMap = new Map<number, WebsocketProvider>();
-const yMapMap = new Map<number, Y.Map<Record<string, unknown>>>();
+interface SavePointConnection {
+  doc: Y.Doc;
+  provider: WebsocketProvider;
+  map: Y.Map<Record<string, unknown>>;
+  activeUsers: Set<string>;
+  cleanupTimer?: NodeJS.Timeout;
+}
+
+const savePointConnections = new Map<number, SavePointConnection>();
+
+const cleanupSavePointConnection = (repositoryId: number) => {
+  const connection = savePointConnections.get(repositoryId);
+  if (!connection) return;
+
+  console.log(`SavePoint 연결 정리: repository-${repositoryId}`);
+
+  try {
+    if (connection.cleanupTimer) {
+      clearTimeout(connection.cleanupTimer);
+    }
+
+    connection.provider.disconnect();
+    connection.provider.destroy();
+    connection.doc.destroy();
+    savePointConnections.delete(repositoryId);
+
+    console.log(`SavePoint 연결 정리 완료: repository-${repositoryId}`);
+  } catch (error) {
+    console.error(`SavePoint 연결 정리 실패: repository-${repositoryId}`, error);
+  }
+};
 
 export function useYjsSavePoint(repositoryId: number) {
   const [yDoc, setYDoc] = useState<Y.Doc | null>(null);
   const [provider, setProvider] = useState<WebsocketProvider | null>(null);
   const [yMap, setYMap] = useState<Y.Map<Record<string, unknown>> | null>(null);
 
+  const userIdRef = useRef<string>(
+    `user-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
+  );
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
   useEffect(() => {
     if (!repositoryId) return;
 
-    let yDoc = yDocMap.get(repositoryId);
-    let provider = providerMap.get(repositoryId);
-    let yMap = yMapMap.get(repositoryId);
+    const userId = userIdRef.current;
+    let connection = savePointConnections.get(repositoryId);
 
-    if (!yDoc) {
-      yDoc = new Y.Doc();
-      yDocMap.set(repositoryId, yDoc);
-    }
-
-    if (!provider) {
-      // WebSocket URL을 환경변수에서 가져오기
+    if (!connection) {
+      const doc = new Y.Doc();
+      const map = doc.getMap<Record<string, unknown>>('save-point');
       const wsUrl = import.meta.env.VITE_YJS_WEBSOCKET_URL || 'ws://localhost:1234';
-      provider = new WebsocketProvider(
-        wsUrl,
-        `savepoint-${repositoryId}`, // YJS 서버가 인식할 수 있는 룸 이름
-        yDoc
-      );
-      providerMap.set(repositoryId, provider);
+      const roomName = `savepoint-${repositoryId}`;
+
+      const provider = new WebsocketProvider(wsUrl, roomName, doc, {
+        connect: true,
+        maxBackoffTime: 30000,
+        resyncInterval: 30000,
+      });
+
+      connection = {
+        doc,
+        provider,
+        map,
+        activeUsers: new Set<string>(),
+      };
+
+      provider.on('status', (event: { status: string }) => {
+        if (!mountedRef.current) return;
+
+        console.log(`SavePoint 연결 상태: ${event.status} (repository-${repositoryId})`);
+      });
+
+      savePointConnections.set(repositoryId, connection);
+      console.log(`새 SavePoint 연결 생성: repository-${repositoryId}`);
     }
 
-    if (!yMap) {
-      yMap = yDoc.getMap<Record<string, unknown>>('save-point');
-      yMapMap.set(repositoryId, yMap);
+    if (connection.cleanupTimer) {
+      clearTimeout(connection.cleanupTimer);
+      connection.cleanupTimer = undefined;
+      console.log(`기존 SavePoint cleanup timer 취소: repository-${repositoryId}`);
     }
 
-    setYDoc(yDoc);
-    setProvider(provider);
-    setYMap(yMap);
+    connection.activeUsers.add(userId);
+
+    if (mountedRef.current) {
+      setYDoc(connection.doc);
+      setProvider(connection.provider);
+      setYMap(connection.map);
+    }
 
     return () => {
-      setProvider(null);
-      setYDoc(null);
-      setYMap(null);
+      if (!connection) return;
+
+      connection.activeUsers.delete(userId);
+
+      if (connection.activeUsers.size === 0) {
+        connection.cleanupTimer = setTimeout(() => {
+          cleanupSavePointConnection(repositoryId);
+        }, 60000);
+        console.log(`SavePoint cleanup timer 설정: repository-${repositoryId} (60초)`);
+      }
+
+      if (mountedRef.current) {
+        setYDoc(null);
+        setProvider(null);
+        setYMap(null);
+      }
     };
   }, [repositoryId]);
 
-  // API에서 최신 히스토리를 가져와서 YJS에 동기화
   const syncHistoriesFromServer = useCallback(async () => {
     if (!yMap) return;
 
     try {
-      // 기존 API 클라이언트 사용
       const response = await fetch(`/api/repositories/${repositoryId}/histories`, {
         credentials: 'include',
         headers: {
@@ -72,7 +139,6 @@ export function useYjsSavePoint(repositoryId: number) {
       const latestHistoriesResponse = await response.json();
       const latestHistories = latestHistoriesResponse.data || [];
 
-      // YJS Map에 최신 데이터 적용
       yMap.set('histories', latestHistories);
       yMap.set('lastUpdated', { value: Date.now() });
 
@@ -82,19 +148,32 @@ export function useYjsSavePoint(repositoryId: number) {
     }
   }, [repositoryId, yMap]);
 
-  // 다른 클라이언트들에게 히스토리 업데이트 알림
   const broadcastHistoryUpdate = useCallback(
     (operation: string, data: unknown) => {
       if (!yMap || !provider) return;
 
-      yMap.set('lastOperation', {
+      const operationData = {
         type: operation,
         data: data,
         timestamp: Date.now(),
         clientId: provider.awareness?.clientID,
-      });
+      };
+
+      yMap.set('lastOperation', operationData);
+
+      if (operation === 'restore') {
+        console.log('복원 이벤트 브로드캐스트:', {
+          operation,
+          timestamp: operationData.timestamp,
+          repositoryId,
+        });
+
+        setTimeout(() => {
+          yMap.set('forceRefresh', { value: Date.now() });
+        }, 100);
+      }
     },
-    [yMap, provider]
+    [yMap, provider, repositoryId]
   );
 
   return {

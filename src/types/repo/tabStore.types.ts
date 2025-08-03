@@ -1,33 +1,29 @@
-import type { OpenTab } from '@/types/repo/repo.types';
+import type { OpenTab } from './repo.types';
 
 export interface TabStore {
-  // 상태
   openTabs: OpenTab[];
   _hasHydrated: boolean;
 
-  // 기본 관리
+  setHasHydrated: (hasHydrated: boolean) => void;
   setOpenTabs: (tabs: OpenTab[]) => void;
   addTab: (tab: OpenTab) => void;
   closeTab: (id: string) => void;
   activateTab: (id: string) => void;
-
-  // 파일 관련
   openFileByPath: (repoId: string, filePath: string, fileName?: string, fileId?: number) => void;
   setTabContent: (tabId: string, content: string) => void;
   setTabContentFromFile: (tabId: string, content: string) => void;
   setTabDirty: (tabId: string, isDirty: boolean) => void;
-  setTabLoading: (tabId: string, isLoading: boolean) => void; // 새로 추가
-
-  // 레포지토리 관련
+  setTabLoading: (tabId: string, isLoading: boolean) => void;
   clearTabsForRepo: (repoId: string) => void;
+  clearAllTabs: () => void;
   keepOnlyCurrentRepoTabs: (repoId: string) => void;
-
-  // 디버그 헬퍼
+  updateTabFromFileTree: (fileId: number, fileName: string, path: string) => void;
+  markTabAsDeleted: (fileId: number) => void;
+  syncTabsWithFileTree: (
+    fileTreeNodes: Array<{ fileId: number; fileName: string; path: string }>
+  ) => void;
   getTabById: (tabId: string) => OpenTab | undefined;
   getActiveTab: () => OpenTab | undefined;
   getDirtyTabs: () => OpenTab[];
   getTabsByRepo: (repoId: string) => OpenTab[];
-
-  // 하이드레이션
-  setHasHydrated: (hasHydrated: boolean) => void;
 }

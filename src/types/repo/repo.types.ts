@@ -13,9 +13,11 @@ export interface OpenTab {
   id: string;
   name: string;
   path: string;
-  isActive: boolean;
-  isDirty: boolean;
   content: string;
+  isDirty: boolean;
+  isActive: boolean;
   fileId?: number;
   isLoading?: boolean;
+  isDeleted?: boolean;
+  hasFileTreeMismatch?: boolean;
 }
