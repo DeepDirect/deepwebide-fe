@@ -38,7 +38,7 @@ Code: [FE](https://github.com/DeepDirect/deepwebide-fe), [BE](https://github.com
 | 상태 관리        | Zustand (클라이언트 상태), TanStack Query (서버 상태)                 |
 | 라우팅          | TanStack Router (@tanstack/react-router)                        |
 | 폼 관리/검증     | React Hook Form, Zod, @hookform/resolvers                       |
-| 실시간          | Yjs, y-monaco, y-websocket, WebSocket, SockJS                   |
+| 실시간          | Yjs, y-monaco, y-websocket, STOMP, SockJS                       |
 | 코드 에디터      | Monaco Editor (@monaco-editor/react)                            |
 | UI 라이브러리    | Radix UI (Toast, Tooltip, Switch, VisuallyHidden)               |
 | Drag & Drop   | React DnD, react-dnd-html5-backend, @minoru/react-dnd-treeview  |
