@@ -9,7 +9,7 @@ import { useThemeStore } from '@/stores/themeStore';
 import { useFileSectionStore } from '@/stores/fileSectionStore';
 import { useAuthStore } from '@/stores/authStore';
 import { getCurrentUserId, getCurrentNickname } from '@/utils/authChatUtils';
-import Chat from '@/features/Chat/ChatStompVer';
+import Chat from '@/features/Chat/Chat';
 import useStompChat from '@/hooks/chat/useStompChat';
 
 export function RepoLayout() {

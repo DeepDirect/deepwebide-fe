@@ -38,19 +38,10 @@ const Chat: React.FC<ChattingProps> = ({ isConnected, connectedCount, messages, 
   const [totalMessages, setTotalMessages] = useState<ChatReceivedMessage[]>([]);
   const prevMessagesRef = useRef<ChatReceivedMessage[]>([]);
   const [searchResults, setSearchResults] = useState<SearchMessagesData | null>(null);
-  const [showLoading, setShowLoading] = useState(true);
 
   // 현재 사용자 ID (메시지 비교용)
   const currentUserId = getCurrentUserId();
   const { data, fetchNextPage, hasNextPage, isSuccess } = useGetChatMessagesInfinite(repoId);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowLoading(false);
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, []);
 
   // SearchMessageData 타입을 ChatReceivedMessage로 변환
   const searchMessages: ChatReceivedMessage[] = searchResults
@@ -81,7 +72,7 @@ const Chat: React.FC<ChattingProps> = ({ isConnected, connectedCount, messages, 
         }))
         .sort((a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime());
       setTotalMessages(formattedMessages);
-      if (!isSuccess) {
+      if (data.pageParams && data.pageParams.length === 1) {
         requestAnimationFrame(() => {
           scrollToBottom();
         });
@@ -175,7 +166,7 @@ const Chat: React.FC<ChattingProps> = ({ isConnected, connectedCount, messages, 
         <CurrentMembers onlineCount={connectedCount} />
 
         {/* 로딩 중일 때 로딩 컴포넌트 표시 */}
-        {(!isConnected || showLoading) && <Loading />}
+        {!isConnected && <Loading />}
 
         {/* 채팅 메시지 목록 */}
         <div className="chat__messages" onScroll={handleScroll}>
