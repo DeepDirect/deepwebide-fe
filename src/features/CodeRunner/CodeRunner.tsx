@@ -1,22 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
-import type { KeyboardEvent } from 'react';
+import type { KeyboardEvent, ReactNode } from 'react';
 import { useThemeStore } from '@/stores/themeStore';
 import { useCodeRunnerExecute } from '@/features/Repo/codeRunner/hooks/useCodeRunnerExecute';
 import { useCodeRunnerStop } from '@/features/Repo/codeRunner/hooks/useCodeRunnerStop';
 import { useCodeRunnerLogs } from '@/features/Repo/codeRunner/hooks/useCodeRunnerLogs';
+import type { CodeRunnerProps, CommandHistory } from './types';
 import './CodeRunner.scss';
-import type { JSX } from 'react/jsx-runtime';
-
-export interface CodeRunnerProps {
-  repoId?: number | string;
-  repositoryName?: string;
-}
-
-interface CommandHistory {
-  command: string;
-  output: string | JSX.Element;
-  timestamp: Date;
-}
 
 export function CodeRunner(props: CodeRunnerProps) {
   const [commandHistory, setCommandHistory] = useState<CommandHistory[]>([
@@ -67,7 +56,7 @@ export function CodeRunner(props: CodeRunnerProps) {
 
     codeRunnerExecute.mutate(undefined, {
       onSuccess: resp => {
-        let output: string | JSX.Element =
+        let output: string | ReactNode =
           resp.status === 'SUCCESS' ? resp.output || resp.message : resp.error || resp.message;
 
         if (resp.port) {
