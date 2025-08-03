@@ -9,7 +9,6 @@
   background: var(--editor-bg);
 }
 
-// 에디터 컨테이너
 .editorContainer {
   position: relative;
   flex: 1;
@@ -31,7 +30,6 @@
   }
 }
 
-// 로딩 상태
 .editorLoading {
   display: flex;
   flex-direction: column;
@@ -68,7 +66,6 @@
   }
 }
 
-// 플레이스홀더
 .editorPlaceholder {
   display: flex;
   align-items: center;
@@ -142,7 +139,120 @@
   }
 }
 
-// 반응형 디자인
+.readOnlyStatus {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--readonly-border);
+  font-size: $font-size-xxsmall;
+  font-weight: $font-weight-medium;
+  color: var(--readonly-text);
+  background: var(--readonly-bg);
+
+  @media (width <= 768px) {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+}
+
+.readOnlyIcon {
+  flex-shrink: 0;
+  font-size: 14px;
+}
+
+.readOnlyMessage {
+  flex: 1;
+  line-height: 1.4;
+}
+
+.saveStatus {
+  position: absolute;
+  top: 8px;
+  right: 16px;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.savingIndicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border: 1px solid var(--save-indicator-border);
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: $font-weight-medium;
+  color: var(--save-indicator-text);
+  background: var(--save-indicator-bg);
+  backdrop-filter: blur(4px);
+}
+
+.savingSpinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--save-spinner-bg);
+  border-top: 2px solid var(--save-spinner-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.saveMode {
+  font-size: 10px;
+  opacity: 0.8;
+}
+
+.errorStatus {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--error-border);
+  font-size: $font-size-xxsmall;
+  font-weight: $font-weight-medium;
+  color: var(--error-text);
+  background: var(--error-bg);
+}
+
+.errorIcon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 16px;
+  text-align: center;
+  color: $white-2;
+  background: $red;
+}
+
+.errorMessage {
+  flex: 1;
+  line-height: 1.4;
+}
+
+.retryButton {
+  padding: 4px 8px;
+  border: 1px solid var(--retry-border);
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: $font-weight-medium;
+  color: var(--retry-text);
+  background: var(--retry-bg);
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--retry-hover);
+    transform: translateY(-1px);
+  }
+}
+
+.connectionStatus {
+  color: var(--editor-point-color);
+}
+
 @media (width <= 768px) {
   .collaborativeEditor {
     height: 100%;
@@ -169,6 +279,38 @@
   }
 }
 
-.connectionStatus {
-  color: var(--editor-point-color);
+:root {
+  --readonly-bg: #{$gray-10};
+  --readonly-border: #{$gray-8};
+  --readonly-text: #{$red};
+  --save-indicator-bg: #{$white-2};
+  --save-indicator-border: #{$gray-8};
+  --save-indicator-text: #{$gray-3};
+  --save-spinner-bg: #{$gray-8};
+  --save-spinner-color: #{$blue-3};
+  --error-bg: rgb(220 38 38 / 10%);
+  --error-border: #{$red};
+  --error-text: #{$red};
+  --retry-bg: #{$white-2};
+  --retry-border: #{$gray-7};
+  --retry-text: #{$gray-3};
+  --retry-hover: #{$gray-10};
+}
+
+:global(.dark) {
+  --readonly-bg: #{$gray-2};
+  --readonly-border: #{$gray-4};
+  --readonly-text: #{$red};
+  --save-indicator-bg: #{$gray-2};
+  --save-indicator-border: #{$gray-4};
+  --save-indicator-text: #{$gray-7};
+  --save-spinner-bg: #{$gray-4};
+  --save-spinner-color: #{$blue-3};
+  --error-bg: rgb(220 38 38 / 15%);
+  --error-border: #{$red};
+  --error-text: #{$red};
+  --retry-bg: #{$gray-2};
+  --retry-border: #{$gray-4};
+  --retry-text: #{$gray-7};
+  --retry-hover: #{$gray-3};
 }

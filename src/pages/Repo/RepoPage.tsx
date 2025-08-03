@@ -8,6 +8,7 @@ import { useFileSave } from '@/hooks/repo/useFileSave';
 import { useCollaborationStore } from '@/stores/collaborationStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useFileContentLoader } from '@/hooks/repo/useFileContentLoader';
+import { useYjsSavePoint } from '@/hooks/repo/useYjsSavePoint';
 import Loading from '@/components/molecules/Loading/Loading';
 import styles from './RepoPage.module.scss';
 import TabBar from '@/components/organisms/TabBar/TabBar';
@@ -16,7 +17,6 @@ import CodeRunner from '@/features/CodeRunner/CodeRunner';
 import { FileTree } from '@/features/Repo/fileTree';
 import { SavePoint } from '@/features/Repo/savePoint';
 
-// Repository 타입 확장 (currentUser 포함)
 interface RepositoryWithUser {
   repositoryId: number;
   repositoryName: string;
@@ -39,7 +39,14 @@ export function RepoPage() {
   const repoId = params.repoId;
   const filePath = search.file;
 
-  const { openTabs, activateTab, hasHydrated, keepOnlyCurrentRepoTabs } = useTabStoreHydrated();
+  const {
+    openTabs,
+    activateTab,
+    hasHydrated,
+    keepOnlyCurrentRepoTabs,
+    clearTabsForRepo,
+    clearAllTabs,
+  } = useTabStoreHydrated();
   const {
     isVisible: isFileSectionVisible,
     activeSection,
@@ -49,7 +56,6 @@ export function RepoPage() {
   const { getUserInfo } = useAuthStore();
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // 파일 섹션과 에디터 그룹 간의 수평 리사이저
   const {
     width: fileSectionWidth,
     isResizing: isHorizontalResizing,
@@ -61,19 +67,15 @@ export function RepoPage() {
     containerRef,
   });
 
-  // repoId를 숫자로 변환
   const repositoryId = repoId ? parseInt(repoId, 10) : 0;
 
-  // 저장소 정보 조회 및 협업 모드 설정
   const { data: repositoryInfo } = useRepositoryInfo({
     repositoryId: repoId || '',
     enabled: hasHydrated && !!repoId,
   });
 
-  // 타입 안전하게 repositoryInfo 처리
   const typedRepositoryInfo = repositoryInfo as RepositoryWithUser | undefined;
 
-  // 협업 모드 자동 설정
   const enableCollaboration = Boolean(typedRepositoryInfo?.isShared);
 
   console.log('RepoPage 상태:', {
@@ -86,6 +88,37 @@ export function RepoPage() {
     activeTabPath: openTabs.find(tab => tab.isActive)?.path,
   });
 
+  const { yMap: savePointYMap } = useYjsSavePoint(repositoryId);
+
+  useEffect(() => {
+    if (!savePointYMap) return;
+
+    const handleRestoreEvent = () => {
+      const lastOperation = savePointYMap.get('lastOperation') as
+        | {
+            type: string;
+            data: unknown;
+            timestamp: number;
+          }
+        | undefined;
+
+      if (lastOperation?.type === 'restore') {
+        const now = Date.now();
+        const timeDiff = now - lastOperation.timestamp;
+
+        if (timeDiff < 3000) {
+          console.log('RepoPage: 복원 이벤트 감지 - 모든 탭과 에디터 상태 초기화');
+          clearAllTabs();
+          localStorage.removeItem('tab-storage');
+          window.location.reload();
+        }
+      }
+    };
+
+    savePointYMap.observe(handleRestoreEvent);
+    return () => savePointYMap.unobserve(handleRestoreEvent);
+  }, [savePointYMap, clearAllTabs]);
+
   useFileContentLoader({
     repositoryId,
     repoId: repoId || '',
@@ -93,14 +126,11 @@ export function RepoPage() {
     enableCollaboration,
   });
 
-  // 사용자 정보 설정 (협업 모드용) - authStore nickname 우선 사용
   useEffect(() => {
     if (enableCollaboration && !currentUser.id) {
-      // authStore에서 실제 사용자 정보 가져오기
       const authUser = getUserInfo();
 
       if (authUser) {
-        // authStore의 정보를 우선 사용
         setCurrentUser({
           id: String(authUser.id || `user-${Date.now()}`),
           name: authUser.nickname || authUser.username || 'Anonymous User',
@@ -112,7 +142,6 @@ export function RepoPage() {
           name: authUser.nickname || authUser.username,
         });
       } else if (typedRepositoryInfo?.currentUser) {
-        // authStore 정보가 없으면 repository 정보 사용 (fallback)
         const repoUser = typedRepositoryInfo.currentUser;
         setCurrentUser({
           id: String(repoUser.id || `user-${Date.now()}`),
@@ -125,7 +154,6 @@ export function RepoPage() {
           name: repoUser.name,
         });
       } else {
-        // 둘 다 없으면 기본 사용자 생성
         const fallbackUser = {
           id: `user-${Date.now()}`,
           name: 'Anonymous User',
@@ -144,16 +172,13 @@ export function RepoPage() {
     getUserInfo,
   ]);
 
-  // 파일 저장 시스템 (협업/일반 모드 모두 지원)
   const { enableContinuousSave, disableContinuousSave } = useFileSave({
     repositoryId,
     enabled: true,
     collaborationMode: enableCollaboration,
-    // 협업 모드에서는 더 긴 주기로 저장 (Yjs와 충돌 방지)
     continuousSaveInterval: enableCollaboration ? 10000 : 5000,
   });
 
-  // 활성 탭 변경 시 지속적 저장 관리
   const activeTab = openTabs.find(tab => tab.isActive);
   const activeTabId = activeTab?.id;
   const activeTabFileId = activeTab?.fileId;
@@ -174,7 +199,6 @@ export function RepoPage() {
         disableContinuousSave();
       };
     } else {
-      // 활성 탭이 없거나 fileId가 없으면 저장 비활성화
       disableContinuousSave();
     }
   }, [
@@ -186,7 +210,6 @@ export function RepoPage() {
     disableContinuousSave,
   ]);
 
-  // 레포 변경 감지 및 다른 레포 탭 정리
   useEffect(() => {
     if (!hasHydrated || !repoId) return;
 
@@ -196,10 +219,8 @@ export function RepoPage() {
       currentTabsCount: openTabs.length,
     });
 
-    // 현재 레포의 탭만 남기고 나머지 정리
     keepOnlyCurrentRepoTabs(repoId);
 
-    // 협업 모드가 비활성화되면 사용자 목록 정리
     if (!enableCollaboration) {
       clearUsers();
     }
@@ -212,17 +233,23 @@ export function RepoPage() {
     clearUsers,
   ]);
 
-  // 키보드 단축키 추가
+  useEffect(() => {
+    return () => {
+      if (repoId) {
+        console.log('RepoPage 언마운트 - 모든 탭 정리:', repoId);
+        clearTabsForRepo(repoId);
+      }
+    };
+  }, [repoId, clearTabsForRepo]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.key === 'b') {
         e.preventDefault();
-        // Ctrl+B로 현재 활성 섹션 토글 (files가 기본)
         const currentSection = activeSection || 'files';
         if (isFileSectionVisible && activeSection === currentSection) {
           toggleVisibility();
         } else {
-          // 닫혀있거나 다른 섹션이면 files 섹션 열기
           if (!isFileSectionVisible) {
             toggleVisibility();
           }
@@ -234,12 +261,10 @@ export function RepoPage() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [toggleVisibility, isFileSectionVisible, activeSection]);
 
-  // URL 파일 경로 변경 처리 (하이드레이션 완료 후에만)
   useEffect(() => {
     if (!hasHydrated) return;
 
     if (filePath && repoId) {
-      // 현재 열린 탭 중에서 해당 경로의 탭 찾기
       const existingTab = openTabs.find(tab => tab.path === filePath);
 
       if (existingTab && !existingTab.isActive) {
@@ -249,7 +274,6 @@ export function RepoPage() {
         console.log('URL 경로에 해당하는 탭이 없음:', filePath);
       }
     } else if (!filePath && openTabs.length > 0) {
-      // URL에 파일 경로가 없으면 첫 번째 탭을 활성화
       const firstTab = openTabs[0];
       if (firstTab && !firstTab.isActive) {
         console.log('첫 번째 탭 활성화:', firstTab.name);
@@ -258,7 +282,6 @@ export function RepoPage() {
     }
   }, [filePath, repoId, openTabs, activateTab, hasHydrated]);
 
-  // 사이드바 섹션에 따른 컴포넌트 렌더링
   const renderSidebarContent = () => {
     switch (activeSection) {
       case 'files':
@@ -276,7 +299,6 @@ export function RepoPage() {
     }
   };
 
-  // 유효하지 않은 repoId 처리
   if (!repoId || isNaN(repositoryId)) {
     return (
       <div className={styles.errorPage}>
@@ -286,7 +308,6 @@ export function RepoPage() {
     );
   }
 
-  // 하이드레이션 완료까지 로딩 표시
   if (!hasHydrated) {
     return <Loading />;
   }
@@ -298,14 +319,12 @@ export function RepoPage() {
         !isFileSectionVisible ? styles.hideFileSection : ''
       }`}
     >
-      {/* 파일 구조 섹션 */}
       {isFileSectionVisible && (
         <>
           <div className={styles.fileSection} style={{ width: fileSectionWidth }}>
             {renderSidebarContent()}
           </div>
 
-          {/* 수평 리사이저 */}
           <div
             className={`${styles.resizer} ${styles.horizontalResizer}`}
             onMouseDown={startHorizontalResize}
@@ -313,14 +332,12 @@ export function RepoPage() {
         </>
       )}
 
-      {/* 에디터 + 터미널 그룹 */}
       <div
         className={styles.editorGroup}
         style={{
           width: isFileSectionVisible ? `calc(100% - ${fileSectionWidth} - 6px)` : '100%',
         }}
       >
-        {/* 코드 에디터 */}
         <div className={styles.editorSection}>
           <div className={styles.tabBarContainer}>
             <TabBar repoId={repoId} />
@@ -341,7 +358,6 @@ export function RepoPage() {
           </div>
         </div>
 
-        {/* 터미널 */}
         <div className={styles.terminalSection}>
           <CodeRunner repoId={repoId} />
         </div>

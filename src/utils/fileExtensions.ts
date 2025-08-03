@@ -8,6 +8,13 @@ import articleIcon from '@/assets/icons/article.svg';
 import slidersIcon from '@/assets/icons/sliders.svg';
 import folderClosedIcon from '@/assets/icons/folder-closed.svg';
 import folderOpenIcon from '@/assets/icons/folder-open.svg';
+import chartIcon from '@/assets/icons/chart.svg';
+import noteIcon from '@/assets/icons/note.svg';
+import lockIcon from '@/assets/icons/lock.svg';
+import archiveIcon from '@/assets/icons/archive.svg';
+import bookIcon from '@/assets/icons/book.svg';
+import imageIcon from '@/assets/icons/image.svg';
+import gitIcon from '@/assets/icons/git-merge.svg';
 
 export const getLanguageFromFile = (fileName: string): string => {
   const extension = fileName.split('.').pop()?.toLowerCase();
@@ -19,6 +26,17 @@ export const getLanguageFromFile = (fileName: string): string => {
     properties: 'properties',
     yaml: 'yaml',
     yml: 'yaml',
+    gradle: 'groovy',
+    kts: 'kotlin',
+    sql: 'sql',
+    jsp: 'html',
+    jspx: 'xml',
+    ftl: 'html',
+    vm: 'html',
+    groovy: 'groovy',
+    kt: 'kotlin',
+    conf: 'ini',
+    toml: 'toml',
 
     // React/TypeScript
     ts: 'typescript',
@@ -28,11 +46,36 @@ export const getLanguageFromFile = (fileName: string): string => {
     json: 'json',
     css: 'css',
     scss: 'scss',
+    sass: 'scss',
+    less: 'less',
+    stylus: 'stylus',
+    postcss: 'css',
+    vue: 'html',
+    svelte: 'html',
+    mjs: 'javascript',
+    cjs: 'javascript',
+    mdx: 'markdown',
+    htm: 'html',
+    env: 'properties',
 
     // Python/FastAPI
     py: 'python',
     pyi: 'python',
     pyx: 'python',
+    pyc: 'python',
+    pyo: 'python',
+    pyw: 'python',
+    ipynb: 'json',
+    cfg: 'ini',
+    ini: 'ini',
+    lock: 'yaml',
+    pipfile: 'toml',
+    dockerignore: 'plaintext',
+    jinja: 'html',
+    jinja2: 'html',
+    j2: 'html',
+    iml: 'xml',
+    http: 'plaintext',
 
     // 기타 - Monaco Editor 언어 ID에 맞춰 수정
     md: 'markdown',
@@ -40,6 +83,13 @@ export const getLanguageFromFile = (fileName: string): string => {
     html: 'html',
     dockerfile: 'dockerfile',
     gitignore: 'plaintext',
+    log: 'plaintext',
+    eslintrc: 'json',
+    prettierrc: 'json',
+    editorconfig: 'ini',
+    nvmrc: 'plaintext',
+    npmrc: 'ini',
+    svg: 'xml',
   };
 
   return extensionMap[extension || ''] || 'plaintext';
@@ -55,6 +105,17 @@ export const getFileIcon = (fileName: string): string => {
     properties: slidersIcon,
     yaml: fileAltIcon,
     yml: fileAltIcon,
+    gradle: scriptIcon,
+    kts: scriptIcon,
+    sql: chartIcon,
+    jsp: codeIcon,
+    jspx: codeIcon,
+    ftl: noteIcon,
+    vm: noteIcon,
+    groovy: scriptIcon,
+    kt: codeIcon,
+    conf: slidersIcon,
+    toml: slidersIcon,
 
     // React/TypeScript
     ts: codeIcon,
@@ -64,14 +125,47 @@ export const getFileIcon = (fileName: string): string => {
     json: fileAltIcon,
     css: colorsSwatchIcon,
     scss: colorsSwatchIcon,
+    sass: colorsSwatchIcon,
+    less: colorsSwatchIcon,
+    stylus: colorsSwatchIcon,
+    postcss: colorsSwatchIcon,
+    vue: codeIcon,
+    svelte: codeIcon,
+    mjs: scriptIcon,
+    cjs: scriptIcon,
+    mdx: articleIcon,
+    htm: codeIcon,
+    env: lockIcon,
 
     // Python/FastAPI
     py: scriptIcon,
+    pyc: archiveIcon,
+    pyo: archiveIcon,
+    pyw: scriptIcon,
+    ipynb: bookIcon,
+    cfg: slidersIcon,
+    ini: slidersIcon,
+    lock: lockIcon,
+    pipfile: fileAltIcon,
+    dockerignore: fileOffIcon,
+    jinja: noteIcon,
+    jinja2: noteIcon,
+    j2: noteIcon,
+    iml: slidersIcon,
+    http: scriptIcon,
 
     // 기타
     md: articleIcon,
     txt: notesIcon,
     html: codeIcon,
+    log: notesIcon,
+    eslintrc: slidersIcon,
+    prettierrc: slidersIcon,
+    editorconfig: slidersIcon,
+    nvmrc: fileAltIcon,
+    npmrc: slidersIcon,
+    gitignore: gitIcon,
+    svg: imageIcon,
   };
 
   return iconMap[extension || ''] || fileOffIcon;

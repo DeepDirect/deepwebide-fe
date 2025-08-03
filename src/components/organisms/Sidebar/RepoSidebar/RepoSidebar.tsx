@@ -23,6 +23,14 @@ export const Sidebar = () => {
     }
   };
 
+  const handleExitClick = () => {
+    if (repoId) {
+      navigate({
+        to: '/main',
+      });
+    }
+  };
+
   return (
     <aside className={styles.sidebar}>
       <div className={styles.top}>
@@ -49,7 +57,7 @@ export const Sidebar = () => {
         </Tooltip>
 
         <Tooltip label="Exit">
-          <button className={styles.icon}>
+          <button className={styles.icon} onClick={handleExitClick}>
             <ExitIcon className={styles.iconImage} />
           </button>
         </Tooltip>

@@ -1,7 +1,6 @@
 import { useTabStore } from '@/stores/tabStore';
 import type { OpenTab } from '@/types/repo/repo.types';
 
-// 하이드레이션을 포함한 메인 훅
 export const useTabStoreHydrated = () => {
   const hasHydrated = useTabStore(state => state._hasHydrated);
   const openTabs = useTabStore(state => state.openTabs);
@@ -13,6 +12,7 @@ export const useTabStoreHydrated = () => {
   const setTabContent = useTabStore(state => state.setTabContent);
   const setTabDirty = useTabStore(state => state.setTabDirty);
   const clearTabsForRepo = useTabStore(state => state.clearTabsForRepo);
+  const clearAllTabs = useTabStore(state => state.clearAllTabs);
   const keepOnlyCurrentRepoTabs = useTabStore(state => state.keepOnlyCurrentRepoTabs);
 
   return {
@@ -26,11 +26,11 @@ export const useTabStoreHydrated = () => {
     setTabContent,
     setTabDirty,
     clearTabsForRepo,
+    clearAllTabs,
     keepOnlyCurrentRepoTabs,
   };
 };
 
-// 편의성 훅들
 export const useActiveTab = (): OpenTab | undefined => {
   return useTabStore(state => state.openTabs.find(tab => tab.isActive));
 };

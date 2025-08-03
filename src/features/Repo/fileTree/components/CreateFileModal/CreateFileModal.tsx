@@ -114,7 +114,7 @@ const CreateFileModal: React.FC<CreateFileModalProps> = ({
     }
 
     onConfirm(trimmedName, parentNode?.path);
-    toast.success(`${isFile ? '파일' : '폴더'}이 생성되었습니다.`);
+    toast.success(`${isFile ? '파일이' : '폴더가'} 생성되었습니다.`);
     cleanupModal();
     onOpenChange(false);
   }, [
