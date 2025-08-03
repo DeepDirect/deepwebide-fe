@@ -1,6 +1,7 @@
 import React from 'react';
 import clsx from 'clsx';
 import { getFolderIcon, getFileIcon } from '@/utils/fileExtensions';
+import { useTabStore } from '@/stores/tabStore';
 import FileTreeContextMenu from '../FileTreeContextMenu/FileTreeContextMenu';
 import InlineEdit from '../InlineEdit/InlineEdit';
 import styles from './FileTreeItem.module.scss';
@@ -38,6 +39,29 @@ const FileTreeItem: React.FC<FileTreeItemProps> = ({
   onExternalDragLeave,
   onExternalDrop,
 }) => {
+  const { openTabs } = useTabStore();
+
+  // 탭 상태 확인 - 파일만 체크
+  const getTabStatus = () => {
+    if (node.fileType === 'FOLDER') {
+      return { isOpen: false, isActive: false, isDirty: false };
+    }
+
+    const tab = openTabs.find(
+      tab =>
+        tab.fileId === node.fileId || tab.path === node.path || tab.id.endsWith(`/${node.path}`)
+    );
+
+    return {
+      isOpen: !!tab && !tab.isDeleted && !tab.hasFileTreeMismatch,
+      isActive: !!tab && tab.isActive && !tab.isDeleted && !tab.hasFileTreeMismatch,
+      isDirty: !!tab && tab.isDirty && !tab.isDeleted && !tab.hasFileTreeMismatch,
+      tab,
+    };
+  };
+
+  const tabStatus = getTabStatus();
+
   const handleClick = (e: React.MouseEvent) => {
     // 편집 중이거나 드래그 중일 때는 클릭 이벤트 무시
     if (isEditing || isDragging) {
@@ -242,6 +266,10 @@ const FileTreeItem: React.FC<FileTreeItemProps> = ({
             [styles.canDrop]: canDrop && isDropTarget,
             [styles.cannotDrop]: !canDrop && isDropTarget,
             [styles.draggable]: !isEditing,
+            // 탭 상태 클래스 - 미묘하게 적용
+            [styles.hasTab]: tabStatus.isOpen,
+            [styles.activeTab]: tabStatus.isActive,
+            [styles.dirtyTab]: tabStatus.isDirty,
             // 내부 드롭 위치별 클래스
             [styles.dropBefore]:
               isDropTarget && getDropPosition?.(node.fileId.toString()) === 'before',
@@ -270,6 +298,11 @@ const FileTreeItem: React.FC<FileTreeItemProps> = ({
         onDrop={handleCombinedDrop}
         // 최상단 레벨 여부를 data attribute로 전달
         data-is-top-level={isTopLevel}
+        title={
+          tabStatus.isOpen
+            ? `${node.fileName}${tabStatus.isActive ? ' (활성 탭)' : ' (열린 탭)'}${tabStatus.isDirty ? ' (변경됨)' : ''}`
+            : node.fileName
+        }
       >
         <div className={styles.arrowArea}>
           {node.fileType === 'FOLDER' && (
@@ -308,6 +341,16 @@ const FileTreeItem: React.FC<FileTreeItemProps> = ({
           className={styles.name}
           validateInput={validateFileName}
         />
+
+        {/* 탭 상태 인디케이터 - 우측 끝에 고정 위치 */}
+        {node.fileType === 'FILE' && (
+          <div className={styles.tabStatusIndicators}>
+            {tabStatus.isActive && <div className={styles.activeIndicator} title="현재 활성 탭" />}
+            {tabStatus.isDirty && (
+              <div className={styles.dirtyIndicator} title="변경된 내용이 있음" />
+            )}
+          </div>
+        )}
 
         {/* 외부 파일 드래그오버 상태 표시 */}
         {isExternalDragOver && (

@@ -49,6 +49,37 @@
     }
   }
 
+  // 탭 상태별 미묘한 스타일 변경
+  &.hasTab {
+    // 탭이 열린 파일 - 미묘하게 강조
+    &.file {
+      font-weight: $font-weight-medium;
+    }
+  }
+
+  &.activeTab {
+    // 현재 활성 탭인 파일 - 호버 상태와 동일한 글자색 + 미묘한 배경색
+    &.file {
+      color: var(--filetree-text-hover); // 호버 상태와 동일한 색상
+      background-color: var(--filetree-active-tab-subtle-bg);
+
+      &:hover {
+        background-color: var(--filetree-active-tab-subtle-hover);
+      }
+
+      // 아이콘도 호버 상태와 동일하게
+      .icon {
+        opacity: 1;
+        transform: scale(1.05);
+
+        // 다크모드에서도 호버 상태와 동일
+        :global(.dark) & {
+          filter: brightness(0) invert(1) brightness(0.9) contrast(1.2);
+        }
+      }
+    }
+  }
+
   // 파일과 폴더에 따른 스타일 차이
   &.folder {
     font-weight: $font-weight-medium;
@@ -365,6 +396,38 @@
   }
 }
 
+// 탭 상태 인디케이터 컨테이너 - 우측 끝에 고정
+.tabStatusIndicators {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+// 탭 상태 인디케이터들 - 우측 끝 고정 위치
+.activeIndicator {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: var(--filetree-tab-active-dot);
+  box-shadow: 0 0 4px var(--filetree-tab-active-glow);
+  animation: subtle-pulse 2s ease-in-out infinite;
+}
+
+.dirtyIndicator {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: var(--filetree-tab-dirty-dot);
+  box-shadow: 0 0 3px var(--filetree-tab-dirty-glow);
+  animation: dirty-pulse 1.5s ease-in-out infinite;
+}
+
 // 파일/폴더 이름
 .name {
   flex: 0 1 auto;
@@ -498,6 +561,33 @@
   }
 }
 
+// 탭 상태 애니메이션 - 아주 미묘함
+@keyframes subtle-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.6;
+    transform: scale(0.8);
+  }
+}
+
+@keyframes dirty-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.7;
+    transform: scale(0.9);
+  }
+}
+
 // 아래쪽에 나타나는 툴팁용 애니메이션
 @keyframes tooltip-appear-below {
   from {
@@ -539,6 +629,14 @@
   --filetree-focus-indicator: #{$blue-3};
   --filetree-selected-indicator: #{$orange};
   --filetree-editing-indicator: #{$yellow};
+
+  // 탭 상태 색상 - 미묘함
+  --filetree-active-tab-subtle-bg: rgb(55 79 255 / 3%);
+  --filetree-active-tab-subtle-hover: rgb(55 79 255 / 6%);
+  --filetree-tab-active-dot: #{$blue-3};
+  --filetree-tab-active-glow: rgb(55 79 255 / 40%);
+  --filetree-tab-dirty-dot: #{$orange};
+  --filetree-tab-dirty-glow: rgb(255 107 53 / 40%);
 
   // 내부 드래그앤드롭 색상
   --filetree-item-dragging: #{$gray-8};
@@ -589,6 +687,14 @@
   --filetree-focus-indicator: #{$blue-3};
   --filetree-selected-indicator: #{$orange};
   --filetree-editing-indicator: #{$yellow};
+
+  // 탭 상태 색상 - 미묘함
+  --filetree-active-tab-subtle-bg: rgb(55 79 255 / 8%);
+  --filetree-active-tab-subtle-hover: rgb(55 79 255 / 12%);
+  --filetree-tab-active-dot: #{$blue-3};
+  --filetree-tab-active-glow: rgb(55 79 255 / 60%);
+  --filetree-tab-dirty-dot: #{$orange};
+  --filetree-tab-dirty-glow: rgb(255 107 53 / 60%);
 
   // 내부 드래그앤드롭 색상
   --filetree-item-dragging: #{$gray-5};
