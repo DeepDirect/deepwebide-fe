@@ -9,6 +9,7 @@ import { useCollaborationStore } from '@/stores/collaborationStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useFileContentLoader } from '@/hooks/repo/useFileContentLoader';
 import { useYjsSavePoint } from '@/hooks/repo/useYjsSavePoint';
+import { useThemeStore } from '@/stores/themeStore';
 import Loading from '@/components/molecules/Loading/Loading';
 import styles from './RepoPage.module.scss';
 import TabBar from '@/components/organisms/TabBar/TabBar';
@@ -38,6 +39,7 @@ export function RepoPage() {
   const search = useSearch({ strict: false });
   const repoId = params.repoId;
   const filePath = search.file;
+  const { isDarkMode } = useThemeStore();
 
   const {
     openTabs,
@@ -358,7 +360,7 @@ export function RepoPage() {
           </div>
         </div>
 
-        <div className={styles.terminalSection}>
+        <div className={`${styles.terminalSection} ${isDarkMode ? styles.darkMode : ''}`}>
           <CodeRunner
             repoId={repoId}
             repositoryName={repositoryInfo?.repositoryName}
