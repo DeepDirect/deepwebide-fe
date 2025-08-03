@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import introTitle from '../../assets/images/intro-title.svg';
-import bareFace from '../../assets/images/bare-face.svg';
-import glasses from '../../assets/images/glasses.svg';
+import introTitle from '@/assets/images/intro-title.svg';
+import bareFace from '@/assets/images/bare-face.svg';
+import glasses from '@/assets/images/glasses.svg';
 import './LandingPage.scss';
 
 const LandingPage: React.FC = () => {

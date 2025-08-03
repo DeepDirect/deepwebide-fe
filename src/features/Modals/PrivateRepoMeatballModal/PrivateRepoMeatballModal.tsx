@@ -1,6 +1,9 @@
 import React from 'react';
 import MenuItem from '@/components/molecules/Modals/MenuItem/MenuItem';
 import MeatballModal from '@/components/organisms/Modals/MeatballModal/MeatballModal';
+import editBoxIcon from '@/assets/icons/edit-box.svg';
+import forwardIcon from '@/assets/icons/forward.svg';
+import trashIcon from '@/assets/icons/trash.svg';
 
 export interface PrivateRepoMeatballModalProps {
   open: boolean;
@@ -51,24 +54,14 @@ const PrivateRepoMeatballModal: React.FC<PrivateRepoMeatballModalProps> = ({
     >
       <MenuItem
         label="이름 변경하기"
-        iconPath="/src/assets/icons/edit-box.svg"
+        iconPath={editBoxIcon}
         onClick={handleRename}
         variant="default"
       />
 
-      <MenuItem
-        label="공유하기"
-        iconPath="/src/assets/icons/forward.svg"
-        onClick={handleShare}
-        variant="default"
-      />
+      <MenuItem label="공유하기" iconPath={forwardIcon} onClick={handleShare} variant="default" />
 
-      <MenuItem
-        label="삭제하기"
-        iconPath="/src/assets/icons/trash.svg"
-        onClick={handleDelete}
-        variant="red"
-      />
+      <MenuItem label="삭제하기" iconPath={trashIcon} onClick={handleDelete} variant="red" />
     </MeatballModal>
   );
 };

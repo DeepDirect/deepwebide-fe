@@ -1,6 +1,7 @@
 import React from 'react';
 import { Select as RadixSelect } from 'radix-ui';
 import './Select.scss';
+import chevronDownIcon from '@/assets/icons/chevron-down.svg';
 
 export interface SelectOption {
   value: string;
@@ -29,7 +30,7 @@ const Select: React.FC<SelectProps> = ({
       <RadixSelect.Trigger className={`select-trigger ${className}`.trim()}>
         <RadixSelect.Value placeholder={placeholder} />
         <RadixSelect.Icon className="select-icon">
-          <img src="/src/assets/icons/chevron-down.svg" alt="" />
+          <img src={chevronDownIcon} alt="" />
         </RadixSelect.Icon>
       </RadixSelect.Trigger>
 
