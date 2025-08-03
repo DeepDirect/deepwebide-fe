@@ -186,12 +186,6 @@ const Chat: React.FC<ChattingProps> = ({ isConnected, connectedCount, messages, 
             </div>
           )}
 
-          {displayMessages && displayMessages.length === 0 && (
-            <div style={{ padding: '10px', textAlign: 'center', color: '#999', fontSize: '12px' }}>
-              {searchResults ? '검색 결과가 없습니다.' : <Loading />}
-            </div>
-          )}
-
           {displayMessages.map((message, index) => {
             const shouldShowDate = shouldShowDateDivider(message, index);
             const isMyMessage = String(message.senderId) === currentUserId;
