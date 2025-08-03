@@ -150,7 +150,11 @@
   flex: 0 0 273px;
   box-sizing: border-box;
   overflow: hidden;
-  background-color: #343a40;
+  background-color: $gray-10;
+
+  &.darkMode {
+    background-color: $gray-2;
+  }
 
   @media screen and (height <= 700px) {
     flex: 0 0 200px;

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import PasswordInput from '@/components/atoms/Input/PasswordInput';
 import InvitationFormActions from '@/components/molecules/InvitationFormActions/InvitationFormActions';
+import lockIcon from '../../../assets/icons/lock.svg';
 
 import './InvitationLinkForm.scss';
 
@@ -35,7 +36,7 @@ const InvitationLinkForm: React.FC<InvitationLinkFormProps> = ({
         <div className="invitation-form__header">
           {/* 자물쇠 아이콘 */}
           <div className="invitation-form__icon">
-            <img src="/src/assets/icons/lock.svg" alt="잠금 아이콘" />
+            <img src={lockIcon} alt="잠금 아이콘" />
           </div>
 
           <h1 className="invitation-form__title">입장 코드 입력</h1>

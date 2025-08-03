@@ -64,7 +64,7 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    width: 883px;
+    width: 700px;
     height: 92px;
 
     @include mobile {
@@ -89,7 +89,9 @@
   }
 
   .linkWrapper {
-    width: 424px;
+    display: flex;
+    flex-direction: row;
+    padding-right: 37px;
 
     @include mobile {
       width: 100%;
@@ -110,7 +112,7 @@
   .input {
     box-sizing: border-box;
     width: 100%;
-    max-width: 424px;
+    max-width: 350px;
     padding: 0.75rem 1rem;
     border: 1px solid $gray-8;
     border-radius: 6px;
@@ -177,10 +179,15 @@
   flex-direction: row;
   align-items: center;
   gap: 10px;
-  cursor: pointer;
 
   .icon {
     width: 20px;
     height: 20px;
+    cursor: pointer;
+
+    &:hover {
+      opacity: 1;
+      transform: scale(1.1);
+    }
   }
 }

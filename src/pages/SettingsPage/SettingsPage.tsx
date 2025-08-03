@@ -123,7 +123,7 @@ const SettingsPage: React.FC = () => {
                   onClick={() => scrollToSection('deleteSection')}
                 >
                   <DeleteIcon className={styles.icon} />
-                  <span>DELETE</span>
+                  <span className={styles.deleteLabel}>DELETE</span>
                 </div>
               )}
             </div>
