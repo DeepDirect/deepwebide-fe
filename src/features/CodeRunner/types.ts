@@ -9,6 +9,9 @@ export interface CommandHistory {
 export interface CodeRunnerProps {
   repoId?: number | string;
   repositoryName?: string;
+  enableCollaboration?: boolean;
+  userId?: string;
+  userName?: string;
 }
 
 export interface CodeRunnerState {
