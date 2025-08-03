@@ -72,7 +72,7 @@ const Chat: React.FC<ChattingProps> = ({ isConnected, connectedCount, messages, 
         }))
         .sort((a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime());
       setTotalMessages(formattedMessages);
-      if (!isSuccess) {
+      if (data.pageParams && data.pageParams.length === 1) {
         requestAnimationFrame(() => {
           scrollToBottom();
         });
