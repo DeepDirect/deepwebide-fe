@@ -9,6 +9,7 @@ import {
 } from '@/api/fileTree';
 import type { CreateFileRequest, MoveFileRequest, RenameFileRequest, FileTreeNode } from '../types';
 import { useYjsFileTree } from '@/hooks/repo/useYjsFileTree';
+
 // 파일 트리 조회
 export const useFileTreeQuery = (repositoryId: number) => {
   return useQuery<FileTreeNode[]>({
@@ -164,8 +165,8 @@ export const useUploadFileMutation = (repositoryId: number) => {
   const { broadcastFileTreeUpdate } = useYjsFileTree(repositoryId);
 
   return useMutation({
-    mutationFn: async ({ file, parentPath }: { file: File; parentPath?: string }) => {
-      const response = await uploadFile(repositoryId, file, parentPath);
+    mutationFn: async ({ file, parentId }: { file: File; parentId: number }) => {
+      const response = await uploadFile(repositoryId, file, parentId);
       return response.data as FileTreeNode;
     },
     onSuccess: async (uploadedNode: FileTreeNode) => {

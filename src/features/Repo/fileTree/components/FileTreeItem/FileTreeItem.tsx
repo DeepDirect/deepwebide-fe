@@ -298,6 +298,7 @@ const FileTreeItem: React.FC<FileTreeItemProps> = ({
         onDrop={handleCombinedDrop}
         // 최상단 레벨 여부를 data attribute로 전달
         data-is-top-level={isTopLevel}
+        data-file-tree-item
         title={
           tabStatus.isOpen
             ? `${node.fileName}${tabStatus.isActive ? ' (활성 탭)' : ' (열린 탭)'}${tabStatus.isDirty ? ' (변경됨)' : ''}`

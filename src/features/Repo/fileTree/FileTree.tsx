@@ -91,7 +91,7 @@ const FileTree: React.FC<ExtendedFileTreeProps> = ({
   } = useFileTreeOperations({
     repositoryId: repositoryId || 0,
     onSuccess: handleOperationSuccess,
-    rootFolderId: treeData?.[0]?.fileId,
+    rootFolderId: treeData?.[0]?.fileId || undefined,
   });
 
   // 내부 드래그앤드롭 훅
@@ -102,10 +102,13 @@ const FileTree: React.FC<ExtendedFileTreeProps> = ({
     handleDragOver,
     handleDragLeave,
     handleDrop,
+    handleContainerDragOver,
+    handleContainerDrop,
     isDragging,
     isDropTarget,
     getDropPosition,
     canDrop,
+    isRootDropTarget,
   } = useFileTreeDragDrop({
     onMoveNode: moveItem,
   });
@@ -122,6 +125,7 @@ const FileTree: React.FC<ExtendedFileTreeProps> = ({
     handleNodeExternalDrop,
   } = useFileTreeExternalDrop({
     onFileUpload: uploadFiles,
+    rootFolderId: treeData?.find(node => node.parentId === null)?.fileId,
   });
 
   // 파일트리 데이터가 변경될 때마다 탭과 동기화
@@ -203,6 +207,46 @@ const FileTree: React.FC<ExtendedFileTreeProps> = ({
       hasError: !!error,
     });
   }, [repoId, repositoryId, enableCollaboration, treeData?.length, yMap, isLoading, error]);
+
+  // 외부 드래그 오버레이 관리
+  useEffect(() => {
+    const fileTreeContainer = document.querySelector('[data-file-tree-container]');
+    if (!fileTreeContainer) return;
+
+    const cleanupOverlay = () => {
+      const existingOverlay = fileTreeContainer.querySelector('.file-tree-drag-overlay');
+      if (existingOverlay) {
+        existingOverlay.remove();
+      }
+    };
+
+    if (externalDropState.isDragOver && !externalDropState.dropTarget) {
+      cleanupOverlay();
+
+      const overlay = document.createElement('div');
+      overlay.className = 'file-tree-drag-overlay';
+      overlay.style.cssText = `
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border: 3px dashed var(--filetree-external-drag-border);
+        border-radius: 12px;
+        background: transparent;
+        animation: external-drag-border-pulse 2s ease-in-out infinite;
+        pointer-events: none;
+        z-index: 1;
+      `;
+
+      fileTreeContainer.appendChild(overlay);
+      console.log('전체 영역 오버레이 생성됨');
+    } else {
+      cleanupOverlay();
+    }
+
+    return cleanupOverlay;
+  }, [externalDropState.isDragOver, externalDropState.dropTarget]);
 
   // 전역 드래그 이벤트 방지
   useEffect(() => {
@@ -356,10 +400,7 @@ const FileTree: React.FC<ExtendedFileTreeProps> = ({
             onDrop={(node, e) => handleDrop(node, e)}
             getDropPosition={nodeId => getDropPosition(nodeId)}
             // 외부 파일 드롭
-            isExternalDragOver={
-              externalDropState.dropTarget?.nodeId === nodeId ||
-              (externalDropState.isDragOver && !externalDropState.dropTarget)
-            }
+            isExternalDragOver={externalDropState.dropTarget?.nodeId === nodeId}
             onExternalDragOver={(node, e) => handleNodeExternalDragOver(node, e)}
             onExternalDragLeave={(node, e) => handleNodeExternalDragLeave(node, e)}
             onExternalDrop={(node, e) => handleNodeExternalDrop(node, e)}
@@ -380,12 +421,19 @@ const FileTree: React.FC<ExtendedFileTreeProps> = ({
         <div
           className={clsx(styles.fileTree, className, {
             [styles.collaborationMode]: enableCollaboration,
+            [styles.rootDropTarget]: isRootDropTarget,
           })}
           data-file-tree-container
           onDragEnter={handleExternalDragEnter}
-          onDragOver={handleExternalDragOver}
+          onDragOver={e => {
+            handleExternalDragOver(e);
+            handleContainerDragOver(e);
+          }}
           onDragLeave={handleExternalDragLeave}
-          onDrop={handleExternalDrop}
+          onDrop={e => {
+            handleExternalDrop(e);
+            handleContainerDrop(e);
+          }}
         >
           {/* 협업 상태 표시 */}
           {renderCollaborationStatus()}
@@ -406,6 +454,16 @@ const FileTree: React.FC<ExtendedFileTreeProps> = ({
                 {isMoving && '이동 중...'}
                 {isUploading && '업로드 중...'}
               </span>
+            </div>
+          )}
+
+          {/* 최상위 폴더 드롭 피드백 */}
+          {isRootDropTarget && (
+            <div className={styles.rootDropOverlay}>
+              <div className={styles.rootDropMessage}>
+                <span className={styles.rootDropIcon}>📁</span>
+                <span>최상위 폴더로 이동</span>
+              </div>
             </div>
           )}
 
