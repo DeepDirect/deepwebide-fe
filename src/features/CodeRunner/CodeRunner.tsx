@@ -71,7 +71,7 @@ export function CodeRunner(props: CodeRunnerProps) {
           resp.status === 'SUCCESS' ? resp.output || resp.message : resp.error || resp.message;
 
         if (resp.port) {
-          const url = `http://localhost:${resp.port}`;
+          const url = `http://3.39.22.178:${resp.port}`;
           output = (
             <a
               href={url}
