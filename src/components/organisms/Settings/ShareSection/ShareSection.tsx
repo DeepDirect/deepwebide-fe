@@ -113,6 +113,7 @@ const ShareSection = ({ onShareLinkCopy }: shareSectionProps) => {
         <ShareIcon className={styles.nameIcon} />
         <h2 className={styles.sectionTitle}>SHARE</h2>
       </div>
+
       {/* 링크 공유 */}
       {settingsData.isShared && (
         <div className={`${styles.itemWrapper} ${styles.shareWrapper}`}>
@@ -127,14 +128,14 @@ const ShareSection = ({ onShareLinkCopy }: shareSectionProps) => {
                 <CopyIcon className={styles.icon} />
               </div>
             </div>
-
-            {/* 공유 링크 인풋 */}
-            {settingsData.shareLink && (
-              <input type="text" value={settingsData.shareLink} readOnly className={styles.input} />
-            )}
           </div>
+          {/* 공유 링크 인풋 */}
+          {settingsData.shareLink && (
+            <input type="text" value={settingsData.shareLink} readOnly className={styles.input} />
+          )}
         </div>
       )}
+
       {/* 입장 코드 */}
       {settingsData.isShared && isCurrentUserOwner(settingsData.members) && (
         <div className={`${styles.itemWrapper} ${styles.entryCodeWrapper}`}>
