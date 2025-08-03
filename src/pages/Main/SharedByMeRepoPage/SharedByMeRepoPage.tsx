@@ -88,6 +88,7 @@ const SharedByMeRepoPage = () => {
   // 좋아요 필터
   const handleLikChange = () => {
     setIsLiked(!isLiked);
+    setPagination(prev => ({ ...prev, current: 1 }));
     repositoryRefetch();
   };
 
