@@ -38,7 +38,7 @@ interface UseFileTreeOperationsResult {
     targetNode: FileTreeNode | null,
     position?: string
   ) => Promise<void>;
-  uploadFiles: (files: File[], targetPath: string) => Promise<void>;
+  uploadFiles: (files: File[], targetParentId?: number) => Promise<void>;
 
   // 로딩 상태
   isCreating: boolean;
@@ -47,30 +47,6 @@ interface UseFileTreeOperationsResult {
   isMoving: boolean;
   isUploading: boolean;
 }
-
-// 안전한 ID 변환 함수
-const safeToString = (value: unknown): string => {
-  if (value === null || value === undefined) {
-    console.warn('safeToString: null 또는 undefined 값 감지');
-    return '';
-  }
-
-  if (typeof value === 'string') {
-    return value;
-  }
-
-  if (typeof value === 'number') {
-    return value.toString();
-  }
-
-  // 객체나 다른 타입인 경우
-  try {
-    return String(value);
-  } catch (error) {
-    console.error('safeToString 변환 실패:', error);
-    return '';
-  }
-};
 
 export const useFileTreeOperations = ({
   repositoryId,
@@ -107,12 +83,7 @@ export const useFileTreeOperations = ({
   };
 
   const startEditing = (nodeId: string) => {
-    const safeNodeId = safeToString(nodeId);
-    if (safeNodeId) {
-      setEditingNode(safeNodeId);
-    } else {
-      //
-    }
+    setEditingNode(nodeId);
   };
 
   const stopEditing = () => {
@@ -122,7 +93,7 @@ export const useFileTreeOperations = ({
   // CRUD 작업 함수들
   const createItem = async (fileName: string) => {
     if (!createModalType) {
-      toast.error('createItem: createModalType이 없음');
+      toast.error('생성할 파일 타입이 지정되지 않았습니다.');
       return;
     }
 
@@ -145,29 +116,23 @@ export const useFileTreeOperations = ({
 
       closeCreateModal();
 
-      // 성공 콜백 호출
       if (onSuccess && typeof onSuccess === 'function') {
         onSuccess();
       }
     } catch (error) {
-      console.error('파일 생성 실패:', error);
+      const errorMessage = error instanceof Error ? error.message : '파일 생성에 실패했습니다.';
+      toast.error(errorMessage);
       throw error;
     }
   };
 
   const renameItem = async (node: FileTreeNode, newName: string) => {
     if (!node || !node.fileId) {
-      console.error('renameItem: 유효하지 않은 node:', node);
+      toast.error('유효하지 않은 파일입니다.');
       return;
     }
 
     try {
-      console.log('파일 이름 변경 시작:', {
-        currentName: node.fileName,
-        newName,
-        fileId: node.fileId,
-      });
-
       await renameMutation.mutateAsync({
         fileId: node.fileId,
         data: { newFileName: newName },
@@ -179,22 +144,23 @@ export const useFileTreeOperations = ({
         onSuccess();
       }
 
-      console.log('파일 이름 변경 완료 - YJS 동기화됨');
+      toast.success(`"${node.fileName}"의 이름이 "${newName}"으로 변경되었습니다.`);
     } catch (error) {
-      console.error('파일 이름 변경 실패:', error);
+      const errorMessage =
+        error instanceof Error ? error.message : '파일 이름 변경에 실패했습니다.';
+      toast.error(errorMessage);
       throw error;
     }
   };
 
   const deleteItem = async (node: FileTreeNode) => {
     if (!node || !node.fileId) {
-      console.error('deleteItem: 유효하지 않은 node:', node);
+      toast.error('유효하지 않은 파일입니다.');
       return;
     }
 
     try {
       if (node.parentId === null) {
-        console.warn('루트 레벨 항목 삭제 시도 - 삭제 불가');
         toast.warning('최상위 프로젝트 폴더는 삭제할 수 없습니다.');
         return;
       }
@@ -203,74 +169,18 @@ export const useFileTreeOperations = ({
         node.fileType === 'FOLDER' ? '\n폴더와 하위 모든 파일이 삭제됩니다.' : ''
       }`;
 
-      toast.warning(deleteMessage, 0, true);
+      if (confirm(deleteMessage)) {
+        await deleteMutation.mutateAsync(node.fileId);
 
-      // 사용자 확인을 기다리기 위해 Promise 사용
-      const userConfirmed = await new Promise<boolean>(resolve => {
-        const confirmButton = document.createElement('button');
-        confirmButton.textContent = '삭제';
-        confirmButton.style.cssText = `
-          margin-left: 8px;
-          padding: 4px 8px;
-          background: #dc2626;
-          color: white;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-        `;
-        confirmButton.onclick = () => {
-          resolve(true);
-          confirmButton.remove();
-          cancelButton.remove();
-        };
-
-        const cancelButton = document.createElement('button');
-        cancelButton.textContent = '취소';
-        cancelButton.style.cssText = `
-          margin-left: 4px;
-          padding: 4px 8px;
-          background: #6b7280;
-          color: white;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-        `;
-        cancelButton.onclick = () => {
-          resolve(false);
-          confirmButton.remove();
-          cancelButton.remove();
-        };
-
-        const toastElement = document.querySelector('[data-toast-id]:last-child .toast-content');
-        if (toastElement) {
-          toastElement.appendChild(confirmButton);
-          toastElement.appendChild(cancelButton);
-        } else {
-          // fallback: 기본 confirm 사용
-          resolve(window.confirm(deleteMessage));
+        if (onSuccess && typeof onSuccess === 'function') {
+          onSuccess();
         }
-      });
 
-      if (!userConfirmed) return;
-
-      console.log('파일 삭제 시작:', {
-        fileName: node.fileName,
-        fileId: node.fileId,
-        fileType: node.fileType,
-      });
-
-      await deleteMutation.mutateAsync(node.fileId);
-
-      if (onSuccess && typeof onSuccess === 'function') {
-        onSuccess();
+        toast.success(`"${node.fileName}"이(가) 삭제되었습니다.`);
       }
-
-      toast.success(`"${node.fileName}"이(가) 삭제되었습니다.`);
-
-      console.log('파일 삭제 완료 - YJS 동기화됨');
     } catch (error) {
-      console.error('파일 삭제 실패:', error);
-      toast.error('파일 삭제에 실패했습니다.');
+      const errorMessage = error instanceof Error ? error.message : '파일 삭제에 실패했습니다.';
+      toast.error(errorMessage);
       throw error;
     }
   };
@@ -281,7 +191,7 @@ export const useFileTreeOperations = ({
     position?: string
   ) => {
     if (!sourceNode || !sourceNode.fileId) {
-      console.error('moveItem: 유효하지 않은 sourceNode:', sourceNode);
+      toast.error('이동할 파일이 유효하지 않습니다.');
       return;
     }
 
@@ -290,21 +200,17 @@ export const useFileTreeOperations = ({
       const getRootFolderId = () => {
         if (rootFolderId) return rootFolderId;
 
-        // sourceNode의 path를 분석해서 최상위 폴더 찾기
         const pathParts = sourceNode.path.split('/');
         if (pathParts.length <= 1) {
-          // 이미 최상위에 있는 경우
           return sourceNode.parentId;
         }
 
-        // path를 역추적해서 최상위 폴더 ID 찾기
         const currentParentId = sourceNode.parentId;
         let currentPath = sourceNode.path;
 
         while (currentPath.includes('/')) {
           const parentPath = currentPath.substring(0, currentPath.lastIndexOf('/'));
           if (!parentPath.includes('/')) {
-            // 최상위 폴더 발견
             break;
           }
           currentPath = parentPath;
@@ -315,31 +221,9 @@ export const useFileTreeOperations = ({
 
       const dynamicRootFolderId = getRootFolderId();
 
-      console.log('파일 이동 시작:', {
-        source: {
-          id: sourceNode.fileId,
-          name: sourceNode.fileName,
-          path: sourceNode.path,
-          currentParentId: sourceNode.parentId,
-          level: sourceNode.level,
-        },
-        target: targetNode
-          ? {
-              id: targetNode.fileId,
-              name: targetNode.fileName,
-              path: targetNode.path,
-              type: targetNode.fileType,
-            }
-          : 'TOP_LEVEL_FOLDER',
-        position,
-        rootFolderId,
-        dynamicRootFolderId,
-      });
-
       let newParentId: number | null = null;
 
       if (!targetNode || position === 'root') {
-        // 최상위 프로젝트 폴더로 이동
         if (!dynamicRootFolderId) {
           throw new Error('최상위 폴더를 찾을 수 없습니다.');
         }
@@ -347,12 +231,11 @@ export const useFileTreeOperations = ({
       } else if (targetNode.fileType === 'FOLDER' && position === 'inside') {
         newParentId = targetNode.fileId;
       } else {
-        // before/after 또는 파일의 경우 부모와 같은 레벨
         newParentId = targetNode.parentId;
       }
 
       if (sourceNode.parentId === newParentId) {
-        console.log('동일한 위치로 이동 시도 - 스킵');
+        toast.info('동일한 위치로는 이동할 수 없습니다.');
         return;
       }
 
@@ -361,13 +244,12 @@ export const useFileTreeOperations = ({
         data: { newParentId },
       });
 
-      // 최상위 폴더 이동의 경우 추가 브로드캐스트 (안전장치)
+      // 최상위 폴더 이동의 경우 추가 브로드캐스트
       if (
         (!targetNode || position === 'root') &&
         broadcastFileTreeUpdate &&
         typeof broadcastFileTreeUpdate === 'function'
       ) {
-        console.log('최상위 폴더 이동 추가 브로드캐스트 시도');
         broadcastFileTreeUpdate('move', {
           node: result,
           repositoryId,
@@ -380,50 +262,52 @@ export const useFileTreeOperations = ({
         onSuccess();
       }
 
-      // 최상위 폴더 이동 성공 메시지
       if (!targetNode || position === 'root') {
         toast.success(`"${sourceNode.fileName}"을(를) 최상위 폴더로 이동했습니다.`);
+      } else {
+        toast.success(`"${sourceNode.fileName}"이(가) 이동되었습니다.`);
       }
     } catch (error) {
-      console.error('파일 이동 실패:', error);
-      toast.error('파일 이동에 실패했습니다.');
+      const errorMessage = error instanceof Error ? error.message : '파일 이동에 실패했습니다.';
+      toast.error(errorMessage);
       throw error;
     }
   };
 
-  const uploadFiles = async (files: File[], targetPath: string) => {
+  const uploadFiles = async (files: File[], targetParentId?: number) => {
     if (!files || files.length === 0) {
-      console.warn('uploadFiles: 업로드할 파일이 없음');
+      toast.warning('업로드할 파일이 없습니다.');
       return;
     }
 
     try {
-      if (!targetPath) {
-        throw new Error('루트에는 파일을 업로드할 수 없습니다. 폴더 안으로 드래그해주세요.');
-      }
+      let finalParentId = targetParentId;
 
-      console.log('파일 업로드 시작:', {
-        fileCount: files.length,
-        targetPath,
-        fileNames: files.map(f => f.name),
-      });
+      if (!finalParentId) {
+        if (rootFolderId) {
+          finalParentId = rootFolderId;
+        } else {
+          throw new Error('업로드할 폴더를 찾을 수 없습니다. 폴더를 선택해주세요.');
+        }
+      }
 
       const uploadPromises = files.map(file =>
         uploadMutation.mutateAsync({
           file,
-          parentPath: targetPath,
+          parentId: finalParentId!,
         })
       );
 
       await Promise.all(uploadPromises);
 
-      console.log('모든 파일 업로드 완료 - YJS 동기화됨');
-
       if (onSuccess && typeof onSuccess === 'function') {
         onSuccess();
       }
+
+      toast.success(`${files.length}개 파일 업로드가 완료되었습니다.`);
     } catch (error) {
-      console.error('파일 업로드 실패:', error);
+      const errorMessage = error instanceof Error ? error.message : '파일 업로드에 실패했습니다.';
+      toast.error(errorMessage);
       throw error;
     }
   };

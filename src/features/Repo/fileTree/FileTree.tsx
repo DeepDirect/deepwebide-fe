@@ -125,6 +125,7 @@ const FileTree: React.FC<ExtendedFileTreeProps> = ({
     handleNodeExternalDrop,
   } = useFileTreeExternalDrop({
     onFileUpload: uploadFiles,
+    rootFolderId: treeData?.find(node => node.parentId === null)?.fileId,
   });
 
   // 파일트리 데이터가 변경될 때마다 탭과 동기화

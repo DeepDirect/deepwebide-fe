@@ -1,18 +1,20 @@
 import { useState, useCallback, useRef } from 'react';
+import { useToast } from '@/hooks/common/useToast';
 import type { FileTreeNode } from '../types';
 
 interface ExternalDropState {
   isDragOver: boolean;
   dropTarget: {
     nodeId: string;
-    path: string;
+    parentId: number;
     type: 'folder' | 'file' | 'root';
   } | null;
   dragPreview: string | null;
 }
 
 interface UseFileTreeExternalDropProps {
-  onFileUpload: (files: File[], targetPath: string) => Promise<void>;
+  onFileUpload: (files: File[], targetParentId: number) => Promise<void>;
+  rootFolderId?: number; // 추가: 최상위 프로젝트 폴더 ID
 }
 
 interface UseFileTreeExternalDropReturn {
@@ -29,7 +31,9 @@ interface UseFileTreeExternalDropReturn {
 
 export const useFileTreeExternalDrop = ({
   onFileUpload,
+  rootFolderId,
 }: UseFileTreeExternalDropProps): UseFileTreeExternalDropReturn => {
+  const toast = useToast();
   const [externalDropState, setExternalDropState] = useState<ExternalDropState>({
     isDragOver: false,
     dropTarget: null,
@@ -42,7 +46,6 @@ export const useFileTreeExternalDrop = ({
   // 외부 파일인지 확인하는 함수
   const isExternalFile = useCallback((e: React.DragEvent): boolean => {
     const types = Array.from(e.dataTransfer.types);
-    // 내부 드래그(application/json)가 아니고 파일이 포함된 경우
     return !types.includes('application/json') && types.includes('Files');
   }, []);
 
@@ -63,19 +66,32 @@ export const useFileTreeExternalDrop = ({
     return { count, preview: `${files[0].name} 외 ${count - 1}개` };
   }, []);
 
-  // 타겟 경로 계산
-  const calculateTargetPath = useCallback((node: FileTreeNode | null): string => {
-    if (!node) return ''; // 루트
+  // 타겟 부모 ID 계산
+  const calculateTargetParentId = useCallback(
+    (node: FileTreeNode | null): number => {
+      if (!node) {
+        // 빈 공간(루트)에 드롭하는 경우 → 최상위 프로젝트 폴더에 업로드
+        if (!rootFolderId) {
+          throw new Error('최상위 폴더 ID를 찾을 수 없습니다.');
+        }
+        return rootFolderId;
+      }
 
-    if (node.fileType === 'FOLDER') {
-      return node.path; // 폴더 내부
-    } else {
-      // 파일과 같은 레벨 (부모 폴더)
-      const pathParts = node.path.split('/');
-      pathParts.pop();
-      return pathParts.join('/');
-    }
-  }, []);
+      if (node.fileType === 'FOLDER') {
+        return node.fileId; // 폴더 내부에 업로드
+      } else {
+        // 파일과 같은 레벨 (부모 폴더에 업로드)
+        if (!node.parentId) {
+          if (!rootFolderId) {
+            throw new Error('최상위 폴더 ID를 찾을 수 없습니다.');
+          }
+          return rootFolderId;
+        }
+        return node.parentId;
+      }
+    },
+    [rootFolderId]
+  );
 
   // 전체 파일트리 영역 드래그 엔터
   const handleExternalDragEnter = useCallback(
@@ -84,7 +100,6 @@ export const useFileTreeExternalDrop = ({
 
       preventDefaultDrop(e);
 
-      // 드래그 진입 시에만 카운터 증가
       if (dragCounterRef.current === 0) {
         dragCounterRef.current = 1;
 
@@ -111,9 +126,14 @@ export const useFileTreeExternalDrop = ({
       if (!isExternalFile(e)) return;
 
       preventDefaultDrop(e);
-      e.dataTransfer.dropEffect = 'copy';
+
+      if (rootFolderId) {
+        e.dataTransfer.dropEffect = 'copy';
+      } else {
+        e.dataTransfer.dropEffect = 'none';
+      }
     },
-    [isExternalFile, preventDefaultDrop]
+    [isExternalFile, preventDefaultDrop, rootFolderId]
   );
 
   // 전체 파일트리 영역 드래그 리브
@@ -123,11 +143,9 @@ export const useFileTreeExternalDrop = ({
 
       preventDefaultDrop(e);
 
-      // 더 엄격한 영역 벗어남 감지
       const currentTarget = e.currentTarget as HTMLElement;
       const relatedTarget = e.relatedTarget as HTMLElement;
 
-      // relatedTarget이 현재 요소의 자식이 아닌 경우에만 드래그 리브 처리
       if (!currentTarget.contains(relatedTarget)) {
         dragCounterRef.current = 0;
 
@@ -141,13 +159,13 @@ export const useFileTreeExternalDrop = ({
             dropTarget: null,
             dragPreview: null,
           });
-        }, 150); // 타임아웃을 늘려서 더 안정적으로
+        }, 150);
       }
     },
     [isExternalFile, preventDefaultDrop]
   );
 
-  // 전체 파일트리 영역 드롭 (빈 공간 = 루트)
+  // 전체 파일트리 영역 드롭 (빈 공간 = 최상위 프로젝트 폴더)
   const handleExternalDrop = useCallback(
     async (e: React.DragEvent) => {
       if (!isExternalFile(e)) return;
@@ -158,12 +176,14 @@ export const useFileTreeExternalDrop = ({
       if (files.length === 0) return;
 
       try {
-        await onFileUpload(files, ''); // 루트 경로
-        console.log(`📁 루트에 ${files.length}개 파일 업로드 완료`);
+        const targetParentId = calculateTargetParentId(null);
+        await onFileUpload(files, targetParentId);
+
+        toast.success(`최상위 프로젝트 폴더에 ${files.length}개 파일 업로드 완료`);
       } catch (error) {
-        console.error('파일 업로드 실패:', error);
+        const errorMessage = error instanceof Error ? error.message : '파일 업로드 실패';
+        toast.error(errorMessage);
       } finally {
-        // 상태 완전 초기화
         if (dragLeaveTimeoutRef.current) {
           clearTimeout(dragLeaveTimeoutRef.current);
           dragLeaveTimeoutRef.current = null;
@@ -177,7 +197,7 @@ export const useFileTreeExternalDrop = ({
         });
       }
     },
-    [isExternalFile, preventDefaultDrop, onFileUpload]
+    [isExternalFile, preventDefaultDrop, calculateTargetParentId, onFileUpload, toast]
   );
 
   // 특정 노드에 드래그 오버
@@ -186,20 +206,24 @@ export const useFileTreeExternalDrop = ({
       if (!isExternalFile(e)) return;
 
       preventDefaultDrop(e);
-      e.dataTransfer.dropEffect = 'copy';
 
-      const targetPath = calculateTargetPath(node);
+      try {
+        const targetParentId = calculateTargetParentId(node);
+        e.dataTransfer.dropEffect = 'copy';
 
-      setExternalDropState(prev => ({
-        ...prev,
-        dropTarget: {
-          nodeId: node.fileId.toString(),
-          path: targetPath,
-          type: node.fileType === 'FOLDER' ? 'folder' : 'file',
-        },
-      }));
+        setExternalDropState(prev => ({
+          ...prev,
+          dropTarget: {
+            nodeId: node.fileId.toString(),
+            parentId: targetParentId,
+            type: node.fileType === 'FOLDER' ? 'folder' : 'file',
+          },
+        }));
+      } catch {
+        e.dataTransfer.dropEffect = 'none';
+      }
     },
-    [isExternalFile, preventDefaultDrop, calculateTargetPath]
+    [isExternalFile, preventDefaultDrop, calculateTargetParentId]
   );
 
   // 특정 노드에서 드래그 리브
@@ -209,7 +233,6 @@ export const useFileTreeExternalDrop = ({
 
       preventDefaultDrop(e);
 
-      // 노드에서 벗어났을 때 해당 노드 타겟 해제
       setExternalDropState(prev => ({
         ...prev,
         dropTarget: prev.dropTarget?.nodeId === node.fileId.toString() ? null : prev.dropTarget,
@@ -228,21 +251,20 @@ export const useFileTreeExternalDrop = ({
       const files = Array.from(e.dataTransfer.files);
       if (files.length === 0) return;
 
-      const targetPath = calculateTargetPath(node);
-
       try {
-        await onFileUpload(files, targetPath);
+        const targetParentId = calculateTargetParentId(node);
+        await onFileUpload(files, targetParentId);
 
         const locationDesc =
           node.fileType === 'FOLDER'
             ? `"${node.fileName}" 폴더 내부`
             : `"${node.fileName}" 파일과 같은 레벨`;
 
-        console.log(`📁 ${locationDesc}에 ${files.length}개 파일 업로드 완료`);
+        toast.success(`${locationDesc}에 ${files.length}개 파일 업로드 완료`);
       } catch (error) {
-        console.error('파일 업로드 실패:', error);
+        const errorMessage = error instanceof Error ? error.message : '파일 업로드 실패';
+        toast.error(errorMessage);
       } finally {
-        // 상태 완전 초기화
         if (dragLeaveTimeoutRef.current) {
           clearTimeout(dragLeaveTimeoutRef.current);
           dragLeaveTimeoutRef.current = null;
@@ -256,7 +278,7 @@ export const useFileTreeExternalDrop = ({
         });
       }
     },
-    [isExternalFile, preventDefaultDrop, calculateTargetPath, onFileUpload]
+    [isExternalFile, preventDefaultDrop, calculateTargetParentId, onFileUpload, toast]
   );
 
   // 특정 노드가 드롭 타겟인지 확인

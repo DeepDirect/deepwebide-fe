@@ -77,24 +77,22 @@ export const createFile = async (
   return response.data;
 };
 
-// TODO: 파일 업로드 (외부 드래그앤드롭용). 추후 API 생성시 수정 필요
+// 파일 업로드 (외부 드래그앤드롭용) - 백엔드 API 스펙에 맞게 수정
 export const uploadFile = async (
   repositoryId: number,
   file: File,
-  parentPath?: string
+  parentId: number
 ): Promise<FileOperationResponse> => {
   const formData = new FormData();
   formData.append('file', file);
-  if (parentPath) {
-    formData.append('parentPath', parentPath);
-  }
+  formData.append('parentId', parentId.toString());
 
   try {
     console.log(`📤 파일 업로드 시작:`, {
       repositoryId,
       fileName: file.name,
       fileSize: file.size,
-      parentPath: parentPath || '(루트)',
+      parentId,
       url: `api/repositories/${repositoryId}/files/upload`,
     });
 
@@ -111,6 +109,7 @@ export const uploadFile = async (
     console.log('📤 파일 업로드 성공:', {
       status: response.status,
       fileName: file.name,
+      uploadedFile: response.data.data,
     });
 
     return response.data;
