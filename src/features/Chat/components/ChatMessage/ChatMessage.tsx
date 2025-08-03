@@ -4,6 +4,9 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import { useTabStore } from '@/stores/tabStore';
+import { useFileTreeQuery } from '@/features/Repo/fileTree/hooks/useFileTreeApi';
+import { findNodeByPath } from '@/features/Repo/fileTree/utils';
+import { useToast } from '@/hooks/common/useToast';
 import './ChatMessage.scss';
 import { type ChatReceivedMessage } from '@/features/Chat/types';
 
@@ -19,10 +22,15 @@ dayjs.locale('ko');
 const ChatMessage: React.FC<ChatMessageProps> = ({ message, isMyMessage }) => {
   const params = useParams({ strict: false });
   const navigate = useNavigate();
+  const toast = useToast();
   const { openFileByPath } = useTabStore();
 
   // 현재 repo ID 가져오기
   const repoId = params.repoId as string;
+  const repositoryId = repoId ? parseInt(repoId, 10) : 0;
+
+  // 파일트리 데이터 가져오기 (파일 존재 여부 확인용)
+  const { data: fileTreeData } = useFileTreeQuery(repositoryId);
 
   // 시간 포맷팅 함수
   const formatTime = (isoString: string) => {
@@ -34,6 +42,28 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isMyMessage }) => {
   const handleFilePathClick = (filePath: string) => {
     if (!repoId) {
       console.warn('repoId가 없어서 파일을 열 수 없습니다.');
+      toast.error('저장소 정보를 찾을 수 없습니다.');
+      return;
+    }
+
+    if (!fileTreeData || fileTreeData.length === 0) {
+      console.warn('파일트리 데이터가 없어서 파일 존재 여부를 확인할 수 없습니다.');
+      toast.error('파일 목록을 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+      return;
+    }
+
+    // 파일트리에서 해당 경로의 파일이 존재하는지 확인
+    const fileNode = findNodeByPath(fileTreeData, filePath);
+
+    if (!fileNode) {
+      console.warn('파일트리에서 파일을 찾을 수 없음:', filePath);
+      toast.error(`파일을 찾을 수 없습니다: ${filePath}`);
+      return;
+    }
+
+    if (fileNode.fileType !== 'FILE') {
+      console.warn('폴더는 탭으로 열 수 없음:', filePath);
+      toast.error('폴더는 열 수 없습니다. 파일만 선택해주세요.');
       return;
     }
 
@@ -44,10 +74,12 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isMyMessage }) => {
       repoId,
       filePath,
       fileName,
+      fileId: fileNode.fileId,
+      fileExists: true,
     });
 
-    // 탭으로 파일 열기
-    openFileByPath(repoId, filePath, fileName);
+    // 탭으로 파일 열기 (fileId도 함께 전달)
+    openFileByPath(repoId, filePath, fileName, fileNode.fileId);
 
     // URL 업데이트하여 파일 경로 반영
     try {
@@ -57,8 +89,11 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isMyMessage }) => {
         search: { file: filePath },
         replace: false,
       });
+
+      toast.success(`${fileName} 파일을 열었습니다.`);
     } catch (error) {
       console.error('파일 경로 네비게이션 실패:', error);
+      toast.error('파일을 여는 중 오류가 발생했습니다.');
     }
   };
 
