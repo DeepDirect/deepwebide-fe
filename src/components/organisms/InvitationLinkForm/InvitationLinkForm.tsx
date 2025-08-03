@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PasswordInput from '@/components/atoms/Input/PasswordInput';
 import InvitationFormActions from '@/components/molecules/InvitationFormActions/InvitationFormActions';
-import lockIcon from '../../../assets/icons/lock.svg';
+import lockIcon from '@/assets/icons/lock.svg';
 
 import './InvitationLinkForm.scss';
 
