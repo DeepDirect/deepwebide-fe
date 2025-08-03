@@ -40,8 +40,8 @@ export interface ExternalDropState {
   isDragOver: boolean;
   dropTarget: {
     nodeId: string;
-    path: string;
-    type: 'folder' | 'file' | 'root'; // NOTE: 드롭 타겟 분류용 소문자
+    parentId: number;
+    type: 'folder' | 'file';
   } | null;
   dragPreview: string | null;
 }
