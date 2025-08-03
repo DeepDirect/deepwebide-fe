@@ -93,7 +93,7 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
   });
 
   useEffect(() => {
-    if (enableCollaboration || !activeTab || !editorRef.current || isTabReadOnly) return;
+    if (enableCollaboration || !activeTab || !editorRef.current) return;
 
     interface MonacoEditorMethods {
       getValue(): string;
@@ -126,6 +126,19 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
     const currentEditorValue = getEditorValue();
     const tabContent = activeTab.content || '';
 
+    if (activeTab.isDeleted || activeTab.hasFileTreeMismatch) {
+      if (currentEditorValue !== tabContent) {
+        console.log('읽기 전용 탭 내용 즉시 업데이트:', {
+          tabId: activeTab.id,
+          isDeleted: activeTab.isDeleted,
+          hasFileTreeMismatch: activeTab.hasFileTreeMismatch,
+        });
+        setEditorValue(tabContent);
+        updateContent(tabContent);
+      }
+      return;
+    }
+
     if (currentEditorValue === '' && tabContent !== '') {
       console.log('일반 모드 - 빈 에디터에 탭 내용 로드:', {
         tabId: activeTab.id,
@@ -156,10 +169,11 @@ const MonacoCollaborativeEditor: React.FC<MonacoCollaborativeEditorProps> = ({
     activeTab?.content,
     activeTab?.id,
     activeTab?.name,
+    activeTab?.isDeleted,
+    activeTab?.hasFileTreeMismatch,
     enableCollaboration,
     updateContent,
     editorRef,
-    isTabReadOnly,
   ]);
 
   const onEditorChange = useCallback(

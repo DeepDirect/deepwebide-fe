@@ -145,7 +145,7 @@ export const useTabStore = create<TabStore>()(
 
         set({
           openTabs: state.openTabs.map(tab => {
-            if (tab.id === tabId) {
+            if (tab.id === tabId && !tab.isDeleted && !tab.hasFileTreeMismatch) {
               const isContentChanged = tab.content !== content;
               const isInitialLoad = tab.content === '';
 
@@ -187,7 +187,7 @@ export const useTabStore = create<TabStore>()(
 
         set({
           openTabs: state.openTabs.map(tab =>
-            tab.id === tabId
+            tab.id === tabId && !tab.isDeleted && !tab.hasFileTreeMismatch
               ? {
                   ...tab,
                   content,
@@ -217,7 +217,11 @@ export const useTabStore = create<TabStore>()(
           });
 
           set({
-            openTabs: state.openTabs.map(tab => (tab.id === tabId ? { ...tab, isDirty } : tab)),
+            openTabs: state.openTabs.map(tab =>
+              tab.id === tabId && !tab.isDeleted && !tab.hasFileTreeMismatch
+                ? { ...tab, isDirty }
+                : tab
+            ),
           });
         }
       },
@@ -322,7 +326,6 @@ export const useTabStore = create<TabStore>()(
                     ...tab,
                     isDeleted: true,
                     hasFileTreeMismatch: false,
-                    content: `// 이 파일은 삭제되었습니다.\n// 파일명: ${tab.name}\n// 경로: ${tab.path}\n\n// 파일트리에서 다른 파일을 선택하거나\n// 이 탭을 닫아주세요.\n\n${tab.content}`,
                   }
                 : tab
             ),
@@ -341,43 +344,41 @@ export const useTabStore = create<TabStore>()(
           tabCount: state.openTabs.length,
         });
 
-        set({
-          openTabs: state.openTabs.map(tab => {
-            if (!tab.fileId) return tab;
+        const updatedTabs = state.openTabs.map(tab => {
+          if (!tab.fileId) return tab;
 
-            const fileTreeNode = fileTreeMap.get(tab.fileId);
+          const fileTreeNode = fileTreeMap.get(tab.fileId);
 
-            if (!fileTreeNode) {
-              console.log('파일트리에서 제거된 탭을 삭제 상태로 표시:', {
-                tabId: tab.id,
-                name: tab.name,
-              });
-              return {
-                ...tab,
-                isDeleted: true,
-                hasFileTreeMismatch: false,
-                content: `// 이 파일은 삭제되었습니다.\n// 파일명: ${tab.name}\n// 경로: ${tab.path}\n\n// 파일트리에서 다른 파일을 선택하거나\n// 이 탭을 닫아주세요.\n\n${tab.content}`,
-              };
-            }
+          if (!fileTreeNode) {
+            console.log('파일트리에서 제거된 탭을 삭제 상태로 표시:', {
+              tabId: tab.id,
+              name: tab.name,
+            });
+            return {
+              ...tab,
+              isDeleted: true,
+              hasFileTreeMismatch: false,
+            };
+          }
 
-            if (fileTreeNode.fileName !== tab.name || fileTreeNode.path !== tab.path) {
-              console.log('파일트리 변경으로 탭을 변경된 상태로 표시:', {
-                oldName: tab.name,
-                newName: fileTreeNode.fileName,
-                oldPath: tab.path,
-                newPath: fileTreeNode.path,
-              });
-              return {
-                ...tab,
-                isDeleted: false,
-                hasFileTreeMismatch: true,
-                content: `// 이 파일의 위치 또는 이름이 변경되었습니다.\n// 파일트리에서 파일을 다시 한번 선택해주세요.\n// 이전: ${tab.name} (${tab.path})\n// 현재: ${fileTreeNode.fileName} (${fileTreeNode.path})\n\n${tab.content}`,
-              };
-            }
+          if (fileTreeNode.fileName !== tab.name || fileTreeNode.path !== tab.path) {
+            console.log('파일트리 변경으로 탭을 변경된 상태로 표시:', {
+              oldName: tab.name,
+              newName: fileTreeNode.fileName,
+              oldPath: tab.path,
+              newPath: fileTreeNode.path,
+            });
+            return {
+              ...tab,
+              isDeleted: false,
+              hasFileTreeMismatch: true,
+            };
+          }
 
-            return { ...tab, isDeleted: false, hasFileTreeMismatch: false };
-          }),
+          return { ...tab, isDeleted: false, hasFileTreeMismatch: false };
         });
+
+        set({ openTabs: updatedTabs });
       },
 
       getTabById: (tabId: string) => {
