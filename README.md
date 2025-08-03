@@ -79,6 +79,12 @@ Code: [FE](https://github.com/DeepDirect/deepwebide-fe), [BE](https://github.com
 ---
 
 ## 📸 Screenshots
+<img width="3024" height="1712" alt="image" src="https://github.com/user-attachments/assets/962fa47f-8d48-4038-b1eb-8bdd36651db6" />
+<img width="3024" height="1712" alt="image" src="https://github.com/user-attachments/assets/5bbafa3b-60e6-4de7-a4df-fc391f351595" />
+<img width="3024" height="1710" alt="image" src="https://github.com/user-attachments/assets/6c566f83-cf5b-44ca-959c-9503b99ddf99" />
+<img width="3022" height="1712" alt="image" src="https://github.com/user-attachments/assets/d594ad93-b870-4664-9ec5-dbde605237e7" />
+
+
 
 
 
