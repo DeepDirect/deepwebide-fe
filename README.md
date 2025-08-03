@@ -3,8 +3,8 @@
 React, TypeScript, Vite 기반의 실시간 웹 IDE입니다.  
 실시간 코드 동시 편집, 채팅, 파일 업로드 및 다운로드, GitHub 로그인 기능을 제공합니다.
 
-프로젝트 기간: 2025.07 ~ 2025.08 (기획 및 개발)
-Link: https://www.deepdirect.site/
+프로젝트 기간: 2025.07 ~ 2025.08 (기획 및 개발)  
+Link: https://www.deepdirect.site/  
 Code: [FE](https://github.com/DeepDirect/deepwebide-fe), [BE](https://github.com/DeepDirect/deepwebide-be)
 
 ---
@@ -19,7 +19,6 @@ Code: [FE](https://github.com/DeepDirect/deepwebide-fe), [BE](https://github.com
 | 박재경     | Full Stack, Infra  | [@Shin-Yu-1](https://github.com/sunghoon-back) |
 | 이은지     | Frontend           | [@ebbll](https://github.com/ebbll)             |
 | 최범근     | Backend            | [@vayaconChoi](https://github.com/vayaconChoi) |
-
 
 ---
 
