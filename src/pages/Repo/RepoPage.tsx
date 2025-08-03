@@ -359,7 +359,7 @@ export function RepoPage() {
         </div>
 
         <div className={styles.terminalSection}>
-          <CodeRunner repoId={repoId} />
+          <CodeRunner repoId={repoId} repositoryName={repositoryInfo?.repositoryName} />
         </div>
       </div>
     </div>
