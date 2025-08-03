@@ -7,6 +7,7 @@ import {
   useUploadFileMutation,
 } from './useFileTreeApi';
 import { useToast } from '@/hooks/common/useToast';
+import { useYjsFileTree } from '@/hooks/repo/useYjsFileTree';
 import type { FileTreeNode } from '../types';
 
 interface UseFileTreeOperationsParams {
@@ -32,7 +33,11 @@ interface UseFileTreeOperationsResult {
   createItem: (fileName: string) => Promise<void>;
   renameItem: (node: FileTreeNode, newName: string) => Promise<void>;
   deleteItem: (node: FileTreeNode) => Promise<void>;
-  moveItem: (sourceNode: FileTreeNode, targetNode: FileTreeNode) => Promise<void>;
+  moveItem: (
+    sourceNode: FileTreeNode,
+    targetNode: FileTreeNode | null,
+    position?: string
+  ) => Promise<void>;
   uploadFiles: (files: File[], targetPath: string) => Promise<void>;
 
   // 로딩 상태
@@ -73,6 +78,7 @@ export const useFileTreeOperations = ({
   rootFolderId,
 }: UseFileTreeOperationsParams): UseFileTreeOperationsResult => {
   const toast = useToast();
+  const { broadcastFileTreeUpdate } = useYjsFileTree(repositoryId);
 
   // 모달 상태
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -189,17 +195,63 @@ export const useFileTreeOperations = ({
     try {
       if (node.parentId === null) {
         console.warn('루트 레벨 항목 삭제 시도 - 삭제 불가');
-        window.alert('최상위 프로젝트 폴더는 삭제할 수 없습니다.');
+        toast.warning('최상위 프로젝트 폴더는 삭제할 수 없습니다.');
         return;
       }
 
-      const confirmed = window.confirm(
-        `"${node.fileName}"을(를) 삭제하시겠습니까?${
-          node.fileType === 'FOLDER' ? '\n폴더와 하위 모든 파일이 삭제됩니다.' : ''
-        }`
-      );
+      const deleteMessage = `"${node.fileName}"을(를) 삭제하시겠습니까?${
+        node.fileType === 'FOLDER' ? '\n폴더와 하위 모든 파일이 삭제됩니다.' : ''
+      }`;
 
-      if (!confirmed) return;
+      toast.warning(deleteMessage, 0, true);
+
+      // 사용자 확인을 기다리기 위해 Promise 사용
+      const userConfirmed = await new Promise<boolean>(resolve => {
+        const confirmButton = document.createElement('button');
+        confirmButton.textContent = '삭제';
+        confirmButton.style.cssText = `
+          margin-left: 8px;
+          padding: 4px 8px;
+          background: #dc2626;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+        `;
+        confirmButton.onclick = () => {
+          resolve(true);
+          confirmButton.remove();
+          cancelButton.remove();
+        };
+
+        const cancelButton = document.createElement('button');
+        cancelButton.textContent = '취소';
+        cancelButton.style.cssText = `
+          margin-left: 4px;
+          padding: 4px 8px;
+          background: #6b7280;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+        `;
+        cancelButton.onclick = () => {
+          resolve(false);
+          confirmButton.remove();
+          cancelButton.remove();
+        };
+
+        const toastElement = document.querySelector('[data-toast-id]:last-child .toast-content');
+        if (toastElement) {
+          toastElement.appendChild(confirmButton);
+          toastElement.appendChild(cancelButton);
+        } else {
+          // fallback: 기본 confirm 사용
+          resolve(window.confirm(deleteMessage));
+        }
+      });
+
+      if (!userConfirmed) return;
 
       console.log('파일 삭제 시작:', {
         fileName: node.fileName,
@@ -213,45 +265,90 @@ export const useFileTreeOperations = ({
         onSuccess();
       }
 
+      toast.success(`"${node.fileName}"이(가) 삭제되었습니다.`);
+
       console.log('파일 삭제 완료 - YJS 동기화됨');
     } catch (error) {
       console.error('파일 삭제 실패:', error);
+      toast.error('파일 삭제에 실패했습니다.');
       throw error;
     }
   };
 
-  const moveItem = async (sourceNode: FileTreeNode, targetNode: FileTreeNode) => {
-    if (!sourceNode || !sourceNode.fileId || !targetNode || !targetNode.fileId) {
-      console.error('moveItem: 유효하지 않은 nodes:', { sourceNode, targetNode });
+  const moveItem = async (
+    sourceNode: FileTreeNode,
+    targetNode: FileTreeNode | null,
+    position?: string
+  ) => {
+    if (!sourceNode || !sourceNode.fileId) {
+      console.error('moveItem: 유효하지 않은 sourceNode:', sourceNode);
       return;
     }
 
     try {
+      // 동적으로 최상위 폴더 ID 계산
+      const getRootFolderId = () => {
+        if (rootFolderId) return rootFolderId;
+
+        // sourceNode의 path를 분석해서 최상위 폴더 찾기
+        const pathParts = sourceNode.path.split('/');
+        if (pathParts.length <= 1) {
+          // 이미 최상위에 있는 경우
+          return sourceNode.parentId;
+        }
+
+        // path를 역추적해서 최상위 폴더 ID 찾기
+        const currentParentId = sourceNode.parentId;
+        let currentPath = sourceNode.path;
+
+        while (currentPath.includes('/')) {
+          const parentPath = currentPath.substring(0, currentPath.lastIndexOf('/'));
+          if (!parentPath.includes('/')) {
+            // 최상위 폴더 발견
+            break;
+          }
+          currentPath = parentPath;
+        }
+
+        return currentParentId;
+      };
+
+      const dynamicRootFolderId = getRootFolderId();
+
       console.log('파일 이동 시작:', {
         source: {
           id: sourceNode.fileId,
           name: sourceNode.fileName,
           path: sourceNode.path,
           currentParentId: sourceNode.parentId,
+          level: sourceNode.level,
         },
-        target: {
-          id: targetNode.fileId,
-          name: targetNode.fileName,
-          path: targetNode.path,
-          type: targetNode.fileType,
-        },
+        target: targetNode
+          ? {
+              id: targetNode.fileId,
+              name: targetNode.fileName,
+              path: targetNode.path,
+              type: targetNode.fileType,
+            }
+          : 'TOP_LEVEL_FOLDER',
+        position,
+        rootFolderId,
+        dynamicRootFolderId,
       });
 
-      let newParentId: number | null;
+      let newParentId: number | null = null;
 
-      if (targetNode.fileType === 'FOLDER') {
+      if (!targetNode || position === 'root') {
+        // 최상위 프로젝트 폴더로 이동
+        if (!dynamicRootFolderId) {
+          throw new Error('최상위 폴더를 찾을 수 없습니다.');
+        }
+        newParentId = dynamicRootFolderId;
+      } else if (targetNode.fileType === 'FOLDER' && position === 'inside') {
         newParentId = targetNode.fileId;
       } else {
+        // before/after 또는 파일의 경우 부모와 같은 레벨
         newParentId = targetNode.parentId;
-      }
-
-      if (newParentId === null) {
-        throw new Error('파일을 루트로 이동할 수 없습니다. 폴더 안으로만 이동 가능합니다.');
       }
 
       if (sourceNode.parentId === newParentId) {
@@ -259,16 +356,37 @@ export const useFileTreeOperations = ({
         return;
       }
 
-      await moveMutation.mutateAsync({
+      const result = await moveMutation.mutateAsync({
         fileId: sourceNode.fileId,
         data: { newParentId },
       });
 
+      // 최상위 폴더 이동의 경우 추가 브로드캐스트 (안전장치)
+      if (
+        (!targetNode || position === 'root') &&
+        broadcastFileTreeUpdate &&
+        typeof broadcastFileTreeUpdate === 'function'
+      ) {
+        console.log('최상위 폴더 이동 추가 브로드캐스트 시도');
+        broadcastFileTreeUpdate('move', {
+          node: result,
+          repositoryId,
+          timestamp: Date.now(),
+          isTopLevelMove: true,
+        });
+      }
+
       if (onSuccess && typeof onSuccess === 'function') {
         onSuccess();
       }
+
+      // 최상위 폴더 이동 성공 메시지
+      if (!targetNode || position === 'root') {
+        toast.success(`"${sourceNode.fileName}"을(를) 최상위 폴더로 이동했습니다.`);
+      }
     } catch (error) {
       console.error('파일 이동 실패:', error);
+      toast.error('파일 이동에 실패했습니다.');
       throw error;
     }
   };

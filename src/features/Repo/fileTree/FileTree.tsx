@@ -91,7 +91,7 @@ const FileTree: React.FC<ExtendedFileTreeProps> = ({
   } = useFileTreeOperations({
     repositoryId: repositoryId || 0,
     onSuccess: handleOperationSuccess,
-    rootFolderId: treeData?.[0]?.fileId,
+    rootFolderId: treeData?.[0]?.fileId || undefined,
   });
 
   // 내부 드래그앤드롭 훅
@@ -102,10 +102,13 @@ const FileTree: React.FC<ExtendedFileTreeProps> = ({
     handleDragOver,
     handleDragLeave,
     handleDrop,
+    handleContainerDragOver,
+    handleContainerDrop,
     isDragging,
     isDropTarget,
     getDropPosition,
     canDrop,
+    isRootDropTarget,
   } = useFileTreeDragDrop({
     onMoveNode: moveItem,
   });
@@ -380,12 +383,19 @@ const FileTree: React.FC<ExtendedFileTreeProps> = ({
         <div
           className={clsx(styles.fileTree, className, {
             [styles.collaborationMode]: enableCollaboration,
+            [styles.rootDropTarget]: isRootDropTarget,
           })}
           data-file-tree-container
           onDragEnter={handleExternalDragEnter}
-          onDragOver={handleExternalDragOver}
+          onDragOver={e => {
+            handleExternalDragOver(e);
+            handleContainerDragOver(e);
+          }}
           onDragLeave={handleExternalDragLeave}
-          onDrop={handleExternalDrop}
+          onDrop={e => {
+            handleExternalDrop(e);
+            handleContainerDrop(e);
+          }}
         >
           {/* 협업 상태 표시 */}
           {renderCollaborationStatus()}
@@ -406,6 +416,16 @@ const FileTree: React.FC<ExtendedFileTreeProps> = ({
                 {isMoving && '이동 중...'}
                 {isUploading && '업로드 중...'}
               </span>
+            </div>
+          )}
+
+          {/* 최상위 폴더 드롭 피드백 */}
+          {isRootDropTarget && (
+            <div className={styles.rootDropOverlay}>
+              <div className={styles.rootDropMessage}>
+                <span className={styles.rootDropIcon}>📁</span>
+                <span>최상위 폴더로 이동</span>
+              </div>
             </div>
           )}
 
