@@ -129,7 +129,7 @@ export function CodeRunner(props: CodeRunnerProps) {
             typeof output === 'string'
               ? output
               : resp.port
-                ? `http://localhost:${resp.port}`
+                ? `http://3.39.22.178:${resp.port}`
                 : 'Link generated';
           console.log(`[CodeRunner] 협업 모드 결과 브로드캐스트: ${outputText}`);
           broadcastCommand(command, outputText, new Date());
