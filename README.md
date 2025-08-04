@@ -14,11 +14,11 @@ Code: [FE](https://github.com/DeepDirect/deepwebide-fe), [BE](https://github.com
 ## 🫶 팀원
 | 이름      | 역할                 | GitHub 링크                                     |
 |----------|--------------------|------------------------------------------------|
-| 정원용     | 팀장, Full Stack    | [@projectmiluju](https://github.com/jihun-dev) |
+| 정원용     | 팀장, Full Stack, Infra    | [@projectmiluju](https://github.com/jihun-dev) |
 | 권혜진     | Backend            | [@sunsetkk](https://github.com/sunsetkk)       |
 | 박건      | Frontend            | [@Jammanb0](https://github.com/Jammanb0)       |
 | 박소현     | Frontend           | [@ssoogit](https://github.com/ssoogit)         |
-| 박재경     | Full Stack, Infra  | [@Shin-Yu-1](https://github.com/Shin-Yu-1) |
+| 박재경     | Full Stack  | [@Shin-Yu-1](https://github.com/Shin-Yu-1) |
 | 이은지     | Frontend           | [@ebbll](https://github.com/ebbll)             |
 | 최범근     | Backend            | [@vayaconChoi](https://github.com/vayaconChoi) |
 
