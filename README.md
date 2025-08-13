@@ -5,7 +5,7 @@ React, TypeScript, Vite 기반의 실시간 웹 IDE입니다.
 
 프로젝트 기간: 2025.07 ~ 2025.08 (기획 및 개발)  
 시연영상 [YouTube](https://youtu.be/-I3UiIWDW2s?si=5LgCsWK0JfLuCn6O)   
-Link: https://www.deepdirect.site/  
+Link: ~https://www.deepdirect.site/~  
 Code: [FE](https://github.com/DeepDirect/deepwebide-fe), [BE](https://github.com/DeepDirect/deepwebide-be)
 
 <br />
